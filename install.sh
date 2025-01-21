@@ -1,32 +1,48 @@
 #!/usr/bin/env bash
 
-echo "Hello!"
-echo "======"
-
-if [[ "$CODESPACES" == "true" ]]; then
-    echo "Installing binfmt support..."
-    docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
-fi
-
-echo "🔨 Installing Nix..."
-
-if ! command -v nix &> /dev/null; then
-    if [[ "$CODESPACES" == "true" ]]; then
-        echo "🔨 Installing Nix for Codespaces..."
-        sh <(curl -L https://nixos.org/nix/install) --no-daemon
-
-        echo 'if [ -e /home/codespace/.nix-profile/etc/profile.d/nix.sh ]; then . /home/codespace/.nix-profile/etc/profile.d/nix.sh; fi # added by dotfiles, required for Nix to work over ssh' >> ~/.bashrc
-
-        sudo mkdir -p /etc/nix
-        sudo touch /etc/nix/nix.conf
-        echo 'sandbox = false' | sudo tee -a /etc/nix/nix.conf
-        echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf
-        echo 'extra-platforms = aarch64-linux arm-linux' | sudo tee -a /etc/nix/nix.conf
-    else
+install_nix() {
+    if ! command -v nix &> /dev/null; then
         echo "🔨 Installing Nix..."
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
-          sh -s -- install --no-confirm
+          sh -s -- install --no-confirm "$@"
+    else
+        echo "✅ Nix is already installed."
     fi
-else
-    echo "🔨 Nix is already installed."
+}
+
+echo "👋 Hello!"
+echo "======"
+
+CONFIGURATION="linux"
+
+if [[ "$CODESPACES" == "true" ]]; then
+    CONFIGURATION="codespace"
 fi
+
+echo "🔨 Setting up for $CONFIGURATION..."
+
+echo "⚙️  Installing binfmt support..."
+case "$CONFIGURATION" in
+    "codespace")
+        docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
+        ;;
+    *)
+        echo "⚠️  $CONFIGURATION doesn't support binfmt setup. Make sure it's setup manually"
+        ;;
+esac
+
+echo "⚙️  Setting up Nix..."
+case "$CONFIGURATION" in
+    "codespace")
+        install_nix \
+            --init none \
+            --extra-conf "extra-platforms = aarch64-linux arm-linux"
+        ;;
+    "linux")
+        install_nix \
+            --extra-conf "extra-platforms = aarch64-linux arm-linux"
+        ;;
+    *)
+        install_nix
+        ;;
+esac
