@@ -19,6 +19,8 @@ and activating the relevant Home Manager configuration in `flake.nix`.
 The `flake.nix` file contains several configurations, depending on what environment we
 install the dotfiles.
 
+| Configuration | Description |
+| :-- | :-- |
 | `linux` | For native Linux systems. |
 | `codespace` | For GitHub Codespaces. |
 | `wsl` | For Windows Subsystem for Linux. (🚧 TODO) |
