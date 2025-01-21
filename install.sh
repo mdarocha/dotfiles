@@ -3,7 +3,7 @@
 echo "Hello!"
 echo "======"
 
-if [[ "$CODESPACE" == "true" ]]; then
+if [[ "$CODESPACES" == "true" ]]; then
     echo "Installing binfmt support..."
     docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
 fi
@@ -11,7 +11,7 @@ fi
 echo "🔨 Installing Nix..."
 
 if ! command -v nix &> /dev/null; then
-    if [[ "$CODESPACE" == "true" ]]; then
+    if [[ "$CODESPACES" == "true" ]]; then
         echo "🔨 Installing Nix for Codespaces..."
         sh <(curl -L https://nixos.org/nix/install) --no-daemon
     else
