@@ -10,7 +10,7 @@ install_nix() {
     fi
 }
 
-install_nix_codespace_workaround() {
+install_nix_codespace_workarounds() {
 cat <<EOF >> /home/codespace/.bashrc
 # Hacky workarounds to make Nix work in Codespaces over SSH
 export PATH="/nix/var/nix/profiles/default/bin/:\${PATH}"
@@ -18,6 +18,11 @@ if ! pidof nix-daemon > /dev/null 2>&1; then
     sudo \$(which nix-daemon) &
 fi
 EOF
+
+    # Fixes issue with "suspicous owner or permissions" error
+    sudo apt update
+    sudo apt install acl
+    sudo setfacl -k /tmp
 }
 
 echo "👋 Hello!"
@@ -48,7 +53,7 @@ case "$CONFIGURATION" in
             --init none \
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
 
-        install_nix_codespace_workaround
+        install_nix_codespace_workarounds
         ;;
     "linux")
         install_nix linux \
