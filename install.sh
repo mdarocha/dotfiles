@@ -10,6 +10,16 @@ install_nix() {
     fi
 }
 
+install_nix_codespace_workaround() {
+cat <<EOF > /home/codespace/.bashrc
+# Hacky workarounds to make Nix work in Codespaces over SSH
+export PATH="/nix/var/nix/profiles/default/bin/:\${PATH}"
+if ! pidof nix-daemon > /dev/null 2>&1; then
+    sudo \$(which nix-daemon) &
+fi
+EOF
+}
+
 echo "👋 Hello!"
 echo "======"
 
@@ -37,6 +47,8 @@ case "$CONFIGURATION" in
         install_nix linux \
             --init none \
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
+
+        install_nix_codespace_workaround
         ;;
     "linux")
         install_nix linux \
