@@ -13,6 +13,13 @@ install_nix() {
 install_nix_codespace_workaround() {
 cat <<EOF >> /home/codespace/.bashrc
 # Hacky workarounds to make Nix work in Codespaces over SSH
+
+until [ -f "$HOME/.dotfiles-installed" ]
+do
+    echo "Waiting for dotfile setup to finish..."
+    sleep 1
+done
+
 export PATH="/nix/var/nix/profiles/default/bin/:\${PATH}"
 if ! pidof nix-daemon > /dev/null 2>&1; then
     sudo \$(which nix-daemon) &
@@ -58,3 +65,6 @@ case "$CONFIGURATION" in
         install_nix
         ;;
 esac
+
+touch "$HOME/.dotfiles-installed"
+echo "✅ Done!"
