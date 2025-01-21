@@ -4,7 +4,7 @@ install_nix() {
     if ! command -v nix &> /dev/null; then
         echo "🔨 Installing Nix..."
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
-          sh -s -- install --no-confirm "$@"
+          sh -s -- install "$@" --no-confirm
     else
         echo "✅ Nix is already installed."
     fi
@@ -34,12 +34,12 @@ esac
 echo "⚙️  Setting up Nix..."
 case "$CONFIGURATION" in
     "codespace")
-        install_nix \
+        install_nix linux \
             --init none \
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
         ;;
     "linux")
-        install_nix \
+        install_nix linux \
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
         ;;
     *)
