@@ -11,7 +11,7 @@ install_nix() {
 }
 
 install_nix_codespace_workaround() {
-cat <<EOF > /home/codespace/.bashrc
+cat <<EOF >> /home/codespace/.bashrc
 # Hacky workarounds to make Nix work in Codespaces over SSH
 export PATH="/nix/var/nix/profiles/default/bin/:\${PATH}"
 if ! pidof nix-daemon > /dev/null 2>&1; then
