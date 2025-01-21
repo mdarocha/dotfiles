@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+wait_for_docker() {
+  echo "Waiting for Docker socket to become available..."
+  while [ ! -S /var/run/docker.sock ]; do
+    sleep 1
+  done
+  echo "Docker socket is now available."
+}
+
 install_nix() {
     if ! command -v nix &> /dev/null; then
         echo "🔨 Installing Nix..."
@@ -39,6 +47,7 @@ echo "🔨 Setting up for $CONFIGURATION..."
 echo "⚙️  Installing binfmt support..."
 case "$CONFIGURATION" in
     "codespace")
+        wait_for_docker
         docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
         ;;
     *)
