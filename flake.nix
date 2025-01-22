@@ -80,7 +80,7 @@
               extraSpecialArgs = { inherit inputs; };
 
               modules = [
-                neovim-config.homeModules.neovim
+                neovim-config.homeManagerModules.default
                 ./config
                 additionalConfig
               ];
@@ -89,12 +89,48 @@
         {
           linux = mkHomeManagerConfiguration {
             mdarocha = {
+              nixgl.enable = true;
+
               neovim.enable = true;
               neovide = {
                 enable = true;
                 useNixGl = true;
               };
             };
+
+            programs.git.enable = true;
+            programs.password-store.enable = true;
+          };
+
+          wsl = mkHomeManagerConfiguration {
+            mdarocha = {
+              nixgl.enable = true;
+
+              neovim.enable = true;
+              neovide = {
+                enable = true;
+                useNixGl = true;
+              };
+            };
+
+            # we configure git manually
+            programs.git.enable = false;
+
+            programs.password-store.enable = false;
+          };
+
+          codespace = mkHomeManagerConfiguration {
+            mdarocha = {
+              nixgl.enable = false;
+
+              neovim.enable = true;
+              neovide.enable = false;
+            };
+
+            # we leave the default codespace git config intact
+            programs.git.enable = false;
+
+            programs.password-store.enable = false;
           };
         };
     };
