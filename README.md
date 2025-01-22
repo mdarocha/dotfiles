@@ -21,6 +21,6 @@ install the dotfiles.
 
 | Configuration | Description |
 | :-- | :-- |
-| `linux` | For native Linux systems. |
-| `codespace` | For GitHub Codespaces. |
-| `wsl` | For Windows Subsystem for Linux. (🚧 TODO) |
+| `homeConfigurations.linux` | For native Linux systems. |
+| `homeConfigurations.codespace` | For GitHub Codespaces. |
+| `homeConfigurations.wsl` | For Windows Subsystem for Linux. (🚧 TODO) |

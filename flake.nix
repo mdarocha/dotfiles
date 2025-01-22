@@ -3,10 +3,34 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+
+    home-manager = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    neovim-config = {
+      url = "github:mdarocha/neovim-config";
+      inputs = {
+        home-manager.follows = "home-manager";
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
+    nixgl = {
+      url = "github:nix-community/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { nixpkgs, ... }:
+    inputs@{
+      nixpkgs,
+      home-manager,
+      neovim-config,
+      nixgl,
+      ...
+    }:
     {
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
 
@@ -25,5 +49,53 @@
             };
           };
       };
+
+      apps.x86_64-linux.apply =
+        let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        in
+        {
+          type = "app";
+          program = pkgs.writeShellApplication {
+            name = "apply";
+            text = ''
+              echo "⚙️  Applying new configuration..."
+            '';
+          };
+        };
+
+      homeConfigurations =
+        let
+          inherit (home-manager.lib) homeManagerConfiguration;
+
+          mkHomeManagerConfiguration =
+            additionalConfig:
+            homeManagerConfiguration {
+              pkgs = import nixpkgs {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+                overlays = [ nixgl.overlay ];
+              };
+
+              extraSpecialArgs = { inherit inputs; };
+
+              modules = [
+                neovim-config.homeModules.neovim
+                ./config
+                additionalConfig
+              ];
+            };
+        in
+        {
+          linux = mkHomeManagerConfiguration {
+            mdarocha = {
+              neovim.enable = true;
+              neovide = {
+                enable = true;
+                useNixGl = true;
+              };
+            };
+          };
+        };
     };
 }
