@@ -103,18 +103,18 @@
           script = pkgs.writeShellApplication {
             name = "apply";
             text = ''
-              # shellcheck disable=SC1091
-              source "${./scripts/lib.sh}";
+                            # shellcheck disable=SC1091
+                            source "${./scripts/lib.sh}";
 
-              declare -A configurations
-              ${configurations}
+                            declare -A configurations
+                            ${configurations}
 
-              echo "⚙️  Applying new configuration for $CONFIGURATION..."
-	      export HOME_MANAGER_BACKUP_EXT="backup"
-              "''${configurations[$CONFIGURATION]}/activate"
+                            echo "⚙️  Applying new configuration for $CONFIGURATION..."
+              	      export HOME_MANAGER_BACKUP_EXT="backup"
+                            "''${configurations[$CONFIGURATION]}/activate"
 
-              echo "🧹 Cleaning up..."
-              nix-collect-garbage -d
+                            echo "🧹 Cleaning up..."
+                            nix-collect-garbage -d
             '';
           };
         in
@@ -141,26 +141,35 @@
               modules = [
                 neovim-config.homeManagerModules.default
                 ./config
-                ({ lib, ... }: let
-                  inherit (lib) mkDefault;
-                in {
-                  mdarocha = {
-                    firefox.enable = mkDefault false;
-                    nixgl.enable = mkDefault true;
+                (
+                  { lib, ... }:
+                  let
+                    inherit (lib) mkDefault;
+                  in
+                  {
+                    mdarocha = {
+                      firefox.enable = mkDefault false;
+                      nixgl.enable = mkDefault true;
 
-                    neovim.enable = mkDefault true;
-                    neovide = {
-                      enable = mkDefault true;
-                      useNixGl = mkDefault true;
+                      neovim.enable = mkDefault true;
+                      neovide = {
+                        enable = mkDefault true;
+                        useNixGl = mkDefault true;
+                      };
                     };
-                  };
 
-                  programs = {
-                    git.enable = mkDefault true;
-                    password-store.enable = mkDefault false;
-                  };
-                  services.ssh-tpm-agent.enable = mkDefault false;
-                })
+                    home = {
+                      username = mkDefault "marek";
+                      homeDirectory = mkDefault "/home/marek";
+                    };
+
+                    programs = {
+                      git.enable = mkDefault true;
+                      password-store.enable = mkDefault false;
+                    };
+                    services.ssh-tpm-agent.enable = mkDefault false;
+                  }
+                )
                 additionalConfig
               ];
             };
@@ -181,13 +190,14 @@
           };
 
           codespace = mkHomeManagerConfiguration {
-	    home = {
-              username = "codespace";
-              homeDirectory = "/home/codespace";
-            };
             mdarocha = {
               nixgl.enable = false;
               neovide.enable = false;
+            };
+
+            home = {
+              username = "codespace";
+              homeDirectory = "/home/codespace";
             };
 
             programs = {

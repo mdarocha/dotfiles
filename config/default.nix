@@ -5,9 +5,6 @@
   ...
 }:
 
-let
-  inherit (lib) mkDefault;
-in
 {
   imports = [
     ./firefox
@@ -21,9 +18,6 @@ in
   targets.genericLinux.enable = true;
 
   home = {
-    username = mkDefault "marek";
-    homeDirectory = mkDefault "/home/marek";
-
     stateVersion = "24.05";
 
     sessionVariables = {
