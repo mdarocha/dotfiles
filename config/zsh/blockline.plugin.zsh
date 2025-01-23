@@ -60,7 +60,11 @@ blockline_python_venv() {
 
 blockline_ssh() {
     if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-        echo "$SOL_BG[violet] $(cat /etc/hostname) $RESET_BG"
+        HOST=" $(cat /etc/hostname)"
+        if [[ "${CODESPACES}" == "true" ]]; then
+            HOST=" ${CODESPACE_NAME%-*}"
+        fi
+        echo "$SOL_BG[violet] $HOST $RESET_BG"
     fi
 }
 

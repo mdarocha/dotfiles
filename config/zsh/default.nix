@@ -26,6 +26,24 @@
     enableCompletion = true;
     enableVteIntegration = false; # TODO fix
 
+    initExtraFirst = ''
+      if [[ "''${CODESPACES:-}" == "true" ]]; then
+        # This file contains logic to cd to the project directory on login
+        . /etc/profile.d/codespaces.sh
+
+        # Setup env-secrets, even if over ssh
+        # By default this logic (contained in /etc/profile.d/codespaces.sh
+        # does not execute on ssh sessions.
+        while read line
+        do
+            key=$(echo $line | sed "s/=.*//")
+            value=$(echo $line | sed "s/$key=//1")
+            decodedValue=$(echo $value | base64 -d)
+            export $key="$decodedValue"
+        done < /workspaces/.codespaces/shared/.env-secrets
+      fi
+    '';
+
     initExtra = ''
       export CLICOLOR=1
       autoload -Uz colors && colors
