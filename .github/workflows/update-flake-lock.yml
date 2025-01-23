@@ -1,0 +1,36 @@
+name: Update flake.lock
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+     - '.github/workflows/update-flake-lock.yml'
+  schedule:
+    - cron: '0 0 * * 0' # runs weekly on Sunday at 00:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  lockfile:
+    name: Update lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Update flake.lock
+        id: update-flake-lock
+        uses: DeterminateSystems/update-flake-lock@v24
+        with:
+          pr-title: "Update flake.lock"
+          pr-labels: automated
+
+      # TODO https://github.com/mdarocha/dotfiles-lawson/issues/9
+      #- uses: ./.github/actions/comment-flake-input-diff
+      #  with:
+      #    pull-request-number: ${{ steps.update-flake-lock.outputs.pull-request-number }}
