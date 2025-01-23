@@ -79,7 +79,7 @@ case "$CONFIGURATION" in
 esac
 
 echo "⚙️  Applying home-manager configuration..."
-nix run .#apply
+/nix/var/nix/profiles/default/bin/nix run .#apply
 
 echo "✅ Done!"
 
