@@ -45,8 +45,8 @@ in
 
   # enable man pages for hm-installed packages
   programs.man = {
-    enable = true;
-    generateCaches = true;
+    enable = lib.mkDefault true;
+    generateCaches = lib.mkDefault true;
   };
 
   home.enableNixpkgsReleaseCheck = false;

@@ -1,7 +1,17 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 # TODO upstream this
 let
-  inherit (lib) mkEnableOption mkOption types literalExpression;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    types
+    literalExpression
+    ;
 
   cfg = config.services.ssh-tpm-agent;
 in
@@ -21,10 +31,8 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
-      (lib.hm.assertions.assertPlatform "services.ssh-tpm-agent" pkgs
-        lib.platforms.linux)
+      (lib.hm.assertions.assertPlatform "services.ssh-tpm-agent" pkgs lib.platforms.linux)
     ];
-
 
     home.sessionVariablesExtra = ''
       if [ -z "$SSH_AUTH_SOCK" ]; then

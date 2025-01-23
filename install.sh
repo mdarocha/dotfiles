@@ -38,10 +38,15 @@ install_nix_codespace_workarounds() {
     if ! command -v setfacl &> /dev/null; then
         echo "🔨 Installing ACL..."
         sudo apt-get update
-        sudo apt-get install -y acl
+        sudo apt-get install -y --no-install-recommends acl
+        sudo rm -rf /var/lib/apt/lists/*
     fi
 
     sudo setfacl -k /tmp
+}
+
+install_nix_daemon_openrc_service() {
+    echo "🔨 Installing nix-daemon OpenRC service..."
 }
 
 echo "👋 Hello!"

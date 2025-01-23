@@ -56,44 +56,50 @@
     {
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
 
-      checks.x86_64-linux = let
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-      in {
-        shellcheck =
-          let
-            inherit (pkgs.lib.fileset) toSource unions;
-          in
-          pkgs.testers.shellcheck {
-            src = toSource {
-              root = ./.;
-              fileset = unions [
-                ./install.sh
-                ./scripts/lib.sh
-              ];
+      checks.x86_64-linux =
+        let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        in
+        {
+          shellcheck =
+            let
+              inherit (pkgs.lib.fileset) toSource unions;
+            in
+            pkgs.testers.shellcheck {
+              src = toSource {
+                root = ./.;
+                fileset = unions [
+                  ./install.sh
+                  ./scripts/lib.sh
+                ];
+              };
             };
-          };
 
-        homeConfigurations = let
-          inherit (pkgs.lib) attrValues map;
-          paths = map (config: config.activationPackage) (attrValues self.homeConfigurations);
-        in pkgs.symlinkJoin {
-          name = "home-configurations";
-          inherit paths;
+          homeConfigurations =
+            let
+              inherit (pkgs.lib) attrValues map;
+              paths = map (config: config.activationPackage) (attrValues self.homeConfigurations);
+            in
+            pkgs.symlinkJoin {
+              name = "home-configurations";
+              inherit paths;
+            };
+
+          apps =
+            let
+              inherit (pkgs.lib) attrValues concatMapStringsSep;
+              paths = concatMapStringsSep "\n" (app: app.program) (attrValues self.apps.x86_64-linux);
+            in
+            pkgs.writeText "apps-check" paths;
         };
-
-        apps = let
-          inherit (pkgs.lib) attrValues concatMapStringsSep;
-          paths = concatMapStringsSep "\n" (app: app.program) (attrValues self.apps.x86_64-linux);
-        in pkgs.writeText "apps-check" paths;
-      };
 
       apps.x86_64-linux.apply =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           inherit (pkgs.lib) attrsToList concatMapStringsSep;
-          configurations = concatMapStringsSep "\n"
-            (config: "configurations['${config.name}']=${config.value.activationPackage}")
-            (attrsToList self.homeConfigurations);
+          configurations = concatMapStringsSep "\n" (
+            config: "configurations['${config.name}']=${config.value.activationPackage}"
+          ) (attrsToList self.homeConfigurations);
           script = pkgs.writeShellApplication {
             name = "apply";
             text = ''
@@ -134,22 +140,33 @@
               modules = [
                 neovim-config.homeManagerModules.default
                 ./config
+                ({ lib, ... }: let
+                  inherit (lib) mkDefault;
+                in {
+                  mdarocha = {
+                    firefox.enable = mkDefault false;
+                    nixgl.enable = mkDefault true;
+
+                    neovim.enable = mkDefault true;
+                    neovide = {
+                      enable = mkDefault true;
+                      useNixGl = mkDefault true;
+                    };
+                  };
+
+                  programs = {
+                    git.enable = mkDefault true;
+                    password-store.enable = mkDefault false;
+                  };
+                  services.ssh-tpm-agent.enable = mkDefault false;
+                })
                 additionalConfig
               ];
             };
         in
         {
           linux = mkHomeManagerConfiguration {
-            mdarocha = {
-              firefox.enable = true;
-              nixgl.enable = true;
-
-              neovim.enable = true;
-              neovide = {
-                enable = true;
-                useNixGl = true;
-              };
-            };
+            mdarocha.firefox.enable = true;
 
             programs = {
               git.enable = true;
@@ -159,41 +176,19 @@
           };
 
           wsl = mkHomeManagerConfiguration {
-            mdarocha = {
-              firefox.enable = false;
-              nixgl.enable = true;
-
-              neovim.enable = true;
-              neovide = {
-                enable = true;
-                useNixGl = true;
-              };
-            };
-
-            programs = {
-              git.enable = false; # we configure git manually
-              password-store.enable = false;
-            };
-            services.ssh-tpm-agent.enable = false;
+            programs.git.enable = false; # we configure git manually
           };
 
           codespace = mkHomeManagerConfiguration {
             mdarocha = {
-              firefox.enable = false;
               nixgl.enable = false;
-
-              neovim.enable = true;
-              neovide = {
-                enable = false;
-                useNixGl = false;
-              };
+              neovide.enable = false;
             };
 
             programs = {
+              man.enable = false; # saves some space
               git.enable = false; # we leave the default codespace git config intact
-              password-store.enable = false;
             };
-            services.ssh-tpm-agent.enable = false;
           };
         };
     };

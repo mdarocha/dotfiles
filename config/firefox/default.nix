@@ -1,4 +1,9 @@
-{ pkgs, lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 
 let
   extensions = {
@@ -6,11 +11,11 @@ let
       "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
     "queryamoid@kaply.com" =
       "https://github.com/mkaply/queryamoid/releases/download/v0.2/query_amo_addon_id-0.2-fx.xpi";
-    "deArrow@ajay.app" =
-      "https://addons.mozilla.org/firefox/downloads/latest/dearrow/latest.xpi";
+    "deArrow@ajay.app" = "https://addons.mozilla.org/firefox/downloads/latest/dearrow/latest.xpi";
 
     "@react-devtools" = "https://addons.mozilla.org/firefox/downloads/latest/react-devtools/latest.xpi";
-    "extension@redux.devtools" = "https://addons.mozilla.org/firefox/downloads/latest/reduxdevtools/latest.xpi";
+    "extension@redux.devtools" =
+      "https://addons.mozilla.org/firefox/downloads/latest/reduxdevtools/latest.xpi";
 
     "pl@dictionaries.addons.mozilla.org" =
       "https://addons.mozilla.org/firefox/downloads/latest/polish-spellchecker-dictionary/latest.xpi";
@@ -91,30 +96,35 @@ let
 
   policies = {
     # extensions
-    ExtensionSettings = {
+    ExtensionSettings =
+      {
         "*" = {
           installation_mode = "blocked";
           blocked_install_message = "Use Nix dotfiles to manage extensions!";
-          allowed_types = [ "theme" "locale" "extension" "dictionary" ];
+          allowed_types = [
+            "theme"
+            "locale"
+            "extension"
+            "dictionary"
+          ];
         };
         "langpack-pl@firefox.mozilla.org" = {
-            installation_mode = "allowed";
+          installation_mode = "allowed";
         };
-    } // (lib.mapAttrs
-      (_: v: {
+      }
+      // (lib.mapAttrs (_: v: {
         installation_mode = "force_installed";
         install_url = v;
-      })
-      extensions);
+      }) extensions);
 
     "3rdparty".Extensions = {
-        "uBlock0@raymondhill.net".adminSettings = ublock-settings;
+      "uBlock0@raymondhill.net".adminSettings = ublock-settings;
     };
 
     # misc
     Cookies = {
-        Behavior = "reject-tracker";
-        BehaviorPrivateBrowsing = "reject-tracker-and-partition-foreign";
+      Behavior = "reject-tracker";
+      BehaviorPrivateBrowsing = "reject-tracker-and-partition-foreign";
     };
     DisplayBookmarksToolbar = "never";
     DisplayMenuBar = "never";
@@ -127,7 +137,10 @@ let
       Enabled = true;
       EnablePermissions = false; # ignore pdf permissions crap like block copy
     };
-    RequestedLocales = [ "pl" "en-US" ];
+    RequestedLocales = [
+      "pl"
+      "en-US"
+    ];
     ShowHomeButton = true;
 
     Preferences = settings;
