@@ -94,36 +94,64 @@
             pkgs.writeText "apps-check" paths;
         };
 
-      apps.x86_64-linux.apply =
+      apps.x86_64-linux =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           inherit (pkgs.lib) attrsToList concatMapStringsSep;
-          configurations = concatMapStringsSep "\n" (
-            config: "configurations['${config.name}']=${config.value.activationPackage}"
-          ) (attrsToList self.homeConfigurations);
-          script = pkgs.writeShellApplication {
-            name = "apply";
-            text = ''
-              # shellcheck disable=SC1091
-              source "${./scripts/lib.sh}";
-
-              declare -A configurations
-              ${configurations}
-
-              echo "⚙️  Applying new configuration for $CONFIGURATION..."
-              export HOME_MANAGER_BACKUP_EXT="backup"
-              "''${configurations[$CONFIGURATION]}/activate"
-
-              echo "🧹 Cleaning up..."
-              nix-collect-garbage -d
-            '';
-          };
         in
         {
-          type = "app";
-          program = "${script}/bin/apply";
-        };
+          report-sizes =
+            let
+              configurations = concatMapStringsSep "\n" (config: ''
+                echo "| `${config.name}` | $(
+                  nix path-info --json --closure-size ${config.value.activationPackage} \
+                    | jq -r 'to_entries | first | .value.closureSize' | numfmt --to=si --suffix=B
+                ) |"
+              '') (attrsToList self.homeConfigurations);
+              script = pkgs.writeShellApplication {
+                name = "report";
+                text = ''
+                  echo "## homeConfigurations sizes"
 
+                  echo "| Configuration | Size |"
+                  echo "| :-- | :-- |"
+                  ${configurations}
+                '';
+              };
+            in
+            {
+              type = "app";
+              program = "${script}/bin/report";
+            };
+          apply =
+            let
+              configurations = concatMapStringsSep "\n" (
+                config: "configurations['${config.name}']=${config.value.activationPackage}"
+              ) (attrsToList self.homeConfigurations);
+
+              script = pkgs.writeShellApplication {
+                name = "apply";
+                text = ''
+                  # shellcheck disable=SC1091
+                  source "${./scripts/lib.sh}";
+
+                  declare -A configurations
+                  ${configurations}
+
+                  echo "⚙️  Applying new configuration for $CONFIGURATION..."
+                  export HOME_MANAGER_BACKUP_EXT="backup"
+                  "''${configurations[$CONFIGURATION]}/activate"
+
+                  echo "🧹 Cleaning up..."
+                  nix-collect-garbage -d
+                '';
+              };
+            in
+            {
+              type = "app";
+              program = "${script}/bin/apply";
+            };
+        };
       homeConfigurations =
         let
           inherit (home-manager.lib) homeManagerConfiguration;

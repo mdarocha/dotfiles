@@ -27,3 +27,6 @@ jobs:
           skipPush: ${{ github.event_name == 'pull_request' }}
 
       - run: nix flake check -L
+
+      - name: Report configuration sizes
+        run: nix run .#report-sizes >> $GITHUB_SUMMARY
