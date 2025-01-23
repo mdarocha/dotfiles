@@ -104,7 +104,8 @@
               ${configurations}
 
               echo "⚙️  Applying new configuration for $CONFIGURATION..."
-              sh "''${configurations[$CONFIGURATION]}/activate"
+	      export HOME_MANAGER_BACKUP_EXT="backup"
+              "''${configurations[$CONFIGURATION]}/activate"
 
               echo "🧹 Cleaning up..."
               nix-collect-garbage -d
@@ -178,6 +179,10 @@
           };
 
           codespace = mkHomeManagerConfiguration {
+	    home = {
+              username = "codespace";
+              homeDirectory = "/home/codespace";
+            };
             mdarocha = {
               firefox.enable = false;
               nixgl.enable = false;
