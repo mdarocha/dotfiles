@@ -89,6 +89,16 @@ esac
 echo "⚙️  Applying home-manager configuration..."
 /nix/var/nix/profiles/default/bin/nix run .#apply
 
+echo "⚙️  Changing the shell to nix-managed zsh..."
+case "$CONFIGURATION" in
+    "codespace")
+        sudo chsh "$(id -un)" --shell "/home/codespace/.nix-profile/bin/zsh"
+        ;;
+    *)
+        echo "⚠️  $CONFIGURATION doesn't support changing the shell. Make sure it's setup manually."
+        ;;
+esac
+
 echo "✅ Done!"
 
 popd > /dev/null || exit
