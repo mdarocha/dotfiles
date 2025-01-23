@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+set -o errexit
+set -o nounset
+set -o pipefail
+
+pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
+
 wait_for_docker() {
   echo "Waiting for Docker socket to become available..."
   while [ ! -S /var/run/docker.sock ]; do
@@ -36,11 +42,8 @@ EOF
 echo "👋 Hello!"
 echo "======"
 
-CONFIGURATION="linux"
-
-if [[ "$CODESPACES" == "true" ]]; then
-    CONFIGURATION="codespace"
-fi
+# shellcheck disable=SC1091
+source ./scripts/lib.sh
 
 echo "🔨 Setting up for $CONFIGURATION..."
 
@@ -73,4 +76,9 @@ case "$CONFIGURATION" in
         ;;
 esac
 
+echo "⚙️  Applying home-manager configuration..."
+nix run .#apply
+
 echo "✅ Done!"
+
+popd > /dev/null || exit

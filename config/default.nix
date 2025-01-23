@@ -54,5 +54,6 @@ in
   home.packages = with pkgs; [
     devenv
     gh
+    cachix
   ];
 }

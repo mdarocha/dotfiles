@@ -46,6 +46,7 @@
 
   outputs =
     inputs@{
+      self,
       nixpkgs,
       home-manager,
       neovim-config,
@@ -55,10 +56,11 @@
     {
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
 
-      checks.x86_64-linux = {
+      checks.x86_64-linux = let
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      in {
         shellcheck =
           let
-            pkgs = nixpkgs.legacyPackages.x86_64-linux;
             inherit (pkgs.lib.fileset) toSource unions;
           in
           pkgs.testers.shellcheck {
@@ -66,23 +68,55 @@
               root = ./.;
               fileset = unions [
                 ./install.sh
+                ./scripts/lib.sh
               ];
             };
           };
+
+        homeConfigurations = let
+          inherit (pkgs.lib) attrValues map;
+          paths = map (config: config.activationPackage) (attrValues self.homeConfigurations);
+        in pkgs.symlinkJoin {
+          name = "home-configurations";
+          inherit paths;
+        };
+
+        apps = let
+          inherit (pkgs.lib) attrValues map;
+          paths = map (app: app.program) (attrValues self.apps.x86_64-linux);
+        in pkgs.symlinkJoin {
+          name = "apps";
+          inherit paths;
+        };
       };
 
       apps.x86_64-linux.apply =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          inherit (pkgs.lib) attrsToList concatMapStringsSep;
+          configurations = concatMapStringsSep "\n"
+            (config: "configurations['${config.name}']=${config.value.activationPackage}")
+            (attrsToList self.homeConfigurations);
+          script = pkgs.writeShellApplication {
+            name = "apply";
+            text = ''
+              # shellcheck disable=SC1091
+              source "${./scripts/lib.sh}";
+
+              declare -A configurations
+              ${configurations}
+
+              echo "⚙️  Applying new configuration for $CONFIGURATION..."
+              sh "''${configurations[$CONFIGURATION]}/activate"
+
+              echo "🧹 Cleaning up..."
+              nix-collect-garbage -d
+            '';
+          };
         in
         {
           type = "app";
-          program = pkgs.writeShellApplication {
-            name = "apply";
-            text = ''
-              echo "⚙️  Applying new configuration..."
-            '';
-          };
+          program = "${script}/bin/apply";
         };
 
       homeConfigurations =
