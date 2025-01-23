@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -20,5 +23,7 @@ jobs:
         with:
           name: mdarocha-dotfiles
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          # only push from the main branch
+          skipPush: ${ github.event_name == 'pull_request' }
 
       - run: nix flake check -L
