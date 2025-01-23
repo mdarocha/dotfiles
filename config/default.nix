@@ -10,9 +10,10 @@ let
 in
 {
   imports = [
+    ./firefox
     ./git
-    ./pass
     ./nixgl
+    ./pass
     ./zsh
   ];
 

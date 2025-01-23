@@ -89,6 +89,7 @@
         {
           linux = mkHomeManagerConfiguration {
             mdarocha = {
+              firefox.enable = true;
               nixgl.enable = true;
 
               neovim.enable = true;
@@ -104,6 +105,7 @@
 
           wsl = mkHomeManagerConfiguration {
             mdarocha = {
+              firefox.enable = false;
               nixgl.enable = true;
 
               neovim.enable = true;
@@ -113,23 +115,23 @@
               };
             };
 
-            # we configure git manually
-            programs.git.enable = false;
-
+            programs.git.enable = false; # we configure git manually
             programs.password-store.enable = false;
           };
 
           codespace = mkHomeManagerConfiguration {
             mdarocha = {
+              firefox.enable = false;
               nixgl.enable = false;
 
               neovim.enable = true;
-              neovide.enable = false;
+              neovide = {
+                enable = false;
+                useNixGl = false;
+              };
             };
 
-            # we leave the default codespace git config intact
-            programs.git.enable = false;
-
+            programs.git.enable = false; # we leave the default codespace git config intact
             programs.password-store.enable = false;
           };
         };
