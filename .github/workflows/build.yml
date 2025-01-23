@@ -24,6 +24,6 @@ jobs:
           name: mdarocha-dotfiles
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
           # only push from the main branch
-          skipPush: github.event_name == 'pull_request'
+          skipPush: ${{ github.event_name == 'pull_request' }}
 
       - run: nix flake check -L
