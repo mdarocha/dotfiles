@@ -11,11 +11,13 @@ wait_for_docker() {
   while [ ! -S /var/run/docker.sock ]; do
     sleep 1
   done
+
+  sleep 1
   echo "Docker socket is now available."
 }
 
 install_nix() {
-    if ! command -v nix &> /dev/null; then
+    if [ -e /nix/var/nix/profiles/default/bin/nix ]; then
         echo "🔨 Installing Nix..."
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
           sh -s -- install "$@" --no-confirm \
@@ -27,17 +29,13 @@ install_nix() {
 }
 
 install_nix_codespace_workarounds() {
-cat <<EOF >> /home/codespace/.bashrc
-# Hacky workarounds to make Nix work in Codespaces over SSH
-export PATH="/nix/var/nix/profiles/default/bin/:\${PATH}"
-if ! pidof nix-daemon > /dev/null 2>&1; then
-    sudo \$(which nix-daemon) &
-fi
-EOF
-
     # Fixes issue with "suspicous owner or permissions" error
-    sudo apt update
-    sudo apt install acl
+    if ! command -v setfacl &> /dev/null; then
+        echo "🔨 Installing ACL..."
+        sudo apt-get update
+        sudo apt-get install -y acl
+    fi
+
     sudo setfacl -k /tmp
 }
 
