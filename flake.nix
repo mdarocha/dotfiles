@@ -221,6 +221,7 @@
           codespace = mkHomeManagerConfiguration {
             mdarocha = {
               nixgl.enable = false;
+              neovim.disableLsp = true;
               neovide.enable = false;
             };
 
