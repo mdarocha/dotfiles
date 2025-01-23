@@ -158,6 +158,7 @@
               git.enable = true;
               password-store.enable = true;
             };
+            services.ssh-tpm-agent.enable = true;
           };
 
           wsl = mkHomeManagerConfiguration {
@@ -176,6 +177,7 @@
               git.enable = false; # we configure git manually
               password-store.enable = false;
             };
+            services.ssh-tpm-agent.enable = false;
           };
 
           codespace = mkHomeManagerConfiguration {
@@ -194,6 +196,7 @@
               git.enable = false; # we leave the default codespace git config intact
               password-store.enable = false;
             };
+            services.ssh-tpm-agent.enable = false;
           };
         };
     };

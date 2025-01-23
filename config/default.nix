@@ -14,6 +14,7 @@ in
     ./git
     ./nixgl
     ./pass
+    ./ssh-tpm-agent
     ./zsh
   ];
 
