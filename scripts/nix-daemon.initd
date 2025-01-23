@@ -1,0 +1,45 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:		nix-daemon
+# Default-Start:	2 3 4 5
+# Default-Stop:		
+# Short-Description:	Nix Daemon
+### END INIT INFO
+
+set -e
+
+# /etc/init.d/nix-daemon: start and stop nix-daemon
+
+export NAME="nix-daemon"
+export PATH="/nix/var/nix/profiles/default/bin:${PATH}"
+export DAEMON="/nix/var/nix/profiles/default/bin/nix-daemon"
+export PIDFILE="/run/nix-daemon.pid"
+
+test -f $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+case "$1" in
+    start)
+        start-stop-daemon --start --quiet --make-pidfile --pidfile $PIDFILE --user root --chuid 0:0 --name $NAME --background --exec $DAEMON
+        log_end_msg $?
+        ;;
+    stop)
+        start-stop-daemon --stop --quiet --pidfile $PIDFILE --user root --exec $DAEMON --name $NAME --retry 5
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && [ -e "$PIDFILE" ] && rm -f $PIDFILE
+        log_end_msg $RETVAL
+        ;;
+    restart)
+        $0 stop
+        $0 start
+        ;;
+    status)
+        status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
+        ;;
+    *)
+        log_action_msg "Usage: /etc/init.d/nix-daemon {start|stop|restart|status}"
+        exit 2
+        ;;
+esac

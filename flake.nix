@@ -71,6 +71,7 @@
                 fileset = unions [
                   ./install.sh
                   ./scripts/lib.sh
+                  ./scripts/nix-daemon.initd
                 ];
               };
             };

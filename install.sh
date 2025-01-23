@@ -45,8 +45,19 @@ install_nix_codespace_workarounds() {
     sudo setfacl -k /tmp
 }
 
-install_nix_daemon_openrc_service() {
-    echo "🔨 Installing nix-daemon OpenRC service..."
+install_nix_daemon_initd_service() {
+    if [ -f /etc/init.d/nix-daemon ]; then
+        echo "✅ /etc/init.d/nix-daemon is already installed."
+        return
+    fi
+
+    echo "🔨 Installing nix-daemon init.d service..."
+    sudo cp ./scripts/nix-daemon.initd /etc/init.d/nix-daemon
+    sudo chown root:root /etc/init.d/nix-daemon
+    sudo chmod 755 /etc/init.d/nix-daemon
+
+    echo "💨 Starting nix-daemon service..."
+    sudo service nix-daemon start
 }
 
 echo "👋 Hello!"
@@ -76,6 +87,7 @@ case "$CONFIGURATION" in
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
 
         install_nix_codespace_workarounds
+        install_nix_daemon_initd_service
         ;;
     "linux")
         install_nix linux \
