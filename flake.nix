@@ -103,7 +103,7 @@
           report-sizes =
             let
               configurations = concatMapStringsSep "\n" (config: ''
-                echo "| `${config.name}` | $(
+                echo "| \`${config.name}\` | $(
                   nix path-info --json --closure-size ${config.value.activationPackage} \
                     | jq -r 'to_entries | first | .value.closureSize' | numfmt --to=si --suffix=B
                 ) |"
