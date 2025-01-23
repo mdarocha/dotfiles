@@ -22,11 +22,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1737480538,
-        "narHash": "sha256-rk/cmrvq3In0TegW9qaAxw+5YpJhRWt2p74/6JStrw0=",
+        "lastModified": 1737575492,
+        "narHash": "sha256-qa/D3NC1JoApnUuLrq1gseBmIxeg6icm/ojPgggMDVQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "4481a16d1ac5bff4a77c608cefe08c9b9efe840d",
+        "rev": "cefb1889b96ddd1dac3dd4734e894f4cadab7802",
         "type": "github"
       },
       "original": {
@@ -134,12 +134,33 @@
         "type": "github"
       }
     },
+    "oh-my-zsh": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1737325840,
+        "narHash": "sha256-tQf3+RA/rCtxQcrLEgZ6irfPZLwrSed13s+BKZtrv9E=",
+        "owner": "ohmyzsh",
+        "repo": "ohmyzsh",
+        "rev": "6e9cda3d30d8e73c11e4d32044b7f4c5e06f822d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ohmyzsh",
+        "ref": "master",
+        "repo": "ohmyzsh",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
         "neovim-config": "neovim-config",
         "nixgl": "nixgl",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "oh-my-zsh": "oh-my-zsh",
+        "zsh-nix-shell": "zsh-nix-shell",
+        "zsh-vanilli": "zsh-vanilli",
+        "zsh-windows-title": "zsh-windows-title"
       }
     },
     "vim-gtfo": {
@@ -189,6 +210,57 @@
         "owner": "qpkorr",
         "ref": "master",
         "repo": "vim-renamer",
+        "type": "github"
+      }
+    },
+    "zsh-nix-shell": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1704028593,
+        "narHash": "sha256-Rtg8kWVLhXRuD2/Ctbtgz9MQCtKZOLpAIdommZhXKdE=",
+        "owner": "chisui",
+        "repo": "zsh-nix-shell",
+        "rev": "82ca15e638cc208e6d8368e34a1625ed75e08f90",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chisui",
+        "ref": "master",
+        "repo": "zsh-nix-shell",
+        "type": "github"
+      }
+    },
+    "zsh-vanilli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1681900360,
+        "narHash": "sha256-Oc8I/IUszDpUp6FkpOW33uNUcB/u54BB2m3afFzSG2A=",
+        "owner": "yous",
+        "repo": "vanilli.sh",
+        "rev": "5a59e75fc76967c528c89a0d29abc6685526e68d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yous",
+        "ref": "master",
+        "repo": "vanilli.sh",
+        "type": "github"
+      }
+    },
+    "zsh-windows-title": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1648318754,
+        "narHash": "sha256-k1RcIaxS7NcYgZv0VcmVN2ZYAmlaaIsbkurloRawgzw=",
+        "owner": "mdarocha",
+        "repo": "zsh-windows-title",
+        "rev": "dfd98a0a32d90c3e5a9dd818465ab46f27e8ccaf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mdarocha",
+        "ref": "master",
+        "repo": "zsh-windows-title",
         "type": "github"
       }
     }

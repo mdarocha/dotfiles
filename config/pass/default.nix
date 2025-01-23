@@ -15,5 +15,5 @@
   };
 
   # ensure clipboard work
-  home.packages = lib.optional config.programs.passsword-store.enable pkgs.wl-clipboard;
+  home.packages = lib.optional config.programs.password-store.enable pkgs.wl-clipboard;
 }

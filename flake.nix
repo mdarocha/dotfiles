@@ -21,6 +21,27 @@
       url = "github:nix-community/nixGL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # zsh plugins
+    oh-my-zsh = {
+      url = "github:ohmyzsh/ohmyzsh/master";
+      flake = false;
+    };
+
+    zsh-vanilli = {
+      url = "github:yous/vanilli.sh/master";
+      flake = false;
+    };
+
+    zsh-nix-shell = {
+      url = "github:chisui/zsh-nix-shell/master";
+      flake = false;
+    };
+
+    zsh-windows-title = {
+      url = "github:mdarocha/zsh-windows-title/master";
+      flake = false;
+    };
   };
 
   outputs =
@@ -99,8 +120,10 @@
               };
             };
 
-            programs.git.enable = true;
-            programs.password-store.enable = true;
+            programs = {
+              git.enable = true;
+              password-store.enable = true;
+            };
           };
 
           wsl = mkHomeManagerConfiguration {
@@ -115,8 +138,10 @@
               };
             };
 
-            programs.git.enable = false; # we configure git manually
-            programs.password-store.enable = false;
+            programs = {
+              git.enable = false; # we configure git manually
+              password-store.enable = false;
+            };
           };
 
           codespace = mkHomeManagerConfiguration {
@@ -131,8 +156,10 @@
               };
             };
 
-            programs.git.enable = false; # we leave the default codespace git config intact
-            programs.password-store.enable = false;
+            programs = {
+              git.enable = false; # we leave the default codespace git config intact
+              password-store.enable = false;
+            };
           };
         };
     };
