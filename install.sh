@@ -7,6 +7,11 @@ set -o pipefail
 pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
 
 wait_for_docker() {
+  if docker version > /dev/null 2>&1; then
+    echo "Docker is already available"
+    return
+  fi
+
   echo "Waiting for Docker to become available..."
   until docker version > /dev/null 2>&1; do
     sleep 1
