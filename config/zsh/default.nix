@@ -41,6 +41,11 @@
         bindkey '^[[F'  end-of-line
         bindkey '^[[3~' delete-char
       fi
+
+      # load machine-specific config if it exists
+      if [ -e "$HOME/.zshrc.local" ]; then
+        . "$HOME/.zshrc.local"
+      fi
     '';
 
     plugins = [
