@@ -11,9 +11,25 @@ To install the dotfiles, clone the repository and run the `install.sh` script.
 $ ./install.sh
 ```
 
-The script will take care of making sure that [Nix](https://nixos.org) is installed,
-and activating the relevant Home Manager configuration in `flake.nix`.
+The script will:
+  1. Install `binfmt` support for ARM systems
+     
+     > This is currently only supported when running on GitHub Codespaces and uses the [tonistiigi/binfmt](https://github.com/tonistiigi/binfmt) Docker image
 
+  1. Install Nix using the [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)
+     
+     > It will setup the [mdarocha-dotfiles](https://app.cachix.org/cache/mdarocha-dotfiles) Nix binary cache, which is updated by GitHub Actions in this repository.
+     > 
+     > On GitHub Codespaces, it uses `--init none`, since Codespaces use `/etc/init.d` instead of `systemd` services.
+        
+  1. _Codespaces only_: Install the `/etc/init.d/nix-daemon` script to manage `nix-daemon` using `init.d` and start it.
+  1. _Codespaces only_: Run various workarounds for problems found running Nix in codespaces
+     - `"error: suspicious ownership or permission"` when running `nix build` - fixed with `sudo setfacl -k /tmp`
+       
+        > See https://github.com/digitallyinduced/ihp/issues/1706#issuecomment-1605415702 and https://github.com/mpscholten/TestIHPJune22/blob/c6d76d61d9b57778b1e8b2d1ff2d896c88395769/.devcontainer/devcontainer.json#L21
+
+  1. Run `nix run .#apply` to apply `home-manager` configurations from the flake
+     
 ## Configurations
 
 The `flake.nix` file contains several configurations, depending on what environment we
