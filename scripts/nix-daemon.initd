@@ -18,6 +18,7 @@ export PIDFILE="/run/nix-daemon.pid"
 
 test -f $DAEMON || exit 0
 
+# shellcheck disable=SC1091
 . /lib/lsb/init-functions
 
 case "$1" in
