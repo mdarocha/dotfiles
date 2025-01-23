@@ -29,4 +29,4 @@ jobs:
       - run: nix flake check -L
 
       - name: Report configuration sizes
-        run: nix run .#report-sizes >> $GITHUB_SUMMARY
+        run: nix run .#report-sizes >> $GITHUB_STEP_SUMMARY
