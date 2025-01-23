@@ -111,7 +111,7 @@
               script = pkgs.writeShellApplication {
                 name = "report";
                 text = ''
-                  echo "## homeConfigurations sizes"
+                  echo "# homeConfigurations sizes"
 
                   echo "| Configuration | Size |"
                   echo "| :-- | :-- |"

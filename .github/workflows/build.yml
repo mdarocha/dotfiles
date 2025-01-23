@@ -17,7 +17,10 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v16
-
+    
+      - name: Check Nix flake inputs
+        uses: DeterminateSystems/flake-checker-action@v9
+        
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
