@@ -82,12 +82,9 @@
         };
 
         apps = let
-          inherit (pkgs.lib) attrValues map;
-          paths = map (app: app.program) (attrValues self.apps.x86_64-linux);
-        in pkgs.symlinkJoin {
-          name = "apps";
-          inherit paths;
-        };
+          inherit (pkgs.lib) attrValues concatMapStringsSep;
+          paths = concatMapStringsSep "\n" (app: app.program) (attrValues self.apps.x86_64-linux);
+        in pkgs.writeText "apps-check" paths;
       };
 
       apps.x86_64-linux.apply =
