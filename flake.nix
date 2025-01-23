@@ -104,18 +104,18 @@
           script = pkgs.writeShellApplication {
             name = "apply";
             text = ''
-                            # shellcheck disable=SC1091
-                            source "${./scripts/lib.sh}";
+              # shellcheck disable=SC1091
+              source "${./scripts/lib.sh}";
 
-                            declare -A configurations
-                            ${configurations}
+              declare -A configurations
+              ${configurations}
 
-                            echo "⚙️  Applying new configuration for $CONFIGURATION..."
-              	      export HOME_MANAGER_BACKUP_EXT="backup"
-                            "''${configurations[$CONFIGURATION]}/activate"
+              echo "⚙️  Applying new configuration for $CONFIGURATION..."
+              export HOME_MANAGER_BACKUP_EXT="backup"
+              "''${configurations[$CONFIGURATION]}/activate"
 
-                            echo "🧹 Cleaning up..."
-                            nix-collect-garbage -d
+              echo "🧹 Cleaning up..."
+              nix-collect-garbage -d
             '';
           };
         in
