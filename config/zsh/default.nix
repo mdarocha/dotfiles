@@ -24,7 +24,7 @@
 
     autosuggestion.enable = false;
     enableCompletion = true;
-    enableVteIntegration = true;
+    enableVteIntegration = false; # TODO fix
 
     initExtra = ''
       export CLICOLOR=1
