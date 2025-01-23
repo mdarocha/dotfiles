@@ -7,8 +7,8 @@ set -o pipefail
 pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
 
 wait_for_docker() {
-  echo "Waiting for Docker socket to become available..."
-  while [ ! -S /var/run/docker.sock ]; do
+  echo "Waiting for Docker to become available..."
+  until docker version > /dev/null 2>&1; do
     sleep 1
   done
 
@@ -17,7 +17,7 @@ wait_for_docker() {
 }
 
 install_nix() {
-    if [ -e /nix/var/nix/profiles/default/bin/nix ]; then
+    if [ ! -f /nix/var/nix/profiles/default/bin/nix ]; then
         echo "🔨 Installing Nix..."
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
           sh -s -- install "$@" --no-confirm \
