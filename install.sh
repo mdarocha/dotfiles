@@ -89,7 +89,7 @@ case "$CONFIGURATION" in
         install_nix_codespace_workarounds
         install_nix_daemon_initd_service
         ;;
-    "linux")
+    "linux" | "wsl")
         install_nix linux \
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
         ;;
@@ -105,6 +105,13 @@ echo "⚙️  Changing the shell to nix-managed zsh..."
 case "$CONFIGURATION" in
     "codespace")
         sudo chsh "$(id -un)" --shell "/home/codespace/.nix-profile/bin/zsh"
+        ;;
+    "wsl")
+        if ! grep "/home/$USER/.nix-profile/bin/zsh" "/etc/shells"; then
+            echo "/home/$USER/.nix-profile/bin/zsh" | sudo tee -a /etc/shells
+        fi
+        chsh --shell "/home/$USER/.nix-profile/bin/zsh"
+        echo "✅ Shell changed. Re-login to see results"
         ;;
     *)
         echo "⚠️  $CONFIGURATION doesn't support changing the shell. Make sure it's setup manually."
