@@ -181,10 +181,6 @@
                       nixgl.enable = mkDefault true;
 
                       neovim.enable = mkDefault true;
-                      neovide = {
-                        enable = mkDefault true;
-                        useNixGl = mkDefault true;
-                      };
                     };
 
                     home = {
@@ -222,7 +218,6 @@
             mdarocha = {
               nixgl.enable = false;
               neovim.disableLsp = true;
-              neovide.enable = false;
             };
 
             home = {
