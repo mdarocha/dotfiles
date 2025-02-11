@@ -101,6 +101,7 @@ esac
 echo "⚙️  Applying home-manager configuration..."
 
 unset __ETC_PROFILE_NIX_SOURCED
+# shellcheck disable=SC1091
 . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
 /nix/var/nix/profiles/default/bin/nix run .#apply
