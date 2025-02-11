@@ -99,6 +99,10 @@ case "$CONFIGURATION" in
 esac
 
 echo "⚙️  Applying home-manager configuration..."
+
+unset __ETC_PROFILE_NIX_SOURCED
+. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
 /nix/var/nix/profiles/default/bin/nix run .#apply
 
 echo "⚙️  Changing the shell to nix-managed zsh..."
