@@ -4,10 +4,9 @@ on:
   push:
     branches: [ "main" ]
     paths:
-     - '.github/workflows/update-flake-lock.yml'
+      - '.github/workflows/update-flake-lock.yml'
   schedule:
-    - cron: '0 0 * * 0' # runs weekly on Sunday at 00:00
-  workflow_dispatch:
+    - cron: '0 0 * * *' # runs daily at 00:00
 
 permissions:
   contents: write
@@ -30,7 +29,7 @@ jobs:
           pr-title: "Update flake.lock"
           pr-labels: automated
 
-      # TODO https://github.com/mdarocha/dotfiles-lawson/issues/9
-      #- uses: ./.github/actions/comment-flake-input-diff
-      #  with:
-      #    pull-request-number: ${{ steps.update-flake-lock.outputs.pull-request-number }}
+      - uses: mdarocha/comment-flake-lock-changelog@6e072ce41517f02a3c5f3ef5eaf9c3e2abe7244e # v0.9.0
+        if: ${{ steps.update-flake-lock.outputs.pull-request-number != '0' }}
+        with:
+          pull-request-number: ${{ steps.update-flake-lock.outputs.pull-request-number }}
