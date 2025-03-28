@@ -18,13 +18,12 @@
     '';
   };
 
-  # TODO fix ls colors
   programs.zsh = {
     enable = true;
 
     autosuggestion.enable = false;
     enableCompletion = true;
-    enableVteIntegration = false; # TODO fix
+    enableVteIntegration = true;
 
     initExtraFirst = ''
       if [[ "''${CODESPACES:-}" == "true" ]]; then
@@ -42,11 +41,18 @@
             export $key="$decodedValue"
         done < /workspaces/.codespaces/shared/.env-secrets
       fi
+
+      # use zsh in nix shell
+      export SHELL=${pkgs.zsh}/bin/zsh
     '';
 
     initExtra = ''
       export CLICOLOR=1
       autoload -Uz colors && colors
+
+      # ls colors
+      export LS_COLORS="$(${pkgs.vivid}/bin/vivid generate solarized-dark)"
+      alias ls="ls --color=auto"
 
       zstyle ':completion:*' menu yes no=5 select
       zstyle ':completion:*:*:make:*' tag-order 'targets'
@@ -83,11 +89,6 @@
         name = "vanilli.sh";
         file = "vanilli.sh";
         src = inputs.zsh-vanilli;
-      }
-      {
-        name = "zsh-nix-shell";
-        file = "nix-shell.plugin.zsh";
-        src = inputs.zsh-nix-shell;
       }
       {
         name = "extract";

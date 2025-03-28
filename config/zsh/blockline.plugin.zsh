@@ -51,8 +51,32 @@ blockline_solarized_colors() {
     TEXT_COLOR="$SOL_FG[base3]"
 }
 
+blockline_nix() {
+    local -r symbol_nix='󱄅'
+    local -r symbol_direnv=''
+
+    # show if direnv active
+    if [[ -n $DIRENV_DIR ]]; then
+        echo "$SOL_BG[violet] ${symbol_direnv} direnv $RESET_BG"
+        return
+    fi
+
+    # show if in nix shell
+    if echo "$PATH" | grep -qc '/nix/store'; then
+        echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
+        return
+    fi
+
+    # show in in legacy nix-shell
+    if [[ -n $IN_NIX_SHELL ]]; then
+        echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
+        return
+    fi
+}
+
 blockline_python_venv() {
-    local readonly symbol_python='ƨ'
+    local -r symbol_python=''
+
     if [ -n "$VIRTUAL_ENV" ]; then
         echo "$SOL_BG[violet] ${symbol_python} $(basename ${VIRTUAL_ENV}) $RESET_BG"
     fi
@@ -143,6 +167,9 @@ blockline() {
 
     # ssh info
     block_prompt+="$(blockline_ssh)"
+
+    # nix info
+    block_prompt+="$(blockline_nix)"
 
     # python env info
     block_prompt+="$(blockline_python_venv)"

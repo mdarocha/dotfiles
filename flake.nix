@@ -33,11 +33,6 @@
       flake = false;
     };
 
-    zsh-nix-shell = {
-      url = "github:chisui/zsh-nix-shell/master";
-      flake = false;
-    };
-
     zsh-windows-title = {
       url = "github:mdarocha/zsh-windows-title/master";
       flake = false;
@@ -215,10 +210,7 @@
           };
 
           codespace = mkHomeManagerConfiguration {
-            mdarocha = {
-              nixgl.enable = false;
-              neovim.disableLsp = true;
-            };
+            mdarocha.nixgl.enable = false;
 
             home = {
               username = "codespace";
