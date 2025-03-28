@@ -22,11 +22,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1742946951,
-        "narHash": "sha256-us5DS0XGVpZBMbYs3TSQYn61bswEPmLpBOYITD4/bUE=",
+        "lastModified": 1743097780,
+        "narHash": "sha256-5tUbaMBKYbfTe/4aXACxmiXG22TgwPBNcfZ8Kg3rt+g=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "0ff53f6d336edb3ad81647dc931ad1c9c7f890ca",
+        "rev": "b14a70c40f4fd0b73d095ab04a7c6e31fbc18e52",
         "type": "github"
       },
       "original": {
@@ -62,16 +62,14 @@
           "nixpkgs"
         ],
         "numbers-vim": "numbers-vim",
-        "vim-gtfo": "vim-gtfo",
-        "vim-password-store": "vim-password-store",
         "vim-renamer": "vim-renamer"
       },
       "locked": {
-        "lastModified": 1742919732,
-        "narHash": "sha256-gm3fHJf901XSy86v+GhNA7jySQc7rdyXGuB/wmTaUwA=",
+        "lastModified": 1743060103,
+        "narHash": "sha256-3P36x3xfoTvVsEZcZEED+V0yZuVQHdnCFJ6qZtE/QNM=",
         "owner": "mdarocha",
         "repo": "neovim-config",
-        "rev": "ee8042b3ff13f3f0b11826a6398f0ccd11ab6fd7",
+        "rev": "5ab3a55f968ce638247f8f90d5c17f95def05b68",
         "type": "github"
       },
       "original": {
@@ -103,11 +101,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1742800061,
-        "narHash": "sha256-oDJGK1UMArK52vcW9S5S2apeec4rbfNELgc50LqiPNs=",
+        "lastModified": 1743014863,
+        "narHash": "sha256-jAIUqsiN2r3hCuHji80U7NNEafpIMBXiwKlSrjWMlpg=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "1750f3c1c89488e2ffdd47cab9d05454dddfb734",
+        "rev": "bd3bac8bfb542dbde7ffffb6987a1a1f9d41699f",
         "type": "github"
       },
       "original": {
@@ -161,39 +159,6 @@
         "zsh-nix-shell": "zsh-nix-shell",
         "zsh-vanilli": "zsh-vanilli",
         "zsh-windows-title": "zsh-windows-title"
-      }
-    },
-    "vim-gtfo": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1718656676,
-        "narHash": "sha256-T3cMfqjFHMLPFu1sa4sOZ4KGCMx84s0C746evSu9tJg=",
-        "owner": "justinmk",
-        "repo": "vim-gtfo",
-        "rev": "21a5e0292dabccba7363a6e508029d078a74504b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "justinmk",
-        "repo": "vim-gtfo",
-        "type": "github"
-      }
-    },
-    "vim-password-store": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1554598191,
-        "narHash": "sha256-MwH3uZI0lGlQTDArUKAwOXs21o7Ql7+2igwZeJZp+n0=",
-        "owner": "fourjay",
-        "repo": "vim-password-store",
-        "rev": "474a7dfc1c49986ed92fa78925963080b673926a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "fourjay",
-        "ref": "master",
-        "repo": "vim-password-store",
-        "type": "github"
       }
     },
     "vim-renamer": {
