@@ -65,11 +65,11 @@
         "vim-renamer": "vim-renamer"
       },
       "locked": {
-        "lastModified": 1746457907,
-        "narHash": "sha256-/XNUN+7xUjAdiUM5mFG7qMxkxXZlPT+pXneB2Jo25DI=",
+        "lastModified": 1746483468,
+        "narHash": "sha256-nsdaPZNqwihamSyFz5oiufB/ubjsmznRWbFGPcox5j4=",
         "owner": "mdarocha",
         "repo": "neovim-config",
-        "rev": "827f2bb539c5e5b570aa9af32ab4e9f3e69ceec1",
+        "rev": "7f424bfdfc125cc38041252a2a7050327cca25c8",
         "type": "github"
       },
       "original": {
