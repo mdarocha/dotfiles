@@ -10,7 +10,6 @@
     ./firefox
     ./git
     ./nixgl
-    ./pass
     ./ssh-tpm-agent
     ./zsh
   ];

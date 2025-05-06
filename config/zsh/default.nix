@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, lib, inputs, ... }:
 
 {
   imports = [ ./nix-index ];
@@ -25,52 +25,53 @@
     enableCompletion = true;
     enableVteIntegration = true;
 
-    initExtraFirst = ''
-      if [[ "''${CODESPACES:-}" == "true" ]]; then
-        # This file contains logic to cd to the project directory on login
-        . /etc/profile.d/codespaces.sh
+    initContent = lib.mkMerge [
+      (lib.mkOrder 500 ''
+        if [[ "''${CODESPACES:-}" == "true" ]]; then
+          # This file contains logic to cd to the project directory on login
+          . /etc/profile.d/codespaces.sh
 
-        # Setup env-secrets, even if over ssh
-        # By default this logic (contained in /etc/profile.d/codespaces.sh
-        # does not execute on ssh sessions.
-        while read line
-        do
-            key=$(echo $line | sed "s/=.*//")
-            value=$(echo $line | sed "s/$key=//1")
-            decodedValue=$(echo $value | base64 -d)
-            export $key="$decodedValue"
-        done < /workspaces/.codespaces/shared/.env-secrets
-      fi
+          # Setup env-secrets, even if over ssh
+          # By default this logic (contained in /etc/profile.d/codespaces.sh
+          # does not execute on ssh sessions.
+          while read line
+          do
+              key=$(echo $line | sed "s/=.*//")
+              value=$(echo $line | sed "s/$key=//1")
+              decodedValue=$(echo $value | base64 -d)
+              export $key="$decodedValue"
+          done < /workspaces/.codespaces/shared/.env-secrets
+        fi
 
-      # use zsh in nix shell
-      export SHELL=${pkgs.zsh}/bin/zsh
-    '';
+        # use zsh in nix shell
+        export SHELL=${pkgs.zsh}/bin/zsh
+      '')
+      (lib.mkOrder 1200 ''
+        export CLICOLOR=1
+        autoload -Uz colors && colors
 
-    initExtra = ''
-      export CLICOLOR=1
-      autoload -Uz colors && colors
+        # ls colors
+        export LS_COLORS="$(${pkgs.vivid}/bin/vivid generate solarized-dark)"
+        alias ls="ls --color=auto"
 
-      # ls colors
-      export LS_COLORS="$(${pkgs.vivid}/bin/vivid generate solarized-dark)"
-      alias ls="ls --color=auto"
+        zstyle ':completion:*' menu yes no=5 select
+        zstyle ':completion:*:*:make:*' tag-order 'targets'
+        zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
+        zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
 
-      zstyle ':completion:*' menu yes no=5 select
-      zstyle ':completion:*:*:make:*' tag-order 'targets'
-      zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
-      zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
+        # bindkey fixups for Ptyxis terminal
+        if [ -n  $PTYXIS_VERSION ]; then
+          bindkey '^[[H'  beginning-of-line
+          bindkey '^[[F'  end-of-line
+          bindkey '^[[3~' delete-char
+        fi
 
-      # bindkey fixups for Ptyxis terminal
-      if [ -n  $PTYXIS_VERSION ]; then
-        bindkey '^[[H'  beginning-of-line
-        bindkey '^[[F'  end-of-line
-        bindkey '^[[3~' delete-char
-      fi
-
-      # load machine-specific config if it exists
-      if [ -e "$HOME/.zshrc.local" ]; then
-        . "$HOME/.zshrc.local"
-      fi
-    '';
+        # load machine-specific config if it exists
+        if [ -e "$HOME/.zshrc.local" ]; then
+          . "$HOME/.zshrc.local"
+        fi
+      '')
+    ];
 
     plugins = [
       {

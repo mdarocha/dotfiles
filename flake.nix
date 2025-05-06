@@ -150,17 +150,17 @@
       homeConfigurations =
         let
           inherit (home-manager.lib) homeManagerConfiguration;
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+            overlays = [ nixgl.overlay ];
+          };
 
           mkHomeManagerConfiguration =
             additionalConfig:
             homeManagerConfiguration {
-              pkgs = import nixpkgs {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-                overlays = [ nixgl.overlay ];
-              };
-
               extraSpecialArgs = { inherit inputs; };
+              inherit pkgs;
 
               modules = [
                 neovim-config.homeManagerModules.default
@@ -173,7 +173,7 @@
                   {
                     mdarocha = {
                       firefox.enable = mkDefault false;
-                      nixgl.enable = mkDefault true;
+                      nixgl.enable = mkDefault false;
 
                       neovim.enable = mkDefault true;
                     };
@@ -185,7 +185,6 @@
 
                     programs = {
                       git.enable = mkDefault true;
-                      password-store.enable = mkDefault false;
                     };
                     services.ssh-tpm-agent.enable = mkDefault false;
                   }
@@ -196,13 +195,26 @@
         in
         {
           linux = mkHomeManagerConfiguration {
-            mdarocha.firefox.enable = true;
-
-            programs = {
-              git.enable = true;
-              password-store.enable = true;
+            mdarocha = {
+              firefox.enable = true;
+              nixgl.enable = true;
             };
             services.ssh-tpm-agent.enable = true;
+
+            # temporary, since flatpak neovide has problems
+            home.packages = [
+              (pkgs.neovide.overrideAttrs (old: {
+                pname = "nixGL-${old.pname}";
+                postFixup = old.postFixup + ''
+                  mv $out/bin/neovide $out/bin/.neovide
+
+                  echo "#! ${pkgs.bash}/bin/bash" >> $out/bin/neovide
+                  echo "${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel $out/bin/.neovide \"\$@\"" >> $out/bin/neovide
+
+                  chmod +x $out/bin/neovide
+                '';
+              }))
+            ];
           };
 
           wsl = mkHomeManagerConfiguration {
@@ -210,8 +222,6 @@
           };
 
           codespace = mkHomeManagerConfiguration {
-            mdarocha.nixgl.enable = false;
-
             home = {
               username = "codespace";
               homeDirectory = "/home/codespace";
