@@ -186,7 +186,6 @@
                     programs = {
                       git.enable = mkDefault true;
                     };
-                    services.ssh-tpm-agent.enable = mkDefault false;
                   }
                 )
                 additionalConfig
@@ -199,7 +198,6 @@
               firefox.enable = true;
               nixgl.enable = true;
             };
-            services.ssh-tpm-agent.enable = true;
 
             # temporary, since flatpak neovide has problems
             home.packages = [
