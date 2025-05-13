@@ -182,10 +182,6 @@
                       username = mkDefault "marek";
                       homeDirectory = mkDefault "/home/marek";
                     };
-
-                    programs = {
-                      git.enable = mkDefault true;
-                    };
                   }
                 )
                 additionalConfig

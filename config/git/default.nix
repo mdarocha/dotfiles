@@ -22,5 +22,10 @@ in
       rerere.enable = true;
       diff.algorithm = "histogram";
     };
+
+    # include a machine-local config if available
+    includes = [
+      { path = "~/.config/git/config.local"; }
+    ];
   };
 }
