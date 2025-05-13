@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 let
   inherit (lib) mkDefault;
@@ -21,6 +21,19 @@ in
       commit.verbose = true;
       rerere.enable = true;
       diff.algorithm = "histogram";
+
+      url = {
+        # always use ssh for Github repos
+        "ssh://git@github.com/" = {
+          insteadOf = "https://github.com/";
+          pushInsteadOf = "https://github.com/";
+        };
+      };
+
+      # ghq tool config
+      ghq = {
+        root = "~/Projekty";
+      };
     };
 
     # include a machine-local config if available
@@ -28,4 +41,6 @@ in
       { path = "~/.config/git/config.local"; }
     ];
   };
+
+  home.packages = [ pkgs.ghq ];
 }

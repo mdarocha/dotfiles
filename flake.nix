@@ -199,21 +199,21 @@
             home.packages = [
               (pkgs.neovide.overrideAttrs (old: {
                 pname = "nixGL-${old.pname}";
-                postFixup = old.postFixup + ''
-                  mv $out/bin/neovide $out/bin/.neovide
+                postFixup =
+                  old.postFixup
+                  + ''
+                    mv $out/bin/neovide $out/bin/.neovide
 
-                  echo "#! ${pkgs.bash}/bin/bash" >> $out/bin/neovide
-                  echo "${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel $out/bin/.neovide \"\$@\"" >> $out/bin/neovide
+                    echo "#! ${pkgs.bash}/bin/bash" >> $out/bin/neovide
+                    echo "${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel $out/bin/.neovide \"\$@\"" >> $out/bin/neovide
 
-                  chmod +x $out/bin/neovide
-                '';
+                    chmod +x $out/bin/neovide
+                  '';
               }))
             ];
           };
 
-          wsl = mkHomeManagerConfiguration {
-            programs.git.enable = false; # we configure git manually
-          };
+          wsl = mkHomeManagerConfiguration { };
 
           codespace = mkHomeManagerConfiguration {
             home = {
