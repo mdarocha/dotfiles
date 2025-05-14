@@ -33,3 +33,9 @@ jobs:
         if: ${{ steps.update-flake-lock.outputs.pull-request-number != 0 }}
         with:
           pull-request-number: ${{ steps.update-flake-lock.outputs.pull-request-number }}
+
+      - uses: thollander/actions-comment-pull-request@e4a76dd2b0a3c2027c3fd84147a67c22ee4c90fa # v3
+        if: ${{ steps.update-flake-lock.outputs.pull-request-number != 0 }}
+        with:
+          pr-number: ${{ steps.update-flake-lock.outputs.pull-request-number }}
+          message: "@robo-intern[bot] run actions"
