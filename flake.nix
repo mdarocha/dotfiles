@@ -172,6 +172,7 @@
                   in
                   {
                     mdarocha = {
+                      autoupdate.enable = mkDefault false;
                       firefox.enable = mkDefault false;
                       nixgl.enable = mkDefault false;
 
@@ -191,6 +192,7 @@
         {
           linux = mkHomeManagerConfiguration {
             mdarocha = {
+              autoupdate.enable = true;
               firefox.enable = true;
               nixgl.enable = true;
             };
