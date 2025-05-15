@@ -59,5 +59,19 @@ in
         );
       };
     };
+
+    systemd.user.timers.dotfiles-autoupdate = {
+      Unit = {
+        Description = "Automatically apply the newest ${cfg.path} flake";
+      };
+      Timer = {
+        OnCalendar = "${cfg.frequency}";
+        Persistent = true;
+        Unit = "dotfiles-autoupdate.service";
+      };
+      Install = {
+        WantedBy = [ "timers.target" ];
+      };
+    };
   };
 }
