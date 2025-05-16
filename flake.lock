@@ -39,11 +39,11 @@
     "neosolarized-nvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1736934405,
-        "narHash": "sha256-QpuOkVfKlajys33on1LfYqx3Lsr2Ajr0xubMpM5vwUo=",
+        "lastModified": 1747308665,
+        "narHash": "sha256-Z8XiaYpGyvCBb96hKbIj0ud4/sQl1K6gino20tDtiAQ=",
         "owner": "Tsuzat",
         "repo": "NeoSolarized.nvim",
-        "rev": "fb395ea220c9befc06a91bd97e80fbfec939add5",
+        "rev": "3c55ad358c062aa4879950c4f83b4deeac6b72df",
         "type": "github"
       },
       "original": {
@@ -66,11 +66,11 @@
         "vim-renamer": "vim-renamer"
       },
       "locked": {
-        "lastModified": 1747339826,
-        "narHash": "sha256-Moga0fqPBXo8xpjDUYy+x6Q2jo+l6r5rmJzP4DjPy6Q=",
+        "lastModified": 1747351661,
+        "narHash": "sha256-k7XQLKIgrzSkVDdr20/Ps620djH0oGakjNj2VFBKAQ8=",
         "owner": "mdarocha",
         "repo": "neovim-config",
-        "rev": "85f139afe6511ee3f8d8eb8370df2dba37e63df1",
+        "rev": "3586d8fd62e3b78f350709c625560362b216a28c",
         "type": "github"
       },
       "original": {
