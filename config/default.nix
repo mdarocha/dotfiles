@@ -47,5 +47,8 @@
     pkgs.devenv
     pkgs.gh
     pkgs.cachix
+
+    # needed for zed
+    pkgs.nil
   ];
 }
