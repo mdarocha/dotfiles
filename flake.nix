@@ -137,8 +137,9 @@
                   export HOME_MANAGER_BACKUP_EXT="backup"
                   "''${configurations[$CONFIGURATION]}/activate"
 
-                  echo "🧹 Cleaning up..."
-                  nix-collect-garbage -d
+                  # TODO removed due to issues found with gcroots
+                  #echo "🧹 Cleaning up..."
+                  #nix-collect-garbage -d
                 '';
               };
             in

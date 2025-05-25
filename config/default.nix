@@ -16,16 +16,14 @@
 
   targets.genericLinux.enable = true;
 
-  home = {
-    stateVersion = "24.05";
+  home.stateVersion = "24.05";
 
-    sessionVariables = {
-      # synchronize NIX_PATH with the dotfiles' nixpkgs
-      NIX_PATH = "nixpkgs=${inputs.nixpkgs}";
+  systemd.user.sessionVariables = {
+    # synchronize NIX_PATH with the dotfiles' nixpkgs
+    NIX_PATH = lib.mkForce "nixpkgs=${inputs.nixpkgs}";
 
-      # make sure libs from nixpkgs can be found
-      LD_LIBRARY_PATH = "$HOME/.nix-profile/lib:\${LD_LIBRARY_PATH:-}";
-    };
+    # make sure libs from nixpkgs can be found
+    LD_LIBRARY_PATH = "$HOME/.nix-profile/lib:\${LD_LIBRARY_PATH:-}";
   };
 
   # shutup home-manager notifications
@@ -45,9 +43,9 @@
   home.enableNixpkgsReleaseCheck = false;
 
   # additional packages
-  home.packages = with pkgs; [
-    devenv
-    gh
-    cachix
+  home.packages = [
+    pkgs.devenv
+    pkgs.gh
+    pkgs.cachix
   ];
 }

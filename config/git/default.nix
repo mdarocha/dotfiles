@@ -6,7 +6,10 @@ in
 {
   programs.git = {
     enable = lib.mkDefault true;
-    ignores = [ ".ccls-cache" ];
+    ignores = [
+      ".ccls-cache"
+      ".aider*"
+    ];
     lfs.enable = true;
 
     userName = mkDefault "mdarocha";
@@ -27,6 +30,11 @@ in
         "ssh://git@github.com/" = {
           insteadOf = "https://github.com/";
           pushInsteadOf = "https://github.com/";
+        };
+        # same for gitlab
+        "ssh://git@gitlab.com/" = {
+          insteadOf = "https://gitlab.com/";
+          pushInsteadOf = "https://gitlab.com/";
         };
       };
 
