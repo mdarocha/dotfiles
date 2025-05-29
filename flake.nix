@@ -194,7 +194,7 @@
           linux = mkHomeManagerConfiguration {
             mdarocha = {
               autoupdate.enable = true;
-              firefox.enable = true;
+              firefox.enable = false;
               nixgl.enable = true;
             };
 
