@@ -61,6 +61,7 @@
               inherit (pkgs.lib.fileset) toSource unions;
             in
             pkgs.testers.shellcheck {
+              name = "shellcheck";
               src = toSource {
                 root = ./.;
                 fileset = unions [
@@ -174,7 +175,6 @@
                   {
                     mdarocha = {
                       autoupdate.enable = mkDefault false;
-                      firefox.enable = mkDefault false;
                       nixgl.enable = mkDefault false;
 
                       neovim.enable = mkDefault true;
@@ -194,26 +194,8 @@
           linux = mkHomeManagerConfiguration {
             mdarocha = {
               autoupdate.enable = true;
-              firefox.enable = false;
               nixgl.enable = true;
             };
-
-            # temporary, since flatpak neovide has problems
-            home.packages = [
-              (pkgs.neovide.overrideAttrs (old: {
-                pname = "nixGL-${old.pname}";
-                postFixup =
-                  old.postFixup
-                  + ''
-                    mv $out/bin/neovide $out/bin/.neovide
-
-                    echo "#! ${pkgs.bash}/bin/bash" >> $out/bin/neovide
-                    echo "${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel $out/bin/.neovide \"\$@\"" >> $out/bin/neovide
-
-                    chmod +x $out/bin/neovide
-                  '';
-              }))
-            ];
           };
 
           wsl = mkHomeManagerConfiguration { };
