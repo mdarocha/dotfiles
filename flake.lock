@@ -25,11 +25,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1751760902,
-        "narHash": "sha256-qBGNn7T/zOgUDQTo/RM/D2oxMkB2x36j3ajvpVanEVs=",
+        "lastModified": 1751824240,
+        "narHash": "sha256-aDDC0CHTlL7QDKWWhdbEgVPK6KwWt+ca0QkmHYZxMzI=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "8b0180dde1d6f4cf632e046309e8f963924dfbd0",
+        "rev": "fd9e55f5fac45a26f6169310afca64d56b681935",
         "type": "github"
       },
       "original": {
@@ -69,11 +69,11 @@
         "vim-renamer": "vim-renamer"
       },
       "locked": {
-        "lastModified": 1751702863,
-        "narHash": "sha256-RIe1jg+S8qEdTJfpXzEbEmP06r2719M7Sxutjf1pHO0=",
+        "lastModified": 1751789273,
+        "narHash": "sha256-TsAx2idViXfSYcl273s/rOllryepbN46kN0M0zdzQko=",
         "owner": "mdarocha",
         "repo": "neovim-config",
-        "rev": "c3f83ae73d7231d4069f6bee730ae3518b3b1f09",
+        "rev": "b7e124a67a902e4df20355ec2702773f13536bb9",
         "type": "github"
       },
       "original": {
@@ -105,11 +105,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1751625545,
-        "narHash": "sha256-4E7wWftF1ExK5ZEDzj41+9mVgxtuRV3wWCId7QAYMAU=",
+        "lastModified": 1751786137,
+        "narHash": "sha256-lIlUKVGCGsh0Q2EA7/6xRtKUZjaQ/ur8uUyY+MynHXQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "c860cf0b3a0829f0f6cf344ca8de83a2bbfab428",
+        "rev": "ceb24d94c6feaa4e8737a8e2bd3cf71c3a7eaaa0",
         "type": "github"
       },
       "original": {
