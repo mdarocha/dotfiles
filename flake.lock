@@ -25,11 +25,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1755229570,
-        "narHash": "sha256-soZegto0xXzG2zYlu/zjknDHv0Z7tRS5EQs+Z/VRTBg=",
+        "lastModified": 1755313937,
+        "narHash": "sha256-pQb7bNcolxYGRiylUCrTddiF+qW2wsUiM9+eRIDUrVU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "11626a4383b458f8dc5ea3237eaa04e8ab1912f3",
+        "rev": "2a749f4790a14f7168be67cdf6e548ef1c944e10",
         "type": "github"
       },
       "original": {
@@ -69,11 +69,11 @@
         "vim-renamer": "vim-renamer"
       },
       "locked": {
-        "lastModified": 1755245370,
-        "narHash": "sha256-9NKmiLNQ3oqWx7wSKuQ/U8oKV9I1UzAHv1Ng1x2pTCI=",
+        "lastModified": 1755331708,
+        "narHash": "sha256-cK6myWIyzWNjivthtxK6Sna+mD8L9NsYwhGUxslspUc=",
         "owner": "mdarocha",
         "repo": "neovim-config",
-        "rev": "1ddbb1aa26578d328ead83866d67cf2f31b4078a",
+        "rev": "44aec74e88157b36b6c69eea4e3c2fa158ad4f37",
         "type": "github"
       },
       "original": {
@@ -139,11 +139,11 @@
     "oh-my-zsh": {
       "flake": false,
       "locked": {
-        "lastModified": 1755072861,
-        "narHash": "sha256-fCAwg6fzXw/mEa+xEnSCK88/ba8nR0FNY2tQ62CchbQ=",
+        "lastModified": 1755372700,
+        "narHash": "sha256-NylC656n3cokbacg0YM8xjKtibBK8vvXG/7G3WXiIQw=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "2423b7a12dc4624a2d8a7c58be4ac75cb82fd8c7",
+        "rev": "736632228a5f39573a15f4533b7672851f30bbe6",
         "type": "github"
       },
       "original": {
