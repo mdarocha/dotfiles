@@ -9,14 +9,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    neovim-config = {
-      url = "github:mdarocha/neovim-config";
-      inputs = {
-        home-manager.follows = "home-manager";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-
     nixgl = {
       url = "github:nix-community/nixGL";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -44,7 +36,6 @@
       self,
       nixpkgs,
       home-manager,
-      neovim-config,
       nixgl,
       ...
     }:
@@ -136,8 +127,27 @@
 
                   echo "⚙️  Applying new configuration for $CONFIGURATION..."
                   export HOME_MANAGER_BACKUP_EXT="backup"
-                  "''${configurations[$CONFIGURATION]}/activate"
 
+                  retries=3
+                  delay=3
+                  attempt=1
+
+                  while [ "$attempt" -le "$retries" ]; do
+                    echo "Attempt $attempt/$retries..."
+
+                    "''${configurations[$CONFIGURATION]}/activate" && break
+                    status=$?
+  
+                    if [ "$attempt" -lt "$retries" ]; then
+                      echo "Activation failed (exit $status). Retrying in $delay seconds..."
+                      sleep "$delay"
+                    else
+                      echo "Activation failed after $retries attempts (exit $status)."
+                      exit "$status"
+                    fi
+                    attempt=$((attempt + 1))
+                  done
+                  
                   # TODO removed due to issues found with gcroots
                   #echo "🧹 Cleaning up..."
                   #nix-collect-garbage -d
@@ -149,6 +159,7 @@
               program = "${script}/bin/apply";
             };
         };
+
       homeConfigurations =
         let
           inherit (home-manager.lib) homeManagerConfiguration;
@@ -165,7 +176,6 @@
               inherit pkgs;
 
               modules = [
-                neovim-config.homeManagerModules.default
                 ./config
                 (
                   { lib, ... }:
@@ -173,13 +183,6 @@
                     inherit (lib) mkDefault;
                   in
                   {
-                    mdarocha = {
-                      autoupdate.enable = mkDefault false;
-                      nixgl.enable = mkDefault false;
-
-                      neovim.enable = mkDefault true;
-                    };
-
                     home = {
                       username = mkDefault "marek";
                       homeDirectory = mkDefault "/home/marek";
