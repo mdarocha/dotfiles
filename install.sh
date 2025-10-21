@@ -26,6 +26,7 @@ install_nix() {
         echo "🔨 Installing Nix..."
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
           sh -s -- install "$@" --no-confirm \
+            --extra-conf "trusted-users = $USER" \
             --extra-conf "substituters = https://cache.nixos.org https://mdarocha-dotfiles.cachix.org" \
             --extra-conf "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= mdarocha-dotfiles.cachix.org-1:kBGT+0RREXqBc0Z7hI9NdvjrA7ypIpIhMLNrD1qLF9k="
     else
