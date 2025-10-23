@@ -45,6 +45,8 @@ in
         exit 1
       fi
 
+      printenv
+      
       # Set VSCODE_FOLDER based on VSCODE_GIT_ASKPASS_NODE
       if [[ -n "''${VSCODE_GIT_ASKPASS_NODE:-}" ]]; then
         VSCODE_FOLDER="''${VSCODE_GIT_ASKPASS_NODE%/node}"
