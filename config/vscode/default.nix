@@ -45,15 +45,26 @@ in
         exit 1
       fi
 
-      printenv
+      # The first time this script is executed, the Codespace container is in the process
+      # of being setup. That means that the `code` cli and related functionality to communicate
+      # with the VSCode instance are not setup yet.
+      # To work around this, we generate a script file - /tmp/dotfiles-setup-codespace-vscode.sh,
+      # and execute it in the default .bashrc, so that it runs when the user opens the terminal
+      # in VSCode, where the needed environment variables are setup.
+      # A marker file prevents duplicate execution.
+      # It's VERY hacky, but it works...
       
+      # Generate the setup script
+      cat > /tmp/dotfiles-setup-codespace-vscode.sh << 'VSCODE_SETUP_EOF'
+      #!/bin/bash
+
       # Set VSCODE_FOLDER based on VSCODE_GIT_ASKPASS_NODE
       if [[ -n "''${VSCODE_GIT_ASKPASS_NODE:-}" ]]; then
         VSCODE_FOLDER="''${VSCODE_GIT_ASKPASS_NODE%/node}"
         echo "VS Code folder detected: $VSCODE_FOLDER"
       else
-        echo "Warning: VSCODE_GIT_ASKPASS_NODE not found, VSCODE_FOLDER not set"
-        exit 1
+        echo "Warning: VSCODE_GIT_ASKPASS_NODE not found, skipping VS Code setup"
+        exit 0
       fi
 
       echo "Installing VS Code extensions..."
@@ -65,12 +76,31 @@ in
       settingsFile="$HOME/.vscode-remote/data/Machine/settings.json"
       newSettingsFile='${configFile}'
 
-
+      if [ ! -f "$settingsFile" ]; then
+        echo "Cannot find VS Code settings file at $settingsFile, skipping settings merge."
+        exit 0
+      fi
+      
       ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$settingsFile" "$newSettingsFile" > "$settingsFile.tmp"
 
       # removing the marker lets VS Code accept the new settings
       rm -rf "$HOME/.vscode-remote/data/Machine/.writeMachineSettingsMarker" || true
       mv "$settingsFile.tmp" "$settingsFile"
+
+      echo "VS Code setup complete."
+      
+      # Remove this script to prevent duplicate execution
+      rm /tmp/dotfiles-setup-codespace-vscode.sh
+      VSCODE_SETUP_EOF
+
+      chmod +x /tmp/dotfiles-setup-codespace-vscode.sh
+    '';
+
+    programs.bash.bashrcExtra = ''
+      # VS Code Codespaces setup
+      if [[ -f /tmp/dotfiles-setup-codespace-vscode.sh ]]; then
+        /tmp/dotfiles-setup-codespace-vscode.sh
+      fi
     '';
   };
 }
