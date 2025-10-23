@@ -128,25 +128,7 @@
                   echo "⚙️  Applying new configuration for $CONFIGURATION..."
                   export HOME_MANAGER_BACKUP_EXT="backup"
 
-                  retries=3
-                  delay=3
-                  attempt=1
-
-                  while [ "$attempt" -le "$retries" ]; do
-                    echo "Attempt $attempt/$retries..."
-
-                    "''${configurations[$CONFIGURATION]}/activate" && break
-                    status=$?
-  
-                    if [ "$attempt" -lt "$retries" ]; then
-                      echo "Activation failed (exit $status). Retrying in $delay seconds..."
-                      sleep "$delay"
-                    else
-                      echo "Activation failed after $retries attempts (exit $status)."
-                      exit "$status"
-                    fi
-                    attempt=$((attempt + 1))
-                  done
+                  "''${configurations[$CONFIGURATION]}/activate"
                   
                   # TODO removed due to issues found with gcroots
                   #echo "🧹 Cleaning up..."

@@ -105,7 +105,27 @@ unset __ETC_PROFILE_NIX_SOURCED
 # shellcheck disable=SC1091
 . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
-/nix/var/nix/profiles/default/bin/nix run .#apply
+retries=3
+delay=3
+attempt=1
+
+while [ "$attempt" -le "$retries" ]; do
+    echo "Attempt $attempt/$retries..."
+
+    if /nix/var/nix/profiles/default/bin/nix run .#apply; then
+        break
+    fi
+    status=$?
+
+    if [ "$attempt" -lt "$retries" ]; then
+        echo "Configuration apply failed (exit $status). Retrying in $delay seconds..."
+        sleep "$delay"
+    else
+        echo "Configuration apply failed after $retries attempts (exit $status)."
+        exit "$status"
+    fi
+    attempt=$((attempt + 1))
+done
 
 echo "⚙️  Changing the shell to nix-managed zsh..."
 case "$CONFIGURATION" in
