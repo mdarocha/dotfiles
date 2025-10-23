@@ -112,27 +112,18 @@
             };
           apply =
             let
-              configurations = concatMapStringsSep "\n" (
-                config: "configurations['${config.name}']=${config.value.activationPackage}"
-              ) (attrsToList self.homeConfigurations);
-
               script = pkgs.writeShellApplication {
                 name = "apply";
                 text = ''
                   # shellcheck disable=SC1091
                   source "${./scripts/lib.sh}";
 
-                  declare -A configurations
-                  ${configurations}
-
                   echo "⚙️  Applying new configuration for $CONFIGURATION..."
                   export HOME_MANAGER_BACKUP_EXT="backup"
+                  nix run .#homeConfigurations."$CONFIGURATION".activationPackage
 
-                  "''${configurations[$CONFIGURATION]}/activate"
-                  
-                  # TODO removed due to issues found with gcroots
-                  #echo "🧹 Cleaning up..."
-                  #nix-collect-garbage -d
+                  echo "🧹 Cleaning up..."
+                  nix-collect-garbage -d
                 '';
               };
             in
@@ -186,6 +177,8 @@
           wsl = mkHomeManagerConfiguration { };
 
           codespace = mkHomeManagerConfiguration {
+            mdarocha.vscode.enable = true;
+            
             home = {
               username = "codespace";
               homeDirectory = "/home/codespace";

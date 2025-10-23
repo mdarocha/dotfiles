@@ -12,11 +12,12 @@ in
     ];
     lfs.enable = true;
 
-    userName = mkDefault "mdarocha";
-    userEmail = mkDefault "git@mdarocha.pl";
+    settings = {
+      user.name = mkDefault "mdarocha";
+      user.email = mkDefault "git@mdarocha.pl";
 
-    # mostly based on https://jvns.ca/blog/2024/02/16/popular-git-config-options
-    extraConfig = {
+      # additional settings
+      # mostly based on https://jvns.ca/blog/2024/02/16/popular-git-config-options
       init.defaultBranch = "main";
       pull.rebase = false;
       push.autoSetupRemote = true;
