@@ -79,11 +79,11 @@
     "oh-my-zsh": {
       "flake": false,
       "locked": {
-        "lastModified": 1762944155,
-        "narHash": "sha256-dPpRgpNNHZfUq8gklHILPtbBm7Kk0OIDRm1aCsq/SyQ=",
+        "lastModified": 1763126492,
+        "narHash": "sha256-B5PiBmvAik1cww0tClLJhOrDv5CWi3njw0otDP5wnwI=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "dca16e8f9a20a84172044621a95832b4d5a1e057",
+        "rev": "5a282b9b3050e4851c15cfdb9d79af6a708988b7",
         "type": "github"
       },
       "original": {
