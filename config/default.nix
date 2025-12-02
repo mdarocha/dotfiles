@@ -7,7 +7,6 @@
 
 {
   imports = [
-    ./autoupdate
     ./git
     ./nixgl
     ./vscode
@@ -55,7 +54,7 @@
     pkgs.gh
     pkgs.cachix
     pkgs.jq
-    
+
     # needed for zed
     #pkgs.nil
   ];

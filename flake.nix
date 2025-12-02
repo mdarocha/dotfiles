@@ -168,17 +168,14 @@
         in
         {
           linux = mkHomeManagerConfiguration {
-            mdarocha = {
-              autoupdate.enable = true;
-              nixgl.enable = true;
-            };
+            mdarocha.nixgl.enable = true;
           };
 
           wsl = mkHomeManagerConfiguration { };
 
           codespace = mkHomeManagerConfiguration {
             mdarocha.vscode.enable = true;
-            
+
             home = {
               username = "codespace";
               homeDirectory = "/home/codespace";
