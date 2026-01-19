@@ -7,6 +7,7 @@
       "git.autofetch" = true;
       "git.enableSmartCommit" = true;
       "git.confirmSync" = false;
+      "github.copilot.nextEditSuggestions.enabled" = false;
     };
     extensions = [
       "bbenoist.nix"
