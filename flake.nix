@@ -168,10 +168,19 @@
         in
         {
           linux = mkHomeManagerConfiguration {
-            mdarocha.nixgl.enable = true;
+            mdarocha = {
+              nixgl.enable = true;
+              zed.enable = true;
+            };
           };
 
-          wsl = mkHomeManagerConfiguration { };
+          wsl = mkHomeManagerConfiguration {
+            mdarocha = {
+              zed = {
+                enable = true;
+              };
+            };
+          };
 
           codespace = mkHomeManagerConfiguration {
             mdarocha.vscode.enable = true;

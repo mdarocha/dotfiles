@@ -11,6 +11,7 @@
     ./nixgl
     ./vscode
     ./zsh
+    ./zed
   ];
 
   targets.genericLinux.enable = true;
