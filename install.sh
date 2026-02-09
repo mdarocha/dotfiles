@@ -7,6 +7,7 @@ set -o pipefail
 pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
 
 NIX_COMMAND=""
+NIX_SHELL_COMMAND=""
 
 install_nix() {
     if [ ! -f /nix/var/nix/profiles/default/bin/nix ]; then
@@ -25,6 +26,7 @@ install_nix() {
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
     NIX_COMMAND="/nix/var/nix/profiles/default/bin/nix"
+    NIX_SHELL_COMMAND="/nix/var/nix/profiles/default/bin/nix-shell"
 }
 
 install_nix_portable() {
@@ -46,15 +48,16 @@ install_nix_portable() {
     chmod +x ./nix-portable
 
     export NP_GIT="$(which git)"
-    export NP_RUNTIME="proot"
 
     NIX_COMMAND="$(pwd)/nix-portable nix"
+    NIX_SHELL_COMMAND="$(pwd)/nix-portable nix-shell"
 }
 
 install_nix_codespace_workarounds() {
     # Fixes issue with "suspicous owner or permissions" error
     if ! command -v setfacl &> /dev/null; then
         echo "🔨 Installing ACL..."
+        sudo apt-get update || true
         sudo apt-get install -y --no-install-recommends acl
         echo "✅ ACL installed."
     fi
@@ -104,7 +107,8 @@ echo "🔨 Activating the home-manager configuration..."
 while [ "$attempt" -le "$retries" ]; do
     echo "Attempt $attempt/$retries..."
 
-    if $NIX_COMMAND shell nixpkgs#nix --command ./activation/activate; then
+    export HOME_MANAGER_BACKUP_EXT=backup
+    if $NIX_SHELL_COMMAND -p nix --command ./activation/activate; then
         break
     fi
     status=$?

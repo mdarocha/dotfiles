@@ -126,7 +126,7 @@
             homeManagerConfiguration {
               extraSpecialArgs = { inherit inputs; };
               inherit pkgs;
-
+              
               modules = [
                 ./config
                 (
