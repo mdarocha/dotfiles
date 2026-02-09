@@ -6,20 +6,7 @@ set -o pipefail
 
 pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
 
-wait_for_docker() {
-  if docker version > /dev/null 2>&1; then
-    echo "Docker is already available"
-    return
-  fi
-
-  echo "Waiting for Docker to become available..."
-  until docker version > /dev/null 2>&1; do
-    sleep 1
-  done
-
-  sleep 1
-  echo "Docker socket is now available."
-}
+NIX_COMMAND=""
 
 install_nix() {
     if [ ! -f /nix/var/nix/profiles/default/bin/nix ]; then
@@ -32,33 +19,36 @@ install_nix() {
     else
         echo "✅ Nix is already installed."
     fi
+
+    unset __ETC_PROFILE_NIX_SOURCED
+    # shellcheck disable=SC1091
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
+    NIX_COMMAND="/nix/var/nix/profiles/default/bin/nix"
 }
 
-install_nix_codespace_workarounds() {
-    # Fixes issue with "suspicous owner or permissions" error
-    if ! command -v setfacl &> /dev/null; then
-        echo "🔨 Installing ACL..."
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends acl
-        sudo rm -rf /var/lib/apt/lists/*
+install_nix_portable() {
+    if [ -f ./bin/nix-portable ]; then
+        echo "✅ nix-portable is already downloaded."
+    else
+        mkdir -p ./bin
+        echo "🔨 Downloading nix-portable..."
+        curl --proto '=https' --tlsv1.2 -sSf -L \
+            -o ./bin/nix-portable \
+            https://github.com/DavHau/nix-portable/releases/download/v012/nix-portable-x86_64
     fi
 
-    sudo setfacl -k /tmp
-}
+    chmod +x ./bin/nix-portable
 
-install_nix_daemon_initd_service() {
-    if [ -f /etc/init.d/nix-daemon ]; then
-        echo "✅ /etc/init.d/nix-daemon is already installed."
-        return
-    fi
+    export NP_GIT="$(which git)"
+    export NP_RUNTIME=proot
 
-    echo "🔨 Installing nix-daemon init.d service..."
-    sudo cp ./scripts/nix-daemon.initd /etc/init.d/nix-daemon
-    sudo chown root:root /etc/init.d/nix-daemon
-    sudo chmod 755 /etc/init.d/nix-daemon
+    rm ./bin/nix && ln -s $(pwd)/bin/nix-portable ./bin/nix
+    rm ./bin/nix-build && ln -s $(pwd)/bin/nix-portable ./bin/nix-build
 
-    echo "💨 Starting nix-daemon service..."
-    sudo service nix-daemon start
+    export PATH="$PATH:$(pwd)/bin"
+
+    NIX_COMMAND="$(pwd)/bin/nix"
 }
 
 echo "👋 Hello!"
@@ -69,26 +59,10 @@ source ./scripts/lib.sh
 
 echo "🔨 Setting up for $CONFIGURATION..."
 
-echo "⚙️  Installing binfmt support..."
-case "$CONFIGURATION" in
-    "codespace")
-        wait_for_docker
-        docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
-        ;;
-    *)
-        echo "⚠️  $CONFIGURATION doesn't support binfmt setup. Make sure it's setup manually"
-        ;;
-esac
-
 echo "⚙️  Setting up Nix..."
 case "$CONFIGURATION" in
     "codespace")
-        install_nix linux \
-            --init none \
-            --extra-conf "extra-platforms = aarch64-linux arm-linux"
-
-        install_nix_codespace_workarounds
-        install_nix_daemon_initd_service
+        install_nix_portable
         ;;
     "linux" | "wsl")
         install_nix linux \
@@ -98,21 +72,22 @@ case "$CONFIGURATION" in
         install_nix
         ;;
 esac
+echo "✅ Nix installed at $NIX_COMMAND"
 
 echo "⚙️  Applying home-manager configuration..."
-
-unset __ETC_PROFILE_NIX_SOURCED
-# shellcheck disable=SC1091
-. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-
 retries=3
 delay=3
 attempt=1
 
+$NIX_COMMAND build .#homeConfigurations."$CONFIGURATION".activationPackage \
+    --extra-substituters "https://cache.nixos.org https://mdarocha-dotfiles.cachix.org" \
+    --extra-trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= mdarocha-dotfiles.cachix.org-1:kBGT+0RREXqBc0Z7hI9NdvjrA7ypIpIhMLNrD1qLF9k=" \
+    --out-link "./activation"
+
 while [ "$attempt" -le "$retries" ]; do
     echo "Attempt $attempt/$retries..."
 
-    if /nix/var/nix/profiles/default/bin/nix run .#apply; then
+    if $NIX_COMMAND shell nixpkgs#nix --command ./activation/activate; then
         break
     fi
     status=$?
@@ -126,6 +101,7 @@ while [ "$attempt" -le "$retries" ]; do
     fi
     attempt=$((attempt + 1))
 done
+echo "✅ Home-manager configuration applied successfully."
 
 echo "⚙️  Changing the shell to nix-managed zsh..."
 case "$CONFIGURATION" in
@@ -143,6 +119,7 @@ case "$CONFIGURATION" in
         echo "⚠️  $CONFIGURATION doesn't support changing the shell. Make sure it's setup manually."
         ;;
 esac
+echo "✅ Shell changed for $CONFIGURATION."
 
 echo "✅ Done!"
 

@@ -110,27 +110,6 @@
               type = "app";
               program = "${script}/bin/report";
             };
-          apply =
-            let
-              script = pkgs.writeShellApplication {
-                name = "apply";
-                text = ''
-                  # shellcheck disable=SC1091
-                  source "${./scripts/lib.sh}";
-
-                  echo "⚙️  Applying new configuration for $CONFIGURATION..."
-                  export HOME_MANAGER_BACKUP_EXT="backup"
-                  nix run .#homeConfigurations."$CONFIGURATION".activationPackage
-
-                  echo "🧹 Cleaning up..."
-                  nix-collect-garbage -d
-                '';
-              };
-            in
-            {
-              type = "app";
-              program = "${script}/bin/apply";
-            };
         };
 
       homeConfigurations =
