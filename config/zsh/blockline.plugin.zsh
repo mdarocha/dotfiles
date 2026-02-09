@@ -67,7 +67,7 @@ blockline_nix() {
         return
     fi
 
-    # show in in legacy nix-shell
+    # show if in legacy nix-shell
     if [[ -n $IN_NIX_SHELL ]]; then
         echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
         return

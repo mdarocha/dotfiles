@@ -24,13 +24,6 @@
 
     # make sure libs from nixpkgs can be found
     LD_LIBRARY_PATH = "$HOME/.nix-profile/lib:\${LD_LIBRARY_PATH:-}";
-
-    # needed to make sure omnisharp in zed works
-    #DOTNET_ROOT = "${(pkgs.dotnetCorePackages.combinePackages [
-    #  pkgs.dotnetCorePackages.sdk_8_0
-    #  pkgs.dotnetCorePackages.sdk_9_0
-    #  pkgs.dotnetCorePackages.sdk_10_0
-    #]).unwrapped}/share/dotnet";
   };
 
   # shutup home-manager notifications

@@ -48,7 +48,8 @@ install_nix_portable() {
     chmod +x ./nix-portable
 
     export NP_GIT="$(which git)"
-
+    export NP_RUNTIME="proot"
+    
     NIX_COMMAND="$(pwd)/nix-portable nix"
     NIX_SHELL_COMMAND="$(pwd)/nix-portable nix-shell"
 }
@@ -67,6 +68,22 @@ install_nix_codespace_workarounds() {
     echo "✅ /tmp ACLs set."
 }
 
+generate_shell_wrapper() {
+    # pre-warm nix-shell invocation to make sure its cached
+    ./nix-portable nix-shell -p nix --command "echo 'Nix shell warmed up'"
+
+cat <<EOF > ./zsh-wrapper.sh
+#!/usr/bin/env bash
+
+export NP_GIT="$(which git)"
+export NP_RUNTIME="proot"
+
+export PATH="\$HOME/.nix-profile/bin:\$PATH"
+exec "$(pwd)/nix-portable" nix-shell -p nix --command zsh
+EOF
+
+    chmod +x ./zsh-wrapper.sh
+}
 echo "👋 Hello!"
 echo "======"
 
@@ -127,8 +144,10 @@ echo "✅ Home-manager configuration applied successfully."
 echo "⚙️  Changing the shell to nix-managed zsh..."
 case "$CONFIGURATION" in
     "codespace")
-        echo "TODO"
-        #sudo chsh "$(id -un)" --shell "/home/codespace/.nix-profile/bin/zsh"
+        generate_shell_wrapper
+        wrapper_path="$(pwd)/zsh-wrapper.sh"
+        sudo chsh "$(id -un)" --shell "$wrapper_path"
+        sudo ln -sf "$wrapper_path" "/usr/local/bin/zsh"
         ;;
     "wsl")
         if ! grep "/home/$USER/.nix-profile/bin/zsh" "/etc/shells"; then

@@ -96,7 +96,7 @@ in
       chmod +x /tmp/dotfiles-setup-codespace-vscode.sh
     '';
 
-    programs.bash.bashrcExtra = ''
+    programs.zsh.initExtra = ''
       # VS Code Codespaces setup
       if [[ -f /tmp/dotfiles-setup-codespace-vscode.sh ]]; then
         /tmp/dotfiles-setup-codespace-vscode.sh

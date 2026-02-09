@@ -109,10 +109,6 @@
         src = "${inputs.oh-my-zsh}/plugins/systemd";
       }
     ];
-
-    shellAliases = {
-      vimr = "vim -c Renamer";
-    };
   };
 
   home.packages = with pkgs; [
