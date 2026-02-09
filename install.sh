@@ -28,27 +28,40 @@ install_nix() {
 }
 
 install_nix_portable() {
-    if [ -f ./bin/nix-portable ]; then
-        echo "✅ nix-portable is already downloaded."
-    else
-        mkdir -p ./bin
-        echo "🔨 Downloading nix-portable..."
-        curl --proto '=https' --tlsv1.2 -sSf -L \
-            -o ./bin/nix-portable \
-            https://github.com/DavHau/nix-portable/releases/download/v012/nix-portable-x86_64
+    if which nix >/dev/null 2>&1 || [ -d /nix ]; then
+        echo "⚠️  Nix is already installed on this system. Skipping install."
+        return
     fi
 
-    chmod +x ./bin/nix-portable
+    if [ -f ./nix-portable ]; then
+        echo "✅ nix-portable is already downloaded."
+    else
+        echo "🔨 Downloading nix-portable..."
+        curl --proto '=https' --tlsv1.2 -sSf -L \
+            -o ./nix-portable \
+            https://github.com/DavHau/nix-portable/releases/download/v012/nix-portable-x86_64
+        echo "✅ nix-portable downloaded."
+    fi
+
+    chmod +x ./nix-portable
 
     export NP_GIT="$(which git)"
-    export NP_RUNTIME=proot
+    export NP_RUNTIME="proot"
 
-    rm ./bin/nix && ln -s $(pwd)/bin/nix-portable ./bin/nix
-    rm ./bin/nix-build && ln -s $(pwd)/bin/nix-portable ./bin/nix-build
+    NIX_COMMAND="$(pwd)/nix-portable nix"
+}
 
-    export PATH="$PATH:$(pwd)/bin"
+install_nix_codespace_workarounds() {
+    # Fixes issue with "suspicous owner or permissions" error
+    if ! command -v setfacl &> /dev/null; then
+        echo "🔨 Installing ACL..."
+        sudo apt-get install -y --no-install-recommends acl
+        echo "✅ ACL installed."
+    fi
 
-    NIX_COMMAND="$(pwd)/bin/nix"
+    echo "🔨 Setting /tmp ACLs..."
+    sudo setfacl -k /tmp
+    echo "✅ /tmp ACLs set."
 }
 
 echo "👋 Hello!"
@@ -62,6 +75,7 @@ echo "🔨 Setting up for $CONFIGURATION..."
 echo "⚙️  Setting up Nix..."
 case "$CONFIGURATION" in
     "codespace")
+        install_nix_codespace_workarounds
         install_nix_portable
         ;;
     "linux" | "wsl")
@@ -79,11 +93,14 @@ retries=3
 delay=3
 attempt=1
 
+echo "🔨 Building the home-manager activation package..."
 $NIX_COMMAND build .#homeConfigurations."$CONFIGURATION".activationPackage \
     --extra-substituters "https://cache.nixos.org https://mdarocha-dotfiles.cachix.org" \
     --extra-trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= mdarocha-dotfiles.cachix.org-1:kBGT+0RREXqBc0Z7hI9NdvjrA7ypIpIhMLNrD1qLF9k=" \
     --out-link "./activation"
+echo "✅ Build successful."
 
+echo "🔨 Activating the home-manager configuration..."
 while [ "$attempt" -le "$retries" ]; do
     echo "Attempt $attempt/$retries..."
 
@@ -106,7 +123,8 @@ echo "✅ Home-manager configuration applied successfully."
 echo "⚙️  Changing the shell to nix-managed zsh..."
 case "$CONFIGURATION" in
     "codespace")
-        sudo chsh "$(id -un)" --shell "/home/codespace/.nix-profile/bin/zsh"
+        echo "TODO"
+        #sudo chsh "$(id -un)" --shell "/home/codespace/.nix-profile/bin/zsh"
         ;;
     "wsl")
         if ! grep "/home/$USER/.nix-profile/bin/zsh" "/etc/shells"; then

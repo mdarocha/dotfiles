@@ -37,9 +37,9 @@
   news.display = "silent";
 
   # needed for program icons to show up in DE
-  programs.bash.enable = true;
-  xdg.enable = true;
-  xdg.mime.enable = true;
+  programs.bash.enable = lib.mkDefault true;
+  xdg.enable = lib.mkDefault true;
+  xdg.mime.enable = lib.mkDefault true;
 
   # enable man pages for hm-installed packages
   programs.man = {
@@ -55,8 +55,5 @@
     pkgs.gh
     pkgs.cachix
     pkgs.jq
-
-    # needed for zed
-    #pkgs.nil
   ];
 }

@@ -178,6 +178,14 @@
             programs = {
               man.enable = false; # saves some space
               git.enable = false; # we leave the default codespace git config intact
+
+              bash.enable = false; # we use custom bash init with nix-portable
+            };
+
+            # xdg setup is not necessary
+            xdg = {
+              enable = false;
+              mime.enable = false;
             };
           };
         };
