@@ -7,11 +7,11 @@
 
 {
   imports = [
-    ./autoupdate
     ./git
     ./nixgl
     ./vscode
     ./zsh
+    ./zed
   ];
 
   targets.genericLinux.enable = true;
@@ -55,7 +55,7 @@
     pkgs.gh
     pkgs.cachix
     pkgs.jq
-    
+
     # needed for zed
     #pkgs.nil
   ];

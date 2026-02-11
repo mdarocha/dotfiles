@@ -169,8 +169,8 @@
         {
           linux = mkHomeManagerConfiguration {
             mdarocha = {
-              autoupdate.enable = true;
               nixgl.enable = true;
+              zed.enable = true;
             };
           };
 
