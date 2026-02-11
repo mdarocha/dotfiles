@@ -174,11 +174,13 @@
             };
           };
 
-          wsl = mkHomeManagerConfiguration { };
+          wsl = mkHomeManagerConfiguration {
+            programs.git.forceSSH = false; # we don't use ssh in WSL
+          };
 
           codespace = mkHomeManagerConfiguration {
             mdarocha.vscode.enable = true;
-            
+
             home = {
               username = "codespace";
               homeDirectory = "/home/codespace";

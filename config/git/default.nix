@@ -1,14 +1,19 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, config, ... }:
 
 let
-  inherit (lib) mkDefault;
+  inherit (lib) mkDefault mkOption types;
 in
 {
-  programs.git = {
+  options.programs.git.forceSSH = mkOption {
+    type = types.bool;
+    default = true;
+    description = "Force SSH for GitHub and GitLab repositories";
+  };
+
+  config.programs.git = {
     enable = lib.mkDefault true;
     ignores = [
       ".ccls-cache"
-      ".aider*"
     ];
     lfs.enable = true;
 
@@ -28,12 +33,12 @@ in
 
       url = {
         # always use ssh for Github repos
-        "ssh://git@github.com/" = {
+        "ssh://git@github.com/" = lib.mkIf config.programs.git.forceSSH {
           insteadOf = "https://github.com/";
           pushInsteadOf = "https://github.com/";
         };
         # same for gitlab
-        "ssh://git@gitlab.com/" = {
+        "ssh://git@gitlab.com/" = lib.mkIf config.programs.git.forceSSH {
           insteadOf = "https://gitlab.com/";
           pushInsteadOf = "https://gitlab.com/";
         };
@@ -51,5 +56,5 @@ in
     ];
   };
 
-  home.packages = [ pkgs.ghq ];
+  config.home.packages = [ pkgs.ghq ];
 }
