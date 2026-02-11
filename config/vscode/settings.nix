@@ -8,6 +8,7 @@
       "git.enableSmartCommit" = true;
       "git.confirmSync" = false;
       "github.copilot.nextEditSuggestions.enabled" = false;
+      "editor.fontFamily" = "Hack Nerd Font Mono";
     };
     extensions = [
       "bbenoist.nix"
