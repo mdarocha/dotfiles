@@ -196,7 +196,7 @@ blockline() {
     local symbol_color="%(?.$SOL_BG[green].$SOL_BG[red])"
     block_prompt+="$symbol_color $ $RESET_BG"
 
-    PROMPT="$TEXT_COLOR${block_prompt} $RESET_FG"
+    PROMPT="${TEXT_COLOR}${block_prompt} ${RESET_FG}"
     RPROMPT=""
 }
 
