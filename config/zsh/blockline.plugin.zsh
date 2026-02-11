@@ -62,7 +62,16 @@ blockline_nix() {
     fi
 
     # show if in nix shell
-    if echo "$PATH" | grep -qc '/nix/store'; then
+    # in codespaces with nix-portable, check shell level to avoid showing
+    # nix indicator in base proot environment (SHLVL=3)
+    if [[ "${CODESPACES}" == "true" && -n $NP_RUNTIME ]]; then
+        # only show nix indicator if we're in a deeper shell (nix shell command)
+        if [[ $SHLVL -gt 3 ]]; then
+            echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
+            return
+        fi
+    elif echo "$PATH" | grep -qc '/nix/store'; then
+        # fallback to PATH check for other environments
         echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
         return
     fi

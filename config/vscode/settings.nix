@@ -12,6 +12,7 @@
     };
     extensions = [
       "bbenoist.nix"
+      "vscodevim.vim"
     ];
   };
 }
