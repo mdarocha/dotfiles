@@ -56,6 +56,8 @@
     pkgs.cachix
     pkgs.jq
 
+    pkgs.github-copilot-cli
+
     # needed for zed
     #pkgs.nil
   ];
