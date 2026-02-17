@@ -10,6 +10,7 @@
       proxy = null;
       proxy_no_verify = null;
       enterprise_uri = null;
+      enable_next_edit_suggestions = false;
     };
     enabled_in_text_threads = false;
   };
