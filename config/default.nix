@@ -59,6 +59,6 @@
     pkgs.github-copilot-cli
 
     # needed for zed
-    #pkgs.nil
+    pkgs.nil
   ];
 }
