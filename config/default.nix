@@ -14,7 +14,10 @@
     ./zed
   ];
 
-  targets.genericLinux.enable = true;
+  targets.genericLinux = {
+    enable = true;
+    gpu.enable = true;
+  };
 
   home.stateVersion = "24.05";
 
