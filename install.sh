@@ -22,23 +22,24 @@ wait_for_docker() {
 }
 
 install_nix() {
-    if [ ! -f /nix/var/nix/profiles/default/bin/nix ]; then
-        echo "🔨 Installing Nix..."
-        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
-          sh -s -- install "$@" --no-confirm \
+    if which nix >/dev/null 2>&1 || [ -d /nix ] || [ -f /nix/var/nix/profiles/default/bin/nix ]; then
+        echo "✅ Nix is already installed."
+        return
+    fi
+    
+    echo "🔨 Installing Nix..."
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
+        sh -s -- install "$@" --no-confirm \
             --extra-conf "trusted-users = $USER" \
             --extra-conf "substituters = https://cache.nixos.org https://mdarocha-dotfiles.cachix.org" \
             --extra-conf "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= mdarocha-dotfiles.cachix.org-1:kBGT+0RREXqBc0Z7hI9NdvjrA7ypIpIhMLNrD1qLF9k="
-    else
-        echo "✅ Nix is already installed."
-    fi
 }
 
 install_nix_codespace_workarounds() {
     # Fixes issue with "suspicous owner or permissions" error
     if ! command -v setfacl &> /dev/null; then
         echo "🔨 Installing ACL..."
-        sudo apt-get update
+        sudo apt-get update || true
         sudo apt-get install -y --no-install-recommends acl
         sudo rm -rf /var/lib/apt/lists/*
     fi
