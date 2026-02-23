@@ -3,6 +3,8 @@
 This repository contains my personal dotfiles.
 It's managed using [Home Manager](https://github.com/nix-community/home-manager/).
 
+Nix derivations on the `main` branch are built by Github Actions and pushed to the [Cachix cache](https://app.cachix.org/cache/mdarocha-dotfiles#pull).
+
 ## Installation
 
 To install the dotfiles, clone the repository and run the `install.sh` script.
