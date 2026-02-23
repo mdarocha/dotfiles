@@ -74,7 +74,7 @@ echo "⚙️  Installing binfmt support..."
 case "$CONFIGURATION" in
     "codespace")
         wait_for_docker
-        docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
+        docker run --privileged --rm tonistiigi/binfmt --install arm64,arm || true
         ;;
     *)
         echo "⚠️  $CONFIGURATION doesn't support binfmt setup. Make sure it's setup manually"
