@@ -2,6 +2,7 @@
   pkgs,
   lib,
   inputs,
+  config,
   ...
 }:
 
@@ -29,6 +30,8 @@
     autosuggestion.enable = false;
     enableCompletion = true;
     enableVteIntegration = true;
+
+    dotDir = config.home.homeDirectory;
 
     initContent = lib.mkMerge [
       (lib.mkOrder 500 ''
