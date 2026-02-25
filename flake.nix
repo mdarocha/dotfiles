@@ -9,11 +9,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixgl = {
-      url = "github:nix-community/nixGL";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # zsh plugins
     oh-my-zsh = {
       url = "github:ohmyzsh/ohmyzsh/master";
@@ -36,7 +31,6 @@
       self,
       nixpkgs,
       home-manager,
-      nixgl,
       ...
     }:
     {
@@ -139,7 +133,6 @@
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             config.allowUnfree = true;
-            overlays = [ nixgl.overlay ];
           };
 
           mkHomeManagerConfiguration =
@@ -169,8 +162,7 @@
         {
           linux = mkHomeManagerConfiguration {
             mdarocha = {
-              nixgl.enable = true;
-              zed.enable = true;
+              #zed.enable = true;
             };
           };
 
