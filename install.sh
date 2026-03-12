@@ -6,21 +6,6 @@ set -o pipefail
 
 pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
 
-wait_for_docker() {
-  if docker version > /dev/null 2>&1; then
-    echo "Docker is already available"
-    return
-  fi
-
-  echo "Waiting for Docker to become available..."
-  until docker version > /dev/null 2>&1; do
-    sleep 1
-  done
-
-  sleep 1
-  echo "Docker socket is now available."
-}
-
 install_nix() {
     if which nix >/dev/null 2>&1 || [ -d /nix ] || [ -f /nix/var/nix/profiles/default/bin/nix ]; then
         echo "✅ Nix is already installed."
@@ -69,17 +54,6 @@ echo "======"
 source ./scripts/lib.sh
 
 echo "🔨 Setting up for $CONFIGURATION..."
-
-echo "⚙️  Installing binfmt support..."
-case "$CONFIGURATION" in
-    "codespace")
-        wait_for_docker
-        docker run --privileged --rm tonistiigi/binfmt --install arm64,arm || true
-        ;;
-    *)
-        echo "⚠️  $CONFIGURATION doesn't support binfmt setup. Make sure it's setup manually"
-        ;;
-esac
 
 echo "⚙️  Setting up Nix..."
 case "$CONFIGURATION" in
