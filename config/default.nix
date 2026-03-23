@@ -51,8 +51,8 @@
     pkgs.cachix
     pkgs.jq
 
-    pkgs.github-copilot-cli
-    pkgs.opencode
+    pkgs.llm-agents.copilot-cli
+    pkgs.llm-agents.opencode
 
     # needed for zed
     pkgs.nil

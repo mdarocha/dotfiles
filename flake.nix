@@ -9,6 +9,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    llm-agents.url = "github:numtide/llm-agents.nix";
+
     # zsh plugins
     oh-my-zsh = {
       url = "github:ohmyzsh/ohmyzsh/master";
@@ -31,6 +33,7 @@
       self,
       nixpkgs,
       home-manager,
+      llm-agents,
       ...
     }:
     {
@@ -133,6 +136,7 @@
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             config.allowUnfree = true;
+            overlays = [ llm-agents.overlays.default ];
           };
 
           mkHomeManagerConfiguration =
