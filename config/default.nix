@@ -52,6 +52,7 @@
     pkgs.jq
 
     pkgs.github-copilot-cli
+    pkgs.opencode
 
     # needed for zed
     pkgs.nil
