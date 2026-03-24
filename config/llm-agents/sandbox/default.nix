@@ -20,6 +20,8 @@ let
       denyRead = [
         "/home"
         "/var"
+        "/mnt"
+        "/media"
         "/etc/shadow"
         "/etc/gshadow"
         "/etc/sudoers"
@@ -30,6 +32,7 @@ let
       ];
       allowRead = [
         "."
+        "~/.nix-profile"
         "~/.local/share/opencode"
         "~/.config/opencode"
         "~/.config/gh"
