@@ -36,6 +36,8 @@ in
       rerere.enable = true;
       diff.algorithm = "histogram";
 
+      signing.format = "openpgp";
+
       url = {
         # always use ssh for Github repos
         "ssh://git@github.com/" = lib.mkIf config.programs.git.forceSSH {
