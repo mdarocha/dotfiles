@@ -1,0 +1,36 @@
+--- a/lib/node_modules/@anthropic-ai/sandbox-runtime/dist/sandbox/linux-sandbox-utils.js	2026-03-25 00:13:16.629048208 +0100
++++ b/lib/node_modules/@anthropic-ai/sandbox-runtime/dist/sandbox/linux-sandbox-utils.js	2026-03-25 00:13:57.056383249 +0100
+@@ -478,13 +478,14 @@
+  */
+ async function generateFilesystemArgs(readConfig, writeConfig, ripgrepConfig = { command: 'rg' }, mandatoryDenySearchDepth = DEFAULT_MANDATORY_DENY_SEARCH_DEPTH, allowGitConfig = false, abortSignal) {
+     const args = [];
++    const allowedWritePaths = [];
+     // fs already imported
+     // Determine initial root mount based on write restrictions
+     if (writeConfig) {
+         // Write restrictions: Start with read-only root, then allow writes to specific paths
+         args.push('--ro-bind', '/', '/');
+         // Collect normalized allowed write paths for later checking
+-        const allowedWritePaths = [];
++        // (hoisted above)
+         // Allow writes to specific paths
+         for (const pathPattern of writeConfig.allowOnly || []) {
+             const normalizedPath = normalizePathForSandbox(pathPattern);
+@@ -638,8 +639,15 @@
+                         continue;
+                     }
+                     // Bind the allowed path back over the tmpfs so it's readable
+-                    args.push('--ro-bind', allowPath, allowPath);
+-                    logForDebugging(`[Sandbox Linux] Re-allowed read access within denied region: ${allowPath}`);
++                    // Use --bind (rw) if this path is also in allowWrite, otherwise --ro-bind
++                    const isWritePath = allowedWritePaths.some(wp => allowPath.startsWith(wp + '/') || allowPath === wp || wp.startsWith(allowPath + '/'));
++                    if (isWritePath) {
++                        args.push('--bind', allowPath, allowPath);
++                        logForDebugging(`[Sandbox Linux] Re-allowed read+write access within denied region: ${allowPath}`);
++                    } else {
++                        args.push('--ro-bind', allowPath, allowPath);
++                        logForDebugging(`[Sandbox Linux] Re-allowed read access within denied region: ${allowPath}`);
++                    }
+                 }
+             }
+         }

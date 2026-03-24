@@ -13,15 +13,32 @@ let
     types
     ;
 
+  # Patch srt's bwrap argument ordering bug: when denyRead uses --tmpfs on an
+  # ancestor of an allowWrite path (e.g. /var over ~/.cache/nix), the tmpfs
+  # clobbers the earlier --bind mount. The "re-allow read" step then restores
+  # access with --ro-bind, silently losing writability.
+  # Fix: hoist allowedWritePaths and use --bind instead of --ro-bind for paths
+  # that are also writable.
+  # TODO upstream fix
+  patched-sandbox-runtime = pkgs.llm-agents.sandbox-runtime.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.gnupatch ];
+    postInstall = (old.postInstall or "") + ''
+      patch -p1 -d $out < ${./srt-fix-denyread-clobbers-allowwrite.patch}
+    '';
+  });
+
   cfg = config.mdarocha.llm-agents;
 
   anthropic-sandbox-runtime-settings = {
     filesystem = {
+      # Broad denies as recommended by sandbox-runtime README.
+      # Requires the patched-sandbox-runtime above — without the patch,
+      # --tmpfs /var clobbers --bind mounts for allowWrite paths under
+      # $HOME (/var/home/<user> on Fedora Atomic).
       denyRead = [
         "/home"
         "/var"
-        "/mnt"
-        "/media"
+        "/run"
         "/etc/shadow"
         "/etc/gshadow"
         "/etc/sudoers"
@@ -31,22 +48,44 @@ let
         "/etc/security"
       ];
       allowRead = [
+        "/nix"
         "."
         "~/.nix-profile"
         "~/.local/share/opencode"
         "~/.config/opencode"
         "~/.config/gh"
         "~/.config/git"
+        "~/.cache/nix"
         "~/.cache/nix-index"
       ];
       allowWrite = [
         "."
         "/tmp"
+        "~/.cache/nix"
         "~/.local/share/opencode"
       ];
       denyWrite = [ ];
     };
     network = {
+      # Nix needs Unix sockets to communicate with the daemon.
+      # On Linux, srt uses seccomp BPF to block socket(AF_UNIX, ...) at the syscall level,
+      # so allowUnixSockets for specific paths doesn't help — the syscall is blocked
+      # before connect(). We must disable the filter entirely.
+      # On macOS, srt uses Seatbelt which can filter by path, so we can allowlist.
+    }
+    // (
+      if pkgs.stdenv.isLinux then
+        {
+          allowAllUnixSockets = true;
+        }
+      else
+        {
+          allowUnixSockets = [
+            "/nix/var/nix/daemon-socket/socket"
+          ];
+        }
+    )
+    // {
       allowedDomains = [
         # GitHub
         "github.com"
@@ -75,6 +114,7 @@ let
         "cache.nixos.org"
         "cache.numtide.com"
         "*.cachix.org"
+        "install.determinate.systems"
 
         # Azure DevOps
         "dev.azure.com"
@@ -99,7 +139,10 @@ let
       }
       ''
         mkdir -p $out/bin
-        makeBinaryWrapper ${getExe' pkgs.llm-agents.sandbox-runtime "srt"} $out/bin/${name} \
+        # -- separates srt flags from the wrapped command,
+        # so that flags like --help are passed to the wrapped binary, not srt
+        makeBinaryWrapper ${getExe' patched-sandbox-runtime "srt"} $out/bin/${name} \
+          --add-flags -- \
           --add-flags ${getExe' pkg name}
       '';
 
@@ -126,7 +169,7 @@ in
 
   config = mkIf cfg.enable {
     home.packages = mkIf cfg.sandbox.enable [
-      pkgs.llm-agents.sandbox-runtime
+      patched-sandbox-runtime
     ];
 
     home.file.".srt-settings.json" = mkIf cfg.sandbox.enable {

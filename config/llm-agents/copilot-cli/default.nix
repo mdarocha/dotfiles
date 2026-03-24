@@ -11,7 +11,7 @@ in
 {
   config = lib.mkIf cfg.enable {
     home.packages = [
-      (cfg.sandbox.wrapPackage "copilot-cli" pkgs.llm-agents.copilot-cli)
+      (cfg.sandbox.wrapPackage "copilot" pkgs.llm-agents.copilot-cli)
     ];
   };
 }
