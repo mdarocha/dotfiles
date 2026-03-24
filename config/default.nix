@@ -8,6 +8,7 @@
 {
   imports = [
     ./git
+    ./llm-agents
     ./vscode
     ./zsh
     ./zed
@@ -47,12 +48,11 @@
   # additional packages
   home.packages = [
     pkgs.devenv
-    pkgs.gh
     pkgs.cachix
-    pkgs.jq
 
-    pkgs.llm-agents.copilot-cli
-    pkgs.llm-agents.opencode
+    # nice cli utils
+    pkgs.jq
+    pkgs.gh
 
     # needed for zed
     pkgs.nil

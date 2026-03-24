@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 # Configures an existing VS Code instance.
 # Currently only supports running in a Github Codespace instance
@@ -39,7 +44,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.activation.configure-vscode = lib.hm.dag.entryAfter[ "writeBoundary " ] ''
+    home.activation.configure-vscode = lib.hm.dag.entryAfter [ "writeBoundary " ] ''
       if [[ "''${CODESPACES:-}" != "true" ]]; then
         echo "This module supports only Github Codespaces."
         exit 1
@@ -53,7 +58,7 @@ in
       # in VSCode, where the needed environment variables are setup.
       # A marker file prevents duplicate execution.
       # It's VERY hacky, but it works...
-      
+
       # Generate the setup script
       cat > /tmp/dotfiles-setup-codespace-vscode.sh << 'VSCODE_SETUP_EOF'
       #!/bin/bash
@@ -80,7 +85,7 @@ in
         echo "Cannot find VS Code settings file at $settingsFile, skipping settings merge."
         exit 0
       fi
-      
+
       ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$settingsFile" "$newSettingsFile" > "$settingsFile.tmp"
 
       # removing the marker lets VS Code accept the new settings
@@ -88,7 +93,7 @@ in
       mv "$settingsFile.tmp" "$settingsFile"
 
       echo "VS Code setup complete."
-      
+
       # Remove this script to prevent duplicate execution
       rm /tmp/dotfiles-setup-codespace-vscode.sh
       VSCODE_SETUP_EOF
