@@ -17,6 +17,7 @@ in
 
   config.programs.git = {
     enable = lib.mkDefault true;
+    signing.format = "openpgp";
     ignores = [
       ".ccls-cache"
     ];
@@ -35,8 +36,6 @@ in
       commit.verbose = true;
       rerere.enable = true;
       diff.algorithm = "histogram";
-
-      signing.format = "openpgp";
 
       url = {
         # always use ssh for Github repos
