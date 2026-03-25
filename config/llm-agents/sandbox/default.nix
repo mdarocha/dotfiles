@@ -110,6 +110,9 @@ let
     )
     // {
       # Allow opencode web to bind to a local port and serve the web UI.
+      # TODO: The reverse bridge hardcodes port 4096 — only one sandboxed
+      # instance can expose a local port at a time. Implement dynamic port
+      # allocation (pick a free host port, pass it through to the sandbox).
       allowLocalBinding = true;
       allowedDomains = [
         # GitHub
@@ -120,6 +123,11 @@ let
         # GitHub Copilot
         "*.githubcopilot.com"
         "default.exp-tas.com"
+
+        # OpenCode web UI — `opencode web` reverse-proxies the entire frontend
+        # (HTML, JS, CSS, fonts) from app.opencode.ai at runtime; there is no
+        # embedded/offline copy of the UI.
+        "app.opencode.ai"
 
         # npm
         "registry.npmjs.org"
