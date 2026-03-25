@@ -23,7 +23,18 @@ let
   patched-sandbox-runtime = pkgs.llm-agents.sandbox-runtime.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.gnupatch ];
     postInstall = (old.postInstall or "") + ''
+      # Fix bwrap argument ordering: --tmpfs on a denyRead ancestor clobbers
+      # --bind mounts for allowWrite paths underneath it. Re-allows must use
+      # --bind (rw) instead of --ro-bind for paths that are also writable.
       patch -p1 -d $out < ${./srt-fix-denyread-clobbers-allowwrite.patch}
+
+      # Implement allowLocalBinding on Linux. Upstream only wires it for macOS
+      # (Seatbelt). On Linux, bwrap --unshare-net creates an isolated network
+      # namespace so bound ports are invisible from the host. This patch adds a
+      # reverse socat bridge (host TCP:4096 <-> Unix socket <-> sandbox
+      # TCP:localhost:4096) mirroring the existing outbound proxy architecture.
+      # See: https://github.com/anthropic-experimental/sandbox-runtime/issues/165
+      patch -p1 -d $out < ${./srt-implement-allowlocalbinding-linux.patch}
     '';
   });
 
@@ -52,6 +63,8 @@ let
         "."
         "~/.nix-profile"
         "~/.local/share/opencode"
+        "~/.local/state/opencode"
+        "~/.cache/opencode"
         "~/.config/opencode"
         "~/.config/gh"
         "~/.config/git"
@@ -63,6 +76,8 @@ let
         "/tmp"
         "~/.cache/nix"
         "~/.local/share/opencode"
+        "~/.local/state/opencode"
+        "~/.cache/opencode"
       ];
       denyWrite = [ ];
     };
@@ -86,6 +101,8 @@ let
         }
     )
     // {
+      # Allow opencode web to bind to a local port and serve the web UI.
+      allowLocalBinding = true;
       allowedDomains = [
         # GitHub
         "github.com"

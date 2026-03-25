@@ -48,6 +48,7 @@ in
            conceptually relevant code, documentation, and examples even when you don't know the exact syntax.
       '';
       settings = {
+        model = "github-copilot/claude-opus-4.6";
         share = "disabled";
         mcp = {
           grep = {
@@ -58,10 +59,10 @@ in
         permission = {
           "*" = "allow";
 
+          # The sandbox already enforces filesystem boundaries, so there is
+          # no need for opencode to prompt on external directory access.
           external_directory = {
-            "*" = "ask";
-            "/tmp" = "allow";
-            "/tmp/*" = "allow";
+            "*" = "allow";
           };
 
           bash = {
