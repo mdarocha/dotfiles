@@ -33,12 +33,12 @@ let
       # See: https://github.com/anthropic-experimental/sandbox-runtime/issues/165
       patch -p1 -d $out < ${./patches/srt-implement-allowlocalbinding-linux.patch}
 
-      # Fix dangerous_files path resolution and ghost mount-point pollution.
+      # Fix dangerous_files path resolution and ghost mount-point avoidance.
       # Upstream resolves all DANGEROUS_FILES relative to cwd, but shell configs
-      # (.bashrc, .gitconfig, etc.) belong in $HOME.  This also skips files that
-      # don't exist (avoids bwrap creating empty mount-point ghost files in cwd)
-      # and skips cwd files that are git-tracked (not gitignored) since the user
-      # intentionally put them there.
+      # (.bashrc, .gitconfig, etc.) belong in $HOME — always denied there.
+      # CWD files/dirs use git-ignore to decide: gitignored paths are always
+      # denied (even non-existent); tracked paths only denied when they exist
+      # (avoids ghost mount-point files for intentionally tracked content).
       patch -p1 -d $out < ${./patches/srt-fix-dangerous-files-paths.patch}
     '';
   });

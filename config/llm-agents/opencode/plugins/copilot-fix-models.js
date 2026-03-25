@@ -13,20 +13,28 @@
  *    See: https://github.com/anthropics/opencode/issues/7256
  *         https://github.com/anthropics/opencode/issues/13470
  *
- * Additionally provides a "Login with GitHub CLI" auth method that uses
- * the active `gh` account (supports multi-account via `gh auth switch`)
- * instead of OpenCode's built-in OAuth device flow.
+ * Authentication is handled by OpenCode's built-in CopilotAuthPlugin
+ * (device flow with client ID Ov23li8tweQw6odWQebz, scope read:user).
+ * This plugin only augments the auth loader — it does NOT provide its
+ * own auth methods, so the built-in "Login with GitHub Copilot" flow
+ * remains available.
+ *
+ * NOTE: Previously this plugin provided a "Login with GitHub CLI" method
+ * using `gh auth token`. This was removed because the gh CLI's OAuth token
+ * (gho_*) is created by gh's own OAuth app with scopes gist/read:org/repo,
+ * which only grants access to a small subset of Copilot models. The built-in
+ * device flow creates a token via the Copilot-specific OAuth app, granting
+ * access to all models the user's plan allows.
  */
 
 /**
  * Fetch the list of models available to the authenticated user from Copilot API.
- * Uses the public Copilot API directly with the OAuth token — no session token
- * exchange required. This works with both OpenCode's own OAuth tokens and
- * GitHub CLI (`gho_`) tokens.
+ * Uses the Copilot API directly with the OAuth token from the built-in device
+ * flow — no session token exchange required.
  *
  * Returns a Map keyed by model ID for efficient lookup.
  *
- * @param {string} oauthToken - GitHub OAuth access token (from gh auth or device flow)
+ * @param {string} oauthToken - GitHub OAuth access token (from OpenCode's device flow)
  * @returns {Promise<Map<string, any> | null>}
  */
 async function fetchCopilotModels(oauthToken) {
@@ -58,8 +66,6 @@ async function fetchCopilotModels(oauthToken) {
  * @returns {Promise<import("@opencode-ai/plugin").Hooks>}
  */
 export default async function copilotFixModels(input) {
-  const $ = input.$;
-
   return {
     auth: {
       provider: "github-copilot",
@@ -84,8 +90,8 @@ export default async function copilotFixModels(input) {
         if (!info || info.type !== "oauth") return {};
 
         // Fetch the live model list directly from the Copilot API.
-        // The OAuth token (whether from OpenCode's device flow or
-        // the GitHub CLI) works as a Bearer token against
+        // The OAuth token from the built-in device flow (client ID
+        // Ov23li8tweQw6odWQebz) works as a Bearer token against
         // api.githubcopilot.com without needing a session token exchange.
         const copilotModels = await fetchCopilotModels(info.refresh);
         // If the API returned no models, don't touch anything —
@@ -142,66 +148,10 @@ export default async function copilotFixModels(input) {
         return {};
       },
 
-      methods: [
-        {
-          type: "oauth",
-          label: "Login with GitHub CLI",
-          prompts: [],
-
-          /**
-           * Authenticate using the currently selected `gh` CLI account.
-           *
-           * Uses `gh auth token` which respects multi-account setups:
-           * the token returned is always for the active account on the
-           * host (switchable via `gh auth switch --user <name>`).
-           */
-          async authorize() {
-            let token;
-            try {
-              token = (await $`gh auth token`.text()).trim();
-            } catch {
-              throw new Error(
-                "Failed to get token from GitHub CLI. " +
-                  "Make sure you are logged in with: gh auth login",
-              );
-            }
-            if (!token) {
-              throw new Error(
-                "GitHub CLI returned an empty token. " +
-                  "Make sure you are logged in with: gh auth login",
-              );
-            }
-
-            // Resolve the username for the active account so we can
-            // display it and store it as accountId.
-            let login = "";
-            try {
-              login = (
-                await $`gh api user --jq .login`.text()
-              ).trim();
-            } catch {
-              // Non-fatal — we can still authenticate without the username.
-            }
-
-            return {
-              url: "https://github.com/settings/copilot",
-              instructions: login
-                ? `Authenticating as @${login} via GitHub CLI...`
-                : "Authenticating via GitHub CLI...",
-              method: "auto",
-              async callback() {
-                return {
-                  type: "success",
-                  refresh: token,
-                  access: token,
-                  expires: 0,
-                  ...(login ? { accountId: login } : {}),
-                };
-              },
-            };
-          },
-        },
-      ],
+      // No `methods` — we rely on OpenCode's built-in "Login with GitHub
+      // Copilot" device flow. Previously this plugin provided "Login with
+      // GitHub CLI" but that used gh's own OAuth app which only grants
+      // access to a subset of Copilot models.
     },
   };
 }

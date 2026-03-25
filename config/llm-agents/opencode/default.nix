@@ -44,10 +44,9 @@ in
         ];
         model = "github-copilot/claude-opus-4.6";
 
-        # Used for title generation, compaction, and summaries. Without this,
-        # opencode would try to use the opencode provider's gpt-5-nano (which
-        # we've disabled). gpt-4.1 is free on GitHub Copilot.
-        small_model = "github-copilot/gpt-4.1";
+        # Used for title generation, compaction, and summaries. gpt-5-mini is
+        # lightweight and free on GitHub Copilot (1× premium request).
+        small_model = "github-copilot/gpt-5-mini";
 
         # Prevent the opencode provider from loading entirely. Without this,
         # it auto-activates with apiKey: "public" and silently routes title

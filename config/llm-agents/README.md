@@ -34,7 +34,7 @@ sandboxing, and patches on top.
 |---|---|
 | `srt-fix-denyread-clobbers-allowwrite` | `--tmpfs` on a `denyRead` ancestor clobbers `--bind` mounts for `allowWrite` paths underneath it. Uses `--bind` (rw) instead of `--ro-bind` when re-allowing a path that is also writable. |
 | `srt-implement-allowlocalbinding-linux` | `allowLocalBinding` is only wired for macOS (Seatbelt). Adds a reverse socat bridge so sandbox-bound ports are reachable from the host on Linux. |
-| `srt-fix-dangerous-files-paths` | Resolves `DANGEROUS_FILES` relative to `$HOME` instead of cwd, skips files that don't exist, and skips git-tracked files in cwd. |
+| `srt-fix-dangerous-files-paths` | Resolves home-only `DANGEROUS_FILES` (`.bashrc`, `.gitconfig`, …) to `$HOME` (always denied). CWD files/dirs use `git check-ignore`: gitignored paths are always denied (even non-existent); tracked paths only denied when they exist (avoids ghost mount-point files). |
 
 ### opencode patches (`opencode/patches/`)
 

@@ -11,7 +11,7 @@
  import path, { join } from 'node:path';
  import { ripGrep } from '../utils/ripgrep.js';
  import { generateProxyEnvVars, normalizePathForSandbox, normalizeCaseForComparison, isSymlinkOutsideBoundary, DANGEROUS_FILES, getDangerousDirectories, } from './sandbox-utils.js';
-@@ -105,13 +105,84 @@
+@@ -105,13 +105,82 @@
      const fallbackController = new AbortController();
      const signal = abortSignal ?? fallbackController.signal;
      const dangerousDirectories = getDangerousDirectories();
@@ -22,8 +22,8 @@
 -        // Dangerous directories in CWD
 -        ...dangerousDirectories.map(d => path.resolve(cwd, d)),
 +    // Shell/user config files belong in $HOME, not in the project directory.
-+    // Resolving them relative to cwd causes bwrap to create ghost mount-point
-+    // files (empty .bashrc, .gitconfig, …) in the working directory.
++    // Upstream resolves ALL DANGEROUS_FILES relative to cwd, but home-only
++    // files (.bashrc, .gitconfig, …) should resolve to $HOME.
 +    const HOME_DANGEROUS_FILES = [
 +        '.gitconfig',
 +        '.bashrc',
@@ -34,10 +34,11 @@
 +        '.ripgreprc',
      ];
 +    const CWD_DANGEROUS_FILES = DANGEROUS_FILES.filter(f => !HOME_DANGEROUS_FILES.includes(f));
-+    // Helper: check whether a path inside cwd is tracked by git (i.e. NOT
-+    // gitignored).  Tracked/unignored files are under version control so the
-+    // user chose to have them — deny-mounting them causes needless git-status
-+    // noise when cleanupBwrapMountPoints races or fails.
++    // Helper: check whether a path is gitignored.
++    // Gitignored paths are always denied (even non-existent — generateFilesystemArgs
++    // will block their creation via mount points).
++    // Tracked (not-ignored) paths are only denied when they already exist, to
++    // avoid ghost mount-point files for files the user intentionally tracks.
 +    let gitIgnoreCache = undefined;
 +    function isGitIgnored(absPath) {
 +        // Lazily detect whether cwd is inside a git repo.
@@ -49,7 +50,7 @@
 +                gitIgnoreCache = null;
 +            }
 +        }
-+        if (gitIgnoreCache === null) return false; // not a git repo – treat as ignored (= deny it)
++        if (gitIgnoreCache === null) return true; // not a git repo — treat as ignored (= always deny)
 +        if (gitIgnoreCache.has(absPath)) return gitIgnoreCache.get(absPath);
 +        try {
 +            // git check-ignore exits 0 if the path IS ignored, 1 if it is not.
@@ -58,45 +59,42 @@
 +            gitIgnoreCache.set(absPath, ignored);
 +            return ignored;
 +        } catch {
-+            gitIgnoreCache.set(absPath, false);
-+            return false; // on error, treat as not-ignored (= deny it)
++            gitIgnoreCache.set(absPath, true);
++            return true; // on error, treat as ignored (= always deny)
 +        }
 +    }
 +    // Note: Settings files are added at the callsite in sandbox-manager.ts
 +    const denyPaths = [];
-+    // Home-directory dangerous files: resolve relative to $HOME and only deny
-+    // if the file actually exists (avoids ghost mount-point files).
++    // Home-directory dangerous files: resolve relative to $HOME.
++    // Always denied regardless of existence (generateFilesystemArgs handles
++    // non-existent paths by blocking creation via mount points).
 +    const home = homedir();
 +    for (const f of HOME_DANGEROUS_FILES) {
-+        const absPath = path.resolve(home, f);
-+        if (fs.existsSync(absPath)) {
-+            denyPaths.push(absPath);
-+        } else {
-+            logForDebugging(`[Sandbox Linux] Skipping non-existent home dangerous file: ${absPath}`);
-+        }
++        denyPaths.push(path.resolve(home, f));
 +    }
-+    // CWD dangerous files: only deny if the file exists AND is gitignored (or
-+    // we are outside a git repo).  Tracked files are safe — the user put them
-+    // there intentionally.
++    // CWD dangerous files: gitignored files are always denied (even
++    // non-existent).  Tracked (not-ignored) files are only denied when they
++    // already exist to avoid ghost mount-point files.
 +    for (const f of CWD_DANGEROUS_FILES) {
 +        const absPath = path.resolve(cwd, f);
-+        if (!fs.existsSync(absPath)) {
-+            logForDebugging(`[Sandbox Linux] Skipping non-existent cwd dangerous file: ${absPath}`);
-+            continue;
-+        }
-+        if (!isGitIgnored(absPath)) {
-+            logForDebugging(`[Sandbox Linux] Skipping git-tracked (not ignored) cwd dangerous file: ${absPath}`);
-+            continue;
-+        }
-+        denyPaths.push(absPath);
-+    }
-+    // Dangerous directories in CWD — only deny if they exist.
-+    for (const d of dangerousDirectories) {
-+        const absPath = path.resolve(cwd, d);
-+        if (fs.existsSync(absPath)) {
++        if (isGitIgnored(absPath)) {
++            denyPaths.push(absPath);
++        } else if (fs.existsSync(absPath)) {
 +            denyPaths.push(absPath);
 +        } else {
-+            logForDebugging(`[Sandbox Linux] Skipping non-existent cwd dangerous directory: ${absPath}`);
++            logForDebugging(`[Sandbox Linux] Skipping non-existent tracked cwd dangerous file: ${absPath}`);
++        }
++    }
++    // Dangerous directories in CWD — same logic: gitignored dirs always
++    // denied, tracked dirs only when they exist.
++    for (const d of dangerousDirectories) {
++        const absPath = path.resolve(cwd, d);
++        if (isGitIgnored(absPath)) {
++            denyPaths.push(absPath);
++        } else if (fs.existsSync(absPath)) {
++            denyPaths.push(absPath);
++        } else {
++            logForDebugging(`[Sandbox Linux] Skipping non-existent tracked cwd dangerous directory: ${absPath}`);
 +        }
 +    }
      // Git hooks and config are only denied when .git exists as a directory.
