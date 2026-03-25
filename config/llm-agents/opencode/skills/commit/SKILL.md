@@ -1,13 +1,30 @@
 ---
 name: commit
-description: Commit session changes to git. Use when the user asks to commit, save, checkpoint, or snapshot their work. Triggers include "commit this", "save my changes", "create a commit", "git commit", "push my changes", "I'm done", "wrap up", or any request to persist the current session's work to version control - even if the user doesn't explicitly say "commit".
-disable-model-invocation: true
+description: Commit session changes to git. Use when the user asks to commit, save, checkpoint, or snapshot their work. Also use proactively when working in a git worktree and you've completed a discrete unit of work. Triggers include "commit this", "save my changes", "create a commit", "git commit", "push my changes", "I'm done", "wrap up", or any request to persist the current session's work to version control - even if the user doesn't explicitly say "commit".
 ---
 
 # Commit Current Session Changes
 
 Create a single git commit containing only the changes made during this session.
 Do not create multiple commits. Do not push.
+
+## Self-Invocation Rules
+
+If this skill was NOT invoked by the user (i.e. you are invoking it yourself), you must
+check whether you are working inside a git worktree before committing:
+
+```bash
+git rev-parse --is-inside-work-tree   # should be "true"
+git worktree list                     # lists all worktrees
+pwd                                   # check current directory
+```
+
+- **If you are in a worktree** (the current directory is under `<repo>/.worktrees/`):
+  you may commit freely without asking.
+- **If you are NOT in a worktree** (you are in the main working tree):
+  you MUST ask the user for confirmation before committing. Do not commit silently.
+
+When invoked by the user via `/commit`, skip this check — the user has explicitly requested a commit.
 
 ## Step 1: Gather Context
 

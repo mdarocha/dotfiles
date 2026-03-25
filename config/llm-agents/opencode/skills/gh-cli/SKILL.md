@@ -1,6 +1,7 @@
 ---
 name: gh-cli
 description: Use the GitHub CLI (gh) to interact with GitHub. Load when working with issues, pull requests, repositories, code search, Actions, CI status, projects, releases, or gists. Triggers include "create a PR", "open a pull request", "open an issue", "check CI", "list PRs", "merge", "review", "check workflow status", "GitHub Actions", or any task involving GitHub - even if the user doesn't mention "gh" explicitly.
+user-invocable: false
 ---
 
 # GitHub CLI (gh)
