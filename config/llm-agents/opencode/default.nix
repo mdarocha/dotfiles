@@ -48,6 +48,9 @@ in
            conceptually relevant code, documentation, and examples even when you don't know the exact syntax.
       '';
       settings = {
+        plugin = [
+          "file://${./copilot-fix-models.js}"
+        ];
         model = "github-copilot/claude-opus-4.6";
         share = "disabled";
         mcp = {
