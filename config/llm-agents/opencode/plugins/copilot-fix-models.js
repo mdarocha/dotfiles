@@ -127,6 +127,15 @@ export default async function copilotFixModels(input) {
                 model.limit.output = limits.max_output_tokens;
               }
             }
+
+            // Append the premium request multiplier to the model name so it
+            // is visible in the model picker. Free/included models (multiplier
+            // === 0) are left unlabelled; premium models get a "×N" suffix.
+            const billing = live.billing;
+            if (billing?.multiplier > 0) {
+              const baseName = model.name || live.name || modelID;
+              model.name = `${baseName} [×${billing.multiplier}]`;
+            }
           }
         }
 
