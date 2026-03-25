@@ -69,6 +69,9 @@ in
         small_model = "github-copilot/gpt-5-mini";
 
         agent = {
+          general = {
+            model = "github-copilot/claude-sonnet-4.6";
+          };
           summary = {
             model = "github-copilot/claude-haiku-4.5";
           };
