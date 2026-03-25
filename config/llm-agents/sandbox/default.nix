@@ -20,6 +20,9 @@ let
       # Fix bwrap argument ordering: --tmpfs on a denyRead ancestor clobbers
       # --bind mounts for allowWrite paths underneath it. Re-allows must use
       # --bind (rw) instead of --ro-bind for paths that are also writable.
+      # Additionally, deny-write mounts (e.g. --ro-bind for .git/hooks) are
+      # deferred to the end of the arg list so they survive the --tmpfs clobber
+      # + re-allow --bind cycle from denyRead processing.
       patch -p1 -d $out < ${./patches/srt-fix-denyread-clobbers-allowwrite.patch}
 
       # Implement allowLocalBinding on Linux. Upstream only wires it for macOS
