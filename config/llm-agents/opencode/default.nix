@@ -40,6 +40,7 @@ in
       '';
       settings = {
         plugin = [
+          "opencode-copilot-auth"
           "file://${./plugins/copilot-fix-models.js}"
         ];
         model = "github-copilot/claude-opus-4.6";
