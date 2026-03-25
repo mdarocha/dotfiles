@@ -1,0 +1,90 @@
+diff --git a/packages/opencode/src/command/index.ts b/packages/opencode/src/command/index.ts
+index ff93826..3581e6e 100644
+--- a/packages/opencode/src/command/index.ts
++++ b/packages/opencode/src/command/index.ts
+@@ -141,6 +141,7 @@ export namespace Command {
+ 
+         for (const skill of yield* Effect.promise(() => Skill.all())) {
+           if (commands[skill.name]) continue
++          if (skill.userInvocable === false) continue
+           commands[skill.name] = {
+             name: skill.name,
+             description: skill.description,
+diff --git a/packages/opencode/src/server/server.ts b/packages/opencode/src/server/server.ts
+index 7ead4df..a52d5fb 100644
+--- a/packages/opencode/src/server/server.ts
++++ b/packages/opencode/src/server/server.ts
+@@ -450,7 +450,7 @@ export namespace Server {
+           },
+         }),
+         async (c) => {
+-          const skills = await Skill.all()
++          const skills = (await Skill.all()).filter((s) => s.userInvocable !== false)
+           return c.json(skills)
+         },
+       )
+diff --git a/packages/opencode/src/skill/index.ts b/packages/opencode/src/skill/index.ts
+index 43a2221..acc6877 100644
+--- a/packages/opencode/src/skill/index.ts
++++ b/packages/opencode/src/skill/index.ts
+@@ -28,6 +28,8 @@ export namespace Skill {
+   export const Info = z.object({
+     name: z.string(),
+     description: z.string(),
++    disableModelInvocation: z.boolean().optional(),
++    userInvocable: z.boolean().optional(),
+     location: z.string(),
+     content: z.string(),
+   })
+@@ -84,6 +86,14 @@ export namespace Skill {
+     const parsed = Info.pick({ name: true, description: true }).safeParse(md.data)
+     if (!parsed.success) return
+ 
++    // Parse invocation control fields from frontmatter (kebab-case keys)
++    const disableModelInvocation =
++      md.data?.["disable-model-invocation"] === true || md.data?.["disableModelInvocation"] === true
++        ? true
++        : undefined
++    const userInvocable =
++      md.data?.["user-invocable"] === false || md.data?.["userInvocable"] === false ? false : undefined
++
+     if (state.skills[parsed.data.name]) {
+       log.warn("duplicate skill name", {
+         name: parsed.data.name,
+@@ -96,6 +106,8 @@ export namespace Skill {
+     state.skills[parsed.data.name] = {
+       name: parsed.data.name,
+       description: parsed.data.description,
++      disableModelInvocation,
++      userInvocable,
+       location: match,
+       content: md.content,
+     }
+@@ -211,7 +223,9 @@ export namespace Skill {
+ 
+       const available = Effect.fn("Skill.available")(function* (agent?: Agent.Info) {
+         const cache = yield* ensure()
+-        const list = Object.values(cache.skills).toSorted((a, b) => a.name.localeCompare(b.name))
++        const list = Object.values(cache.skills)
++          .filter((skill) => skill.disableModelInvocation !== true)
++          .toSorted((a, b) => a.name.localeCompare(b.name))
+         if (!agent) return list
+         return list.filter((skill) => Permission.evaluate("skill", skill.name, agent.permission).action !== "deny")
+       })
+diff --git a/packages/opencode/src/tool/skill.ts b/packages/opencode/src/tool/skill.ts
+index 17016b0..aefafc1 100644
+--- a/packages/opencode/src/tool/skill.ts
++++ b/packages/opencode/src/tool/skill.ts
+@@ -48,6 +48,12 @@ export const SkillTool = Tool.define("skill", async (ctx) => {
+         throw new Error(`Skill "${params.name}" not found. Available skills: ${available || "none"}`)
+       }
+ 
++      if (skill.disableModelInvocation) {
++        throw new Error(
++          `Skill "${params.name}" has disabled model invocation. It can only be invoked by the user via slash commands.`,
++        )
++      }
++
+       await ctx.ask({
+         permission: "skill",
+         patterns: [params.name],

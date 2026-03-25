@@ -82,6 +82,7 @@ let
     patches = [
       ./patches/opencode-serve-local-web-ui.patch
       ./patches/opencode-merge-plugin-auth-hooks.patch
+      ./patches/opencode-skill-invocation-control.patch
     ];
 
     nativeBuildInputs = with pkgs; [
