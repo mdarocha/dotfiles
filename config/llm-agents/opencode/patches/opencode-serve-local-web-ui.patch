@@ -1,0 +1,80 @@
+--- a/packages/opencode/src/server/server.ts
++++ b/packages/opencode/src/server/server.ts
+@@ -2,8 +2,8 @@
+ import { describeRoute, generateSpecs, validator, resolver, openAPIRouteHandler } from "hono-openapi"
+ import { Hono } from "hono"
+ import { cors } from "hono/cors"
+-import { proxy } from "hono/proxy"
+ import { basicAuth } from "hono/basic-auth"
++import { serveStatic } from "hono/bun"
+ import z from "zod"
+ import { Provider } from "../provider/provider"
+ import { NamedError } from "@opencode-ai/util/error"
+@@ -33,6 +33,7 @@
+ import { EventRoutes } from "./routes/event"
+ import { InstanceBootstrap } from "../project/bootstrap"
+ import { NotFoundError } from "../storage/db"
++import { readFileSync } from "node:fs"
+ import type { ContentfulStatusCode } from "hono/utils/http-status"
+ import { websocket } from "hono/bun"
+ import { HTTPException } from "hono/http-exception"
+@@ -47,6 +48,25 @@
+ // @ts-ignore This global is needed to prevent ai-sdk from logging warnings to stdout https://github.com/vercel/ai/blob/2dc67e0ef538307f21368db32d5a12345d98831b/packages/ai/src/logger/log-warnings.ts#L85
+ globalThis.AI_SDK_LOG_WARNINGS = false
+ 
++// Serve the web UI from a local directory instead of proxying to app.opencode.ai.
++// OPENCODE_WEB_DIR must point to the built SPA (packages/app/dist).
++const WEB_DIR = process.env.OPENCODE_WEB_DIR
++
++// Pre-read index.html at startup so the SPA fallback doesn't hit disk on every request.
++let indexHtml: string | undefined
++if (WEB_DIR) {
++  try {
++    indexHtml = readFileSync(`${WEB_DIR}/index.html`, "utf-8")
++  } catch {
++    // Will be caught at request time
++  }
++}
++
++const CSP_HEADER =
++  "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; " +
++  "style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; " +
++  "font-src 'self' data:; media-src 'self' data:; connect-src 'self' data:"
++
+ export namespace Server {
+   const log = Log.create({ service: "server" })
+ 
+@@ -496,19 +516,24 @@
+           return c.json(await Format.status())
+         },
+       )
++      .get(
++        "/*",
++        serveStatic({
++          root: WEB_DIR || "./",
++        }),
++      )
+       .all("/*", async (c) => {
+-        const path = c.req.path
+-
+-        const response = await proxy(`https://app.opencode.ai${path}`, {
+-          ...c.req,
+-          headers: {
+-            ...c.req.raw.headers,
+-            host: "app.opencode.ai",
+-          },
++        // SPA fallback: serve index.html for any unmatched route so the
++        // client-side SolidJS router can handle it.
++        if (!WEB_DIR || !indexHtml) {
++          return c.text("OPENCODE_WEB_DIR not set or index.html not found", 500)
++        }
++        const response = c.newResponse(indexHtml, 200, {
++          "Content-Type": "text/html; charset=utf-8",
+         })
+         response.headers.set(
+           "Content-Security-Policy",
+-          "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; media-src 'self' data:; connect-src 'self' data:",
++          CSP_HEADER,
+         )
+         return response
+       })

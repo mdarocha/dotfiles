@@ -20,7 +20,7 @@ let
       # Fix bwrap argument ordering: --tmpfs on a denyRead ancestor clobbers
       # --bind mounts for allowWrite paths underneath it. Re-allows must use
       # --bind (rw) instead of --ro-bind for paths that are also writable.
-      patch -p1 -d $out < ${./srt-fix-denyread-clobbers-allowwrite.patch}
+      patch -p1 -d $out < ${./patches/srt-fix-denyread-clobbers-allowwrite.patch}
 
       # Implement allowLocalBinding on Linux. Upstream only wires it for macOS
       # (Seatbelt). On Linux, bwrap --unshare-net creates an isolated network
@@ -28,7 +28,7 @@ let
       # reverse socat bridge (host TCP:4096 <-> Unix socket <-> sandbox
       # TCP:localhost:4096) mirroring the existing outbound proxy architecture.
       # See: https://github.com/anthropic-experimental/sandbox-runtime/issues/165
-      patch -p1 -d $out < ${./srt-implement-allowlocalbinding-linux.patch}
+      patch -p1 -d $out < ${./patches/srt-implement-allowlocalbinding-linux.patch}
 
       # Fix dangerous_files path resolution and ghost mount-point pollution.
       # Upstream resolves all DANGEROUS_FILES relative to cwd, but shell configs
@@ -36,7 +36,7 @@ let
       # don't exist (avoids bwrap creating empty mount-point ghost files in cwd)
       # and skips cwd files that are git-tracked (not gitignored) since the user
       # intentionally put them there.
-      patch -p1 -d $out < ${./srt-fix-dangerous-files-paths.patch}
+      patch -p1 -d $out < ${./patches/srt-fix-dangerous-files-paths.patch}
     '';
   });
 
@@ -118,11 +118,6 @@ let
         "*.githubcopilot.com"
         "default.exp-tas.com"
 
-        # OpenCode web UI — `opencode web` reverse-proxies the entire frontend
-        # (HTML, JS, CSS, fonts) from app.opencode.ai at runtime; there is no
-        # embedded/offline copy of the UI.
-        "app.opencode.ai"
-
         # npm
         "registry.npmjs.org"
         "registry.npmjs.com"
@@ -153,6 +148,9 @@ let
         # MCP tools
         "mcp.grep.app"
         "mcp.exa.ai"
+
+        # Model metadata
+        "models.dev"
       ];
       deniedDomains = [ ];
     };

@@ -8,6 +8,12 @@
 let
   cfg = config.mdarocha.llm-agents;
 
+  webUiPkgs = import ./web-ui.nix { inherit pkgs; };
+
+  # Patched opencode binary with OPENCODE_WEB_DIR pointing to the
+  # locally-built SPA. The patch replaces the app.opencode.ai reverse
+  # proxy with Hono's serveStatic, so `opencode web` serves the UI
+  # directly from the nix store — no Caddy, no external CDN.
   opencode =
     pkgs.runCommand "opencode"
       {
@@ -15,7 +21,8 @@ let
       }
       ''
         mkdir -p $out/bin
-        makeBinaryWrapper ${lib.getExe' pkgs.llm-agents.opencode "opencode"} $out/bin/opencode \
+        makeBinaryWrapper ${lib.getExe' webUiPkgs.opencode-patched "opencode"} $out/bin/opencode \
+          --set OPENCODE_WEB_DIR "${webUiPkgs.opencode-web-ui}" \
           --set OPENCODE_ENABLE_EXA true
       '';
 in
@@ -49,10 +56,21 @@ in
       '';
       settings = {
         plugin = [
-          "file://${./copilot-fix-models.js}"
+          "file://${./plugins/copilot-fix-models.js}"
         ];
         model = "github-copilot/claude-opus-4.6";
+
+        # Used for title generation, compaction, and summaries. Without this,
+        # opencode would try to use the opencode provider's gpt-5-nano (which
+        # we've disabled). gpt-4.1 is free on GitHub Copilot.
+        small_model = "github-copilot/gpt-4.1";
+
+        # Prevent the opencode provider from loading entirely. Without this,
+        # it auto-activates with apiKey: "public" and silently routes title
+        # generation, compaction, and summary tasks through opencode.ai/zen.
+        disabled_providers = [ "opencode" ];
         share = "disabled";
+
         mcp = {
           grep = {
             type = "remote";
