@@ -1,0 +1,104 @@
+--- a/lib/node_modules/@anthropic-ai/sandbox-runtime/dist/sandbox/linux-sandbox-utils.js	1970-01-01 01:00:01.000000000 +0100
++++ b/lib/node_modules/@anthropic-ai/sandbox-runtime/dist/sandbox/linux-sandbox-utils.js	2026-03-25 08:42:30.477333339 +0100
+@@ -3,8 +3,8 @@
+ import { whichSync } from '../utils/which.js';
+ import { randomBytes } from 'node:crypto';
+ import * as fs from 'fs';
+-import { spawn } from 'node:child_process';
+-import { tmpdir } from 'node:os';
++import { spawn, spawnSync } from 'node:child_process';
++import { homedir, tmpdir } from 'node:os';
+ import path, { join } from 'node:path';
+ import { ripGrep } from '../utils/ripgrep.js';
+ import { generateProxyEnvVars, normalizePathForSandbox, normalizeCaseForComparison, isSymlinkOutsideBoundary, DANGEROUS_FILES, getDangerousDirectories, } from './sandbox-utils.js';
+@@ -105,13 +105,84 @@
+     const fallbackController = new AbortController();
+     const signal = abortSignal ?? fallbackController.signal;
+     const dangerousDirectories = getDangerousDirectories();
+-    // Note: Settings files are added at the callsite in sandbox-manager.ts
+-    const denyPaths = [
+-        // Dangerous files in CWD
+-        ...DANGEROUS_FILES.map(f => path.resolve(cwd, f)),
+-        // Dangerous directories in CWD
+-        ...dangerousDirectories.map(d => path.resolve(cwd, d)),
++    // Shell/user config files belong in $HOME, not in the project directory.
++    // Resolving them relative to cwd causes bwrap to create ghost mount-point
++    // files (empty .bashrc, .gitconfig, …) in the working directory.
++    const HOME_DANGEROUS_FILES = [
++        '.gitconfig',
++        '.bashrc',
++        '.bash_profile',
++        '.zshrc',
++        '.zprofile',
++        '.profile',
++        '.ripgreprc',
+     ];
++    const CWD_DANGEROUS_FILES = DANGEROUS_FILES.filter(f => !HOME_DANGEROUS_FILES.includes(f));
++    // Helper: check whether a path inside cwd is tracked by git (i.e. NOT
++    // gitignored).  Tracked/unignored files are under version control so the
++    // user chose to have them — deny-mounting them causes needless git-status
++    // noise when cleanupBwrapMountPoints races or fails.
++    let gitIgnoreCache = undefined;
++    function isGitIgnored(absPath) {
++        // Lazily detect whether cwd is inside a git repo.
++        if (gitIgnoreCache === undefined) {
++            try {
++                const res = spawnSync('git', ['rev-parse', '--is-inside-work-tree'], { cwd, encoding: 'utf-8', timeout: 5000 });
++                gitIgnoreCache = res.status === 0 ? new Map() : null;
++            } catch {
++                gitIgnoreCache = null;
++            }
++        }
++        if (gitIgnoreCache === null) return false; // not a git repo – treat as ignored (= deny it)
++        if (gitIgnoreCache.has(absPath)) return gitIgnoreCache.get(absPath);
++        try {
++            // git check-ignore exits 0 if the path IS ignored, 1 if it is not.
++            const res = spawnSync('git', ['check-ignore', '-q', absPath], { cwd, encoding: 'utf-8', timeout: 5000 });
++            const ignored = res.status === 0;
++            gitIgnoreCache.set(absPath, ignored);
++            return ignored;
++        } catch {
++            gitIgnoreCache.set(absPath, false);
++            return false; // on error, treat as not-ignored (= deny it)
++        }
++    }
++    // Note: Settings files are added at the callsite in sandbox-manager.ts
++    const denyPaths = [];
++    // Home-directory dangerous files: resolve relative to $HOME and only deny
++    // if the file actually exists (avoids ghost mount-point files).
++    const home = homedir();
++    for (const f of HOME_DANGEROUS_FILES) {
++        const absPath = path.resolve(home, f);
++        if (fs.existsSync(absPath)) {
++            denyPaths.push(absPath);
++        } else {
++            logForDebugging(`[Sandbox Linux] Skipping non-existent home dangerous file: ${absPath}`);
++        }
++    }
++    // CWD dangerous files: only deny if the file exists AND is gitignored (or
++    // we are outside a git repo).  Tracked files are safe — the user put them
++    // there intentionally.
++    for (const f of CWD_DANGEROUS_FILES) {
++        const absPath = path.resolve(cwd, f);
++        if (!fs.existsSync(absPath)) {
++            logForDebugging(`[Sandbox Linux] Skipping non-existent cwd dangerous file: ${absPath}`);
++            continue;
++        }
++        if (!isGitIgnored(absPath)) {
++            logForDebugging(`[Sandbox Linux] Skipping git-tracked (not ignored) cwd dangerous file: ${absPath}`);
++            continue;
++        }
++        denyPaths.push(absPath);
++    }
++    // Dangerous directories in CWD — only deny if they exist.
++    for (const d of dangerousDirectories) {
++        const absPath = path.resolve(cwd, d);
++        if (fs.existsSync(absPath)) {
++            denyPaths.push(absPath);
++        } else {
++            logForDebugging(`[Sandbox Linux] Skipping non-existent cwd dangerous directory: ${absPath}`);
++        }
++    }
+     // Git hooks and config are only denied when .git exists as a directory.
+     // In git worktrees, .git is a file (e.g., "gitdir: /path/..."), so
+     // .git/hooks can never exist — denying it would cause bwrap to fail.

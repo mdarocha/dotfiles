@@ -35,6 +35,14 @@ let
       # TCP:localhost:4096) mirroring the existing outbound proxy architecture.
       # See: https://github.com/anthropic-experimental/sandbox-runtime/issues/165
       patch -p1 -d $out < ${./srt-implement-allowlocalbinding-linux.patch}
+
+      # Fix dangerous_files path resolution and ghost mount-point pollution.
+      # Upstream resolves all DANGEROUS_FILES relative to cwd, but shell configs
+      # (.bashrc, .gitconfig, etc.) belong in $HOME.  This also skips files that
+      # don't exist (avoids bwrap creating empty mount-point ghost files in cwd)
+      # and skips cwd files that are git-tracked (not gitignored) since the user
+      # intentionally put them there.
+      patch -p1 -d $out < ${./srt-fix-dangerous-files-paths.patch}
     '';
   });
 
