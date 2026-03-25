@@ -62,10 +62,9 @@ in
         permission = {
           "*" = "allow";
 
-          # The sandbox already enforces filesystem boundaries, so there is
-          # no need for opencode to prompt on external directory access.
           external_directory = {
-            "*" = "allow";
+            "/nix/store/*" = "allow";
+            "*" = "ask";
           };
 
           bash = {

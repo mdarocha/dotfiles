@@ -13,12 +13,6 @@ let
     types
     ;
 
-  # Patch srt's bwrap argument ordering bug: when denyRead uses --tmpfs on an
-  # ancestor of an allowWrite path (e.g. /var over ~/.cache/nix), the tmpfs
-  # clobbers the earlier --bind mount. The "re-allow read" step then restores
-  # access with --ro-bind, silently losing writability.
-  # Fix: hoist allowedWritePaths and use --bind instead of --ro-bind for paths
-  # that are also writable.
   # TODO upstream fix
   patched-sandbox-runtime = pkgs.llm-agents.sandbox-runtime.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.gnupatch ];
