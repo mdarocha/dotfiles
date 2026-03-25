@@ -1,110 +1,102 @@
 ---
 name: run-with-nix
-description: Find and run programs that aren't installed on the system using nix-locate and nix run, without permanently installing anything.
+description: Find and run programs that aren't installed on the system using nix-locate and nix run, without permanently installing anything. Use when a command is not found, a tool is missing, a binary is not in PATH, or the user asks to run something without installing it. Also use when encountering "command not found" errors, or when needing to find which Nix package provides a specific program. This skill should be used proactively whenever a program isn't available.
 ---
 
 # Run programs with Nix
 
-When a program is not found on the system, use `nix-locate` to find which Nix package provides it, then use `nix run` to run it directly without installing it.
+When a program is not found on the system, use `nix-locate` to find which Nix package
+provides it, then use `nix run` to run it directly without installing.
 
-> **Important:** `nix` and `nix-locate` should already be installed and configured. If either command fails due to missing installation, notify the user and do not attempt to install or configure them yourself.
+> **Important:** `nix` and `nix-locate` should already be installed and configured.
+> If either fails due to missing installation, notify the user and do not attempt to
+> install or configure them yourself.
 
-## Workflow
+## Quick Workflow
 
-1. When a command is not found, use `nix-locate` to find the package that provides it.
-2. Use `nix run` to run the program from that package.
+```bash
+# 1. Find the package
+nix-locate --whole-name --minimal 'bin/<command>'
+
+# 2. Run it (everything after -- is passed to the program)
+nix run nixpkgs#<package> -- <args>
+```
 
 ## Finding packages with nix-locate
 
-`nix-locate` searches a pre-built index of Nix packages to find which package provides a given file.
-
 ```bash
-# Find which package provides a binary
-nix-locate --whole-name 'bin/jq'
-
-# Find which package provides a binary (minimal output - just attribute names)
+# Precise lookup (preferred — always use --whole-name with bin/<name>)
 nix-locate --whole-name --minimal 'bin/jq'
 
-# Search for any file matching a pattern
-nix-locate 'bin/firefox'
-
-# Use regex for more flexible matching
-nix-locate --regex 'bin/python3\.[0-9]+'
-
-# Only search for executable files
+# Only match executables
 nix-locate --whole-name --type x 'bin/rg'
 
-# Filter results to a specific package name
-nix-locate --whole-name 'bin/gs' --package ghostscript
+# Regex for flexible matching
+nix-locate --regex 'bin/python3\.[0-9]+'
+
+# Verbose output (shows file sizes and paths)
+nix-locate --whole-name 'bin/jq'
 ```
 
 ### Reading nix-locate output
-
-Output lines look like this:
 
 ```
 jq.out                                        6,144 x /nix/store/...-jq-1.7.1/bin/jq
 ```
 
-The first column is the Nix attribute path (e.g. `jq`). The `.out` suffix is the output name and can be ignored. Use the attribute name with `nix run` as `nixpkgs#<attribute>`.
+- First column is the Nix attribute path (e.g. `jq`). The `.out` suffix can be ignored.
+- Use the attribute name with `nix run` as `nixpkgs#<attribute>`.
+- If wrapped in parentheses like `(some-package.out)`, the path is uncertain — it's a
+  dependency rather than the package itself. Try it anyway, or search more specifically.
 
-If the attribute is wrapped in parentheses like `(some-package.out)`, it means the exact attribute path is uncertain — the package is a dependency of `some-package` rather than `some-package` itself. In that case, try running it anyway, or search more specifically.
+### Choosing between multiple results
 
-### Tips
-
-- Always use `--whole-name` with `bin/<name>` to get precise results and avoid matching unrelated files.
-- Use `--minimal` when you just need the attribute name for `nix run`.
-- Use `--type x` to only match executable files.
+When `nix-locate` returns multiple matches, prefer:
+1. The shortest/simplest attribute name (e.g. `httpie` over `python3Packages.httpie`)
+2. The one that isn't wrapped in parentheses
+3. The one whose package name most closely matches the binary name
 
 ## Running programs with nix run
 
-`nix run` builds and runs a program from a flake without installing it. The program is cached in the Nix store, so subsequent runs are fast.
-
 ```bash
-# Run a program from nixpkgs
+# Run from nixpkgs
 nix run nixpkgs#jq -- --help
-
-# Run a program from nixpkgs (everything after -- is passed to the program)
 nix run nixpkgs#ripgrep -- -i 'pattern' ./src
-
-# Run a program from any flake
-nix run github:owner/repo
-
-# Run a specific program from a flake with multiple outputs
 nix run nixpkgs#python3 -- -c "print('hello')"
+
+# Run from any flake
+nix run github:owner/repo
 ```
 
 ### How nix run finds the binary
 
-When you run `nix run nixpkgs#<name>`, Nix builds the package and then looks for an executable in `$out/bin/` using this priority:
-
-1. `meta.mainProgram` attribute of the package
-2. `pname` attribute of the package
+`nix run nixpkgs#<name>` looks for an executable in `$out/bin/` using this priority:
+1. `meta.mainProgram` attribute
+2. `pname` attribute
 3. The name part of the `name` attribute
 
 This means `nix run nixpkgs#ripgrep` runs `rg` (because `meta.mainProgram = "rg"`), not `ripgrep`.
 
-If the binary name doesn't match the package name, you can still run it — `nix run` handles this automatically via `meta.mainProgram`.
+## Error handling
 
-## Full example
+- **nix-locate returns nothing:** The nix-index database may be out of date, or the program
+  may not be packaged in nixpkgs. Inform the user. They can update the index with `nix-index`.
+- **nix run fails to build:** The package may be broken or unsupported on the current platform.
+  Check the error message and inform the user.
+- **Wrong binary runs:** If `nix run` launches the wrong program (name mismatch), the user
+  can run a specific binary directly: `nix shell nixpkgs#<package> --command <binary> <args>`
+
+## Examples
 
 ```bash
 # Command not found: "rg"
-# Step 1: Find the package
 $ nix-locate --whole-name --minimal 'bin/rg'
 ripgrep.out
-
-# Step 2: Run it
 $ nix run nixpkgs#ripgrep -- -i 'TODO' ./src
-```
 
-```bash
 # Command not found: "http" (httpie)
-# Step 1: Find the package
 $ nix-locate --whole-name --minimal 'bin/http'
 httpie.out
 python3Packages.httpie.out
-
-# Step 2: Run it (pick the most specific match)
 $ nix run nixpkgs#httpie -- GET https://example.com
 ```

@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Commit session changes to git. Use when the user asks to commit, save, or checkpoint their work.
+description: Commit session changes to git. Use when the user asks to commit, save, checkpoint, or snapshot their work. Triggers include "commit this", "save my changes", "create a commit", "git commit", "push my changes", "I'm done", "wrap up", or any request to persist the current session's work to version control - even if the user doesn't explicitly say "commit".
 disable-model-invocation: true
 ---
 
@@ -9,94 +9,71 @@ disable-model-invocation: true
 Create a single git commit containing only the changes made during this session.
 Do not create multiple commits. Do not push.
 
-## Step 1: Learn the Commit Style
+## Step 1: Gather Context
 
-Run this to see recent commits:
+Run these commands in parallel to understand the current state:
 
 ```bash
-git log --oneline -15
+git log --oneline -15       # Learn the repo's commit style
+git status                   # See what's changed
+git diff                     # Unstaged changes
+git diff --staged            # Already staged changes
 ```
 
-Match the style of existing commits (casing, tense, format, prefixes, length).
+**Commit style:** Match the existing commits (casing, tense, format, prefixes, length).
 The repo's conventions always take priority over generic best practices.
+If existing commits use a consistent pattern (e.g. `module: description`, or imperative lowercase),
+follow it exactly. If they are low-quality messages like "fix" or "update", fall back to the
+guidelines in Step 3.
 
-If the existing commits use a consistent pattern (e.g. `module: description`, or imperative lowercase),
-follow that pattern exactly. If they are low-quality one-word messages like "fix" or "update" with
-no useful context, fall back to the general guidelines below instead.
+## Step 2: Stage Session Changes
 
-## Step 2: Identify Session Changes
+Review the conversation history to identify which files were changed as part of this session.
+Only stage changes directly related to this session's work.
 
-Determine which changes belong to this session versus unrelated changes.
-
-```bash
-git status
-git diff
-git diff --staged
-```
-
-Review the conversation history to identify which files and changes were made as part of this session.
-Only stage files and changes that are directly related to the work done in this conversation.
-
-### Handling Mixed Files
-
-If a file contains both session-related and unrelated changes, use `git add -p` to stage only the
-relevant hunks. The key options:
-
-- `y` - stage this hunk
-- `n` - skip this hunk
-- `s` - split into smaller hunks
-- `e` - manually edit the hunk (for fine-grained line-level control)
-
-When using `e` to edit a hunk:
-- Lines starting with `+` are additions. Remove the line entirely to exclude it.
-- Lines starting with `-` are deletions. Change `-` to ` ` (space) to keep the original line.
-- Lines starting with ` ` (space) are context. Do not modify them.
-- Adjust the hunk header line counts (`@@ ... @@`) if you add or remove lines.
-
-For fully non-interactive partial staging, generate a filtered patch and apply it:
-
-```bash
-# Generate diff, filter to relevant hunks, apply to index
-git diff <file> > /tmp/full.patch
-# Edit /tmp/full.patch to keep only relevant hunks
-git apply --cached /tmp/full.patch
-```
-
-If all changes in a file are session-related, use `git add <file>` directly.
-
-## Step 3: Stage and Verify
-
-Stage the identified changes:
+**Most common case** — all changes in a file are session-related:
 
 ```bash
 git add <file1> <file2> ...
 ```
 
-Then verify what will be committed:
+**Mixed files** — a file has both session and unrelated changes. Since `git add -p` is interactive
+and cannot be used here, use the patch-and-apply approach:
+
+```bash
+# 1. Generate the full diff for the file
+git diff <file> > /tmp/partial.patch
+
+# 2. Edit /tmp/partial.patch to keep ONLY the session-related hunks:
+#    - Remove entire hunk blocks (from @@ line through to next @@ or end) that aren't session-related
+#    - Within a hunk: remove `+` lines to exclude additions, change `-` to ` ` to keep deletions
+#    - Adjust hunk header line counts (@@ -a,b +c,d @@) if you modify hunks
+
+# 3. Apply the filtered patch to the staging area
+git apply --cached /tmp/partial.patch
+```
+
+After staging, verify the staged diff matches the session's work:
 
 ```bash
 git diff --staged --stat
 git diff --staged
 ```
 
-Confirm the staged diff matches the session's work. Nothing more, nothing less.
-
-## Step 4: Write the Commit Message
+## Step 3: Commit
 
 Write a single-line commit message. Keep it short and descriptive.
 
-General guidelines (use only when the repo has no clear style or has low-quality messages):
+Fallback guidelines (use only when the repo has no clear style):
 
-- Use imperative mood ("add feature" not "added feature")
+- Imperative mood ("add feature" not "added feature")
 - Lowercase first word (unless the repo capitalizes)
 - No trailing period
-- Keep under ~72 characters
-- Focus on *what* changed and *where*, not *how* -- let the diff speak for itself
-- Avoid generic messages like "fix bug" or "update code" -- be specific about what was fixed or updated
+- Under ~72 characters
+- Focus on *what* changed and *where*, not *how*
+- Be specific — avoid "fix bug" or "update code"
 - If changes span multiple areas, summarize at the level that captures the intent
-- Do not add "Co-authored-by", "Generated by", or similar trailers
-
-## Step 5: Commit
+- No "Co-authored-by", "Generated by", or similar trailers
 
 ```bash
 git commit -m "<message>"
