@@ -8,23 +8,7 @@
 let
   cfg = config.mdarocha.llm-agents;
 
-  webUiPkgs = import ./web-ui.nix { inherit pkgs; };
-
-  # Patched opencode binary with OPENCODE_WEB_DIR pointing to the
-  # locally-built SPA. The patch replaces the app.opencode.ai reverse
-  # proxy with Hono's serveStatic, so `opencode web` serves the UI
-  # directly from the nix store — no Caddy, no external CDN.
-  opencode =
-    pkgs.runCommand "opencode"
-      {
-        nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
-      }
-      ''
-        mkdir -p $out/bin
-        makeBinaryWrapper ${lib.getExe' webUiPkgs.opencode-patched "opencode"} $out/bin/opencode \
-          --set OPENCODE_WEB_DIR "${webUiPkgs.opencode-web-ui}" \
-          --set OPENCODE_ENABLE_EXA true
-      '';
+  opencode = (import ./web-ui.nix { inherit pkgs lib; }).opencode-patched;
 in
 {
   imports = [

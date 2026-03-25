@@ -3,7 +3,7 @@
 # Upstream `opencode web` proxies all frontend assets from app.opencode.ai
 # at runtime. We patch server.ts to use Hono's serveStatic instead, serving
 # a locally-built copy of the SPA from OPENCODE_WEB_DIR.
-{ pkgs }:
+{ pkgs, lib ? pkgs.lib }:
 
 let
   version = pkgs.llm-agents.opencode.version;
@@ -36,7 +36,7 @@ let
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-PRi466RTfKTG2f94iqqC14jARIJ9p9/QpK/i6FoB3eE=";
+    outputHash = "sha256-4r1qNS4aWqI4f0lkvDSo0Ai7xGgIyRBl1uKgdSf/f3Y=";
 
     dontFixup = true;
 
@@ -71,14 +71,29 @@ let
 
   # Patched opencode binary compiled from source.
   # Regular derivation (not FOD) since the output links against glibc.
+  # autoPatchelfHook fixes the ELF interpreter and RPATH so the bun-compiled
+  # binary finds glibc and libstdc++ from the nix store instead of relying
+  # on the build-time paths baked in by bun's linker.
   patched = pkgs.stdenv.mkDerivation {
-    pname = "opencode-patched";
+    pname = "opencode";
     inherit version;
     src = sourceDeps;
 
     patches = [ ./patches/opencode-serve-local-web-ui.patch ];
 
-    nativeBuildInputs = with pkgs; [ bun nodejs ];
+    nativeBuildInputs = with pkgs; [
+      bun
+      nodejs
+      autoPatchelfHook
+      makeBinaryWrapper
+    ];
+
+    buildInputs = with pkgs; [
+      stdenv.cc.cc.lib
+    ];
+
+    # strip removes the compressed TypeScript code embedded by bun's compiler
+    dontStrip = true;
 
     env = {
       OPENCODE_VERSION = version;
@@ -104,6 +119,25 @@ let
       mkdir -p $out/bin
       cp packages/opencode/dist/*/bin/opencode $out/bin/opencode
       chmod +x $out/bin/opencode
+    '';
+
+    # makeBinaryWrapper must run after autoPatchelfHook (which runs in fixupPhase),
+    # otherwise the wrapper replaces the ELF before it can be patched.
+    postFixup = ''
+      mv $out/bin/opencode $out/bin/.opencode-wrapped
+      makeBinaryWrapper $out/bin/.opencode-wrapped $out/bin/opencode \
+        --set OPENCODE_WEB_DIR "${webUi}" \
+        --set OPENCODE_ENABLE_EXA true \
+        --prefix PATH : ${
+          lib.makeBinPath (
+            with pkgs;
+            [
+              fzf
+              ripgrep
+            ]
+            ++ lib.optionals stdenv.isLinux [ wl-clipboard ]
+          )
+        }
     '';
   };
 

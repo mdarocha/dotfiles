@@ -19,50 +19,21 @@
  */
 
 /**
- * Exchange a GitHub OAuth token for a short-lived Copilot session token.
- * The session token is required to call the Copilot REST API (e.g. /models).
- *
- * @param {string} oauthToken - GitHub OAuth access token (from gh auth or device flow)
- * @returns {Promise<{token: string, apiUrl: string} | null>}
- */
-async function exchangeForSessionToken(oauthToken) {
-  try {
-    const res = await fetch(
-      "https://api.github.com/copilot_internal/v2/token",
-      {
-        headers: {
-          Authorization: `token ${oauthToken}`,
-          Accept: "application/json",
-          "User-Agent": "opencode-copilot-fix-models",
-        },
-      },
-    );
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    return {
-      token: data.token,
-      apiUrl:
-        data.endpoints?.api || "https://api.individual.githubcopilot.com",
-    };
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Fetch the list of models available to the authenticated user from Copilot API.
+ * Uses the public Copilot API directly with the OAuth token — no session token
+ * exchange required. This works with both OpenCode's own OAuth tokens and
+ * GitHub CLI (`gho_`) tokens.
+ *
  * Returns a Map keyed by model ID for efficient lookup.
  *
- * @param {string} sessionToken - Copilot session token (from exchangeForSessionToken)
- * @param {string} apiUrl       - Copilot API base URL
+ * @param {string} oauthToken - GitHub OAuth access token (from gh auth or device flow)
  * @returns {Promise<Map<string, any> | null>}
  */
-async function fetchCopilotModels(sessionToken, apiUrl) {
+async function fetchCopilotModels(oauthToken) {
   try {
-    const res = await fetch(`${apiUrl}/models`, {
+    const res = await fetch("https://api.githubcopilot.com/models", {
       headers: {
-        Authorization: `Bearer ${sessionToken}`,
+        Authorization: `Bearer ${oauthToken}`,
         Accept: "application/json",
         "User-Agent": "opencode-copilot-fix-models",
       },
@@ -112,17 +83,11 @@ export default async function copilotFixModels(input) {
         const info = await getAuth();
         if (!info || info.type !== "oauth") return {};
 
-        // Exchange the OAuth token for a Copilot session token.
-        // The raw OAuth token works for the AI SDK (the built-in fetch
-        // handler sends it as Bearer), but the /models REST endpoint
-        // requires the exchanged session token.
-        const session = await exchangeForSessionToken(info.refresh);
-        if (!session) return {};
-
-        const copilotModels = await fetchCopilotModels(
-          session.token,
-          session.apiUrl,
-        );
+        // Fetch the live model list directly from the Copilot API.
+        // The OAuth token (whether from OpenCode's device flow or
+        // the GitHub CLI) works as a Bearer token against
+        // api.githubcopilot.com without needing a session token exchange.
+        const copilotModels = await fetchCopilotModels(info.refresh);
         // If the API returned no models, don't touch anything —
         // better to show stale limits than remove all models.
         if (!copilotModels || copilotModels.size === 0) return {};
@@ -136,9 +101,14 @@ export default async function copilotFixModels(input) {
             const live =
               copilotModels.get(apiID) || copilotModels.get(modelID);
 
-            // Remove models that aren't in the user's Copilot plan
-            // or are explicitly disabled by org policy.
-            if (!live || live.model_picker_enabled === false) {
+            // Remove models that aren't in the user's Copilot plan,
+            // are hidden from the model picker, or are explicitly
+            // disabled by org policy.
+            if (
+              !live ||
+              live.model_picker_enabled === false ||
+              live.policy?.state === "disabled"
+            ) {
               delete provider.models[modelID];
               continue;
             }
@@ -147,8 +117,10 @@ export default async function copilotFixModels(input) {
             const limits = live.capabilities?.limits;
             if (limits) {
               if (!model.limit) model.limit = {};
+              if (limits.max_context_window_tokens) {
+                model.limit.context = limits.max_context_window_tokens;
+              }
               if (limits.max_prompt_tokens) {
-                model.limit.context = limits.max_prompt_tokens;
                 model.limit.input = limits.max_prompt_tokens;
               }
               if (limits.max_output_tokens) {
