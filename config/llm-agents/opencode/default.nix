@@ -39,15 +39,30 @@ in
            conceptually relevant code, documentation, and examples even when you don't know the exact syntax.
       '';
       settings = {
-        plugin = [
-          "opencode-copilot-auth"
-          "file://${./plugins/copilot-fix-models.js}"
-        ];
-        model = "github-copilot/claude-opus-4.6";
+        #plugin = [
+        #  "opencode-copilot-auth"
+        #  "file://${./plugins/copilot-fix-models.js}"
+        #];
+        model = "github-copilot/claude-sonnet-4.6";
 
         # Used for title generation, compaction, and summaries. gpt-5-mini is
         # lightweight and free on GitHub Copilot (1× premium request).
         small_model = "github-copilot/gpt-5-mini";
+
+        agent = {
+          summary = {
+            model = "github-copilot/claude-haiku-4.5";
+          };
+          compaction = {
+            model = "github-copilot/claude-sonnet-4.6";
+          };
+          explore = {
+            model = "github-copilot/claude-haiku-4.5";
+          };
+          plan = {
+            model = "github-copilot/claude-opus-4.6";
+          };
+        };
 
         # Prevent the opencode provider from loading entirely. Without this,
         # it auto-activates with apiKey: "public" and silently routes title
@@ -66,6 +81,7 @@ in
 
           external_directory = {
             "/nix/store/*" = "allow";
+            "/tmp/*" = "allow";
             "*" = "ask";
           };
 
