@@ -22,6 +22,26 @@ in
       enable = true;
       package = cfg.sandbox.wrapPackage "opencode" opencode;
       rules = ''
+        ## Sandbox network restrictions
+
+        You are running inside a sandboxed environment. Outbound network access is restricted
+        to an allowlist of domains. WebFetch and other HTTP requests will fail with connection
+        errors for any domain not listed below.
+
+        Allowed domains:
+        - GitHub: `github.com`, `*.github.com`, `*.githubusercontent.com`
+        - GitHub Copilot: `*.githubcopilot.com`, `default.exp-tas.com`
+        - npm: `registry.npmjs.org`, `npmjs.org`, `registry.yarnpkg.com`
+        - Python: `pypi.org`, `files.pythonhosted.org`
+        - Nix: `cache.nixos.org`, `cache.numtide.com`, `*.cachix.org`
+        - Azure DevOps: `dev.azure.com`, `*.visualstudio.com`, `login.microsoftonline.com`
+        - MCP tools: `mcp.grep.app`, `mcp.exa.ai`
+        - Other: `models.dev`
+
+        Notably **not** allowed: `opencode.ai`, `reddit.com`, `stackoverflow.com`,
+        `medium.com`, generic web search result domains. Do not attempt to fetch pages
+        from these sites -- the requests will fail silently or time out.
+
         ## Code search tool selection
 
         When searching for code outside the current project, choose the right tool:

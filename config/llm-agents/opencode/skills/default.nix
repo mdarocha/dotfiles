@@ -5,6 +5,7 @@
     programs.opencode.skills = {
       gh-cli = ./gh-cli;
       run-with-nix = ./run-with-nix;
+      commit = ./commit;
     };
   };
 }
