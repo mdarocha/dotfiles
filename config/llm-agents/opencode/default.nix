@@ -59,10 +59,9 @@ in
            conceptually relevant code, documentation, and examples even when you don't know the exact syntax.
       '';
       settings = {
-        #plugin = [
-        #  "opencode-copilot-auth"
-        #  "file://${./plugins/copilot-fix-models.js}"
-        #];
+        plugin = [
+          "file://${./plugins/copilot-fix-models.js}"
+        ];
         model = "github-copilot/claude-sonnet-4.6";
 
         # Used for title generation, compaction, and summaries. gpt-5-mini is

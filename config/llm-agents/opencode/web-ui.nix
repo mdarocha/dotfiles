@@ -79,7 +79,10 @@ let
     inherit version;
     src = sourceDeps;
 
-    patches = [ ./patches/opencode-serve-local-web-ui.patch ];
+    patches = [
+      ./patches/opencode-serve-local-web-ui.patch
+      ./patches/opencode-merge-plugin-auth-hooks.patch
+    ];
 
     nativeBuildInputs = with pkgs; [
       bun

@@ -13,6 +13,7 @@ in
     ./sandbox
     ./opencode
     ./copilot-cli
+    ./oh-my-pi
   ];
 
   options.mdarocha.llm-agents = {
