@@ -38,6 +38,9 @@ async function fetchCopilotModels(oauthToken) {
                 Authorization: `Bearer ${oauthToken}`,
                 Accept: "application/json",
                 "User-Agent": "opencode-copilot-fix-models",
+                // Required to get the billing field (including multiplier) in the response.
+                // Without this header the API returns a legacy schema that omits billing entirely.
+                "X-GitHub-Api-Version": "2025-10-01",
             },
         });
         if (!res.ok) return null;
