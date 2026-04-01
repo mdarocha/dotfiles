@@ -8,7 +8,7 @@
 let
   cfg = config.mdarocha.llm-agents;
 
-  opencode = pkgs.llm-agents.opencode;
+  opencode = (import ./web-ui.nix { inherit pkgs lib; }).opencode-patched;
 in
 {
   imports = [

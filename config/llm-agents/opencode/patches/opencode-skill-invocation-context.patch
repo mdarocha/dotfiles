@@ -1,0 +1,16 @@
+diff --git a/packages/opencode/src/session/prompt.ts b/packages/opencode/src/session/prompt.ts
+--- a/packages/opencode/src/session/prompt.ts
++++ b/packages/opencode/src/session/prompt.ts
+@@ -1877,6 +1877,12 @@
+     }
+     template = template.trim()
+ 
++    // When a skill is invoked by the user via slash command, prepend context
++    // so the model understands this is a user-requested skill execution
++    if (command.source === "skill") {
++      template = `The user has invoked the "/${input.command}" skill. Follow the instructions below.\n\n${template}`
++    }
++
+     const taskModel = await (async () => {
+       if (command.model) {
+         return Provider.parseModel(command.model)

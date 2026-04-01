@@ -1,0 +1,41 @@
+--- a/packages/opencode/src/provider/auth.ts
++++ b/packages/opencode/src/provider/auth.ts
+@@ -116,12 +116,23 @@ export namespace ProviderAuth {
+           Effect.promise(async () => {
+             const plugins = await Plugin.list()
+             return {
+-              hooks: Record.fromEntries(
+-                Arr.filterMap(plugins, (x) =>
+-                  x.auth?.provider !== undefined
+-                    ? Result.succeed([ProviderID.make(x.auth.provider), x.auth] as const)
+-                    : Result.failVoid,
+-                ),
++              // Merge auth hooks per provider instead of last-wins.
++              // This allows plugins that only define a loader (no methods)
++              // to augment a provider without clobbering the login methods
++              // registered by an earlier plugin (e.g. the built-in).
++              hooks: Arr.filterMap(plugins, (x) =>
++                x.auth?.provider !== undefined
++                  ? Result.succeed([ProviderID.make(x.auth.provider), x.auth] as const)
++                  : Result.failVoid,
++              ).reduce(
++                (acc, [providerID, auth]) => {
++                  const existing = acc[providerID]
++                  if (!existing) acc[providerID] = auth
++                  else
++                    acc[providerID] = { ...existing, ...auth, methods: auth.methods ?? existing.methods, loader: auth.loader ?? existing.loader }
++                  return acc
++                },
++                {} as globalThis.Record<string, Hook>,
+               ),
+               pending: new Map<ProviderID, AuthOuathResult>(),
+             }
+@@ -131,7 +142,7 @@ export namespace ProviderAuth {
+ 
+       const methods = Effect.fn("ProviderAuth.methods")(function* () {
+         const hooks = (yield* InstanceState.get(state)).hooks
+-        return Record.map(hooks, (item) =>
++        return Record.map(hooks as globalThis.Record<string, Hook>, (item) =>
+           item.methods.map(
+             (method): Method => ({
+               type: method.type,
