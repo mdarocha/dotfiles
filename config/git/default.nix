@@ -1,18 +1,17 @@
 {
   lib,
   pkgs,
-  config,
   ...
 }:
 
 let
-  inherit (lib) mkDefault mkOption types;
+  inherit (lib) mkDefault;
 in
 {
-  options.programs.git.forceSSH = mkOption {
-    type = types.bool;
-    default = true;
-    description = "Force SSH for GitHub and GitLab repositories";
+  config.programs.gh = {
+    enable = lib.mkDefault true;
+    # gh credential helper is enabled by default, which
+    # sets up git to use `gh auth git-credential` for HTTPS auth
   };
 
   config.programs.git = {
@@ -36,19 +35,6 @@ in
       commit.verbose = true;
       rerere.enable = true;
       diff.algorithm = "histogram";
-
-      url = {
-        # always use ssh for Github repos
-        "ssh://git@github.com/" = lib.mkIf config.programs.git.forceSSH {
-          insteadOf = "https://github.com/";
-          pushInsteadOf = "https://github.com/";
-        };
-        # same for gitlab
-        "ssh://git@gitlab.com/" = lib.mkIf config.programs.git.forceSSH {
-          insteadOf = "https://gitlab.com/";
-          pushInsteadOf = "https://gitlab.com/";
-        };
-      };
 
       # ghq tool config
       ghq = {

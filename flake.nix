@@ -178,7 +178,6 @@
 
           wsl = mkHomeManagerConfiguration {
             mdarocha.llm-agents.enable = true;
-            programs.git.forceSSH = false; # we don't use ssh in WSL
           };
 
           codespace = mkHomeManagerConfiguration {

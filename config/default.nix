@@ -52,8 +52,6 @@
 
     # nice cli utils
     pkgs.jq
-    pkgs.gh
-
     # needed for zed
     pkgs.nil
   ];
