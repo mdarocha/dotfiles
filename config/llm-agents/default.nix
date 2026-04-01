@@ -25,7 +25,6 @@ in
     home.packages = [
       pkgs.python3
       pkgs.nodejs
-      pkgs.nodePackages.npm
       pkgs.bun
     ];
   };

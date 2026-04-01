@@ -13,18 +13,9 @@ let
     types
     ;
 
-  # TODO upstream fix
   patched-sandbox-runtime = pkgs.llm-agents.sandbox-runtime.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.gnupatch ];
     postInstall = (old.postInstall or "") + ''
-      # Fix bwrap argument ordering: --tmpfs on a denyRead ancestor clobbers
-      # --bind mounts for allowWrite paths underneath it. Re-allows must use
-      # --bind (rw) instead of --ro-bind for paths that are also writable.
-      # Additionally, deny-write mounts (e.g. --ro-bind for .git/hooks) are
-      # deferred to the end of the arg list so they survive the --tmpfs clobber
-      # + re-allow --bind cycle from denyRead processing.
-      patch -p1 -d $out < ${./patches/srt-fix-denyread-clobbers-allowwrite.patch}
-
       # Implement allowLocalBinding on Linux. Upstream only wires it for macOS
       # (Seatbelt). On Linux, bwrap --unshare-net creates an isolated network
       # namespace so bound ports are invisible from the host. This patch adds a
@@ -48,9 +39,8 @@ let
   anthropic-sandbox-runtime-settings = {
     filesystem = {
       # Broad denies as recommended by sandbox-runtime README.
-      # Requires the patched-sandbox-runtime above — without the patch,
-      # --tmpfs /var clobbers --bind mounts for allowWrite paths under
-      # $HOME (/var/home/<user> on Fedora Atomic).
+      # Fixed upstream in 0.0.46: --tmpfs on an ancestor no longer
+      # clobbers --bind mounts for allowWrite paths underneath it.
       denyRead = [
         "/home"
         "/var"
