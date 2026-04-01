@@ -67,6 +67,7 @@ let
         "/nix"
         "."
         "~/.nix-profile"
+        "~/.omp"
         "~/.local/share/opencode"
         "~/.local/state/opencode"
         "~/.cache/opencode"
@@ -79,6 +80,7 @@ let
       allowWrite = [
         "."
         "/tmp"
+        "~/.omp"
         "~/.cache/nix"
         "~/.local/share/opencode"
         "~/.local/state/opencode"
