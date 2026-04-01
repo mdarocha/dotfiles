@@ -2,7 +2,10 @@
 #
 # We apply patches to add skill invocation control and auth hook
 # merging, which require compiling from the TypeScript source.
-{ pkgs, lib ? pkgs.lib }:
+{
+  pkgs,
+  lib ? pkgs.lib,
+}:
 
 let
   version = pkgs.llm-agents.opencode.version;
@@ -11,7 +14,7 @@ let
     owner = "anomalyco";
     repo = "opencode";
     rev = "v${version}";
-    hash = "sha256-hHyG1s/aaIDpZOF/ZGd0BgBK/DLHfsLZjbbYcYhbFeQ=";
+    hash = "sha256-P6Md0WzHK2/oAZ6VbpYnabVJyVcqwuYizoOqbxaf+lU=";
   };
 
   # Bun needs writable HOME/XDG_CACHE_HOME. The FOD's node_modules contain
@@ -31,11 +34,15 @@ let
     pname = "opencode-source-deps";
     inherit version src;
 
-    nativeBuildInputs = with pkgs; [ bun nodejs cacert ];
+    nativeBuildInputs = with pkgs; [
+      bun
+      nodejs
+      cacert
+    ];
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-roZxay8RNs6iaxpSoKzFcKOqhOyS8111CuY5GqR+B9I=";
+    outputHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 
     dontFixup = true;
 
