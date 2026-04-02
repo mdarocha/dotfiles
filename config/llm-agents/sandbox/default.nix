@@ -66,6 +66,13 @@ let
         "~/.config/git"
         "~/.cache/nix"
         "~/.cache/nix-index"
+
+        # Required for private NuGet artifact feeds.
+        "~/.nuget"
+        "~/.dotnet"
+        "~/.local/share/MicrosoftCredentialProvider"
+        "~/.local/.IdentityService"
+        "~/.microsoft/usersecrets"
       ];
       allowWrite = [
         "."
@@ -75,6 +82,10 @@ let
         "~/.local/share/opencode"
         "~/.local/state/opencode"
         "~/.cache/opencode"
+
+        # Required for private NuGet artifact feeds.
+        "~/.local/share/MicrosoftCredentialProvider"
+        "~/.local/.IdentityService"
       ];
       denyWrite = [ ];
     };
