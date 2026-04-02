@@ -33,7 +33,7 @@ in
         - GitHub Copilot: `*.githubcopilot.com`, `default.exp-tas.com`
         - npm: `registry.npmjs.org`, `npmjs.org`, `registry.yarnpkg.com`
         - Python: `pypi.org`, `files.pythonhosted.org`
-        - Nix: `cache.nixos.org`, `cache.numtide.com`, `*.cachix.org`
+        - Nix: `cache.nixos.org`, `cache.numtide.com`, `*.cachix.org`, `channels.nixos.org`
         - Azure DevOps: `dev.azure.com`, `*.visualstudio.com`, `login.microsoftonline.com`
         - MCP tools: `mcp.grep.app`, `mcp.exa.ai`
         - Other: `models.dev`
