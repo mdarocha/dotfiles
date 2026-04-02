@@ -8,6 +8,7 @@
 {
   imports = [
     ./git
+    ./ghostty
     ./llm-agents
     ./vscode
     ./zsh
