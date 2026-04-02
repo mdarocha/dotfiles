@@ -146,6 +146,9 @@ let
 
         # Model metadata
         "models.dev"
+
+        # NuGet
+        "api.nuget.org"
       ];
       deniedDomains = [ ];
     };

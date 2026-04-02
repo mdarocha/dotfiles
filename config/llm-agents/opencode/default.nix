@@ -37,6 +37,7 @@ in
         - Azure DevOps: `dev.azure.com`, `*.visualstudio.com`, `login.microsoftonline.com`
         - MCP tools: `mcp.grep.app`, `mcp.exa.ai`
         - Other: `models.dev`
+        - NuGet: `api.nuget.org`
 
         Notably **not** allowed: `opencode.ai`, `reddit.com`, `stackoverflow.com`,
         `medium.com`, generic web search result domains. Do not attempt to fetch pages
