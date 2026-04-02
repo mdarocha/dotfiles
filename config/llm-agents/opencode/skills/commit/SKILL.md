@@ -8,23 +8,25 @@ description: Commit session changes to git. Use when the user asks to commit, sa
 Create a single git commit containing only the changes made during this session.
 Do not create multiple commits. Do not push.
 
-## Self-Invocation Rules
+## When to commit
 
-If this skill was NOT invoked by the user (i.e. you are invoking it yourself), you must
-check whether you are working inside a git worktree before committing:
+**User-initiated** (invoked via `/commit` or an explicit request like "commit this"):
+commit on any branch, no questions asked.
+
+**Self-initiated** (you decide a commit would be appropriate after completing work):
+you MUST check whether you are in a git worktree:
 
 ```bash
-git rev-parse --is-inside-work-tree   # should be "true"
-git worktree list                     # lists all worktrees
-pwd                                   # check current directory
+git worktree list
+pwd
 ```
 
-- **If you are in a worktree** (the current directory is under `<repo>/.worktrees/`):
-  you may commit freely without asking.
-- **If you are NOT in a worktree** (you are in the main working tree):
-  you MUST ask the user for confirmation before committing. Do not commit silently.
+- If you are in a **git worktree** (cwd is not the main working tree): commit freely.
+- Otherwise: do NOT commit. Ask the user first.
 
-When invoked by the user via `/commit`, skip this check — the user has explicitly requested a commit.
+**Ambiguous** (the user says something like "I'm done", "wrap up", "save this",
+but hasn't explicitly asked for a commit): ask the user whether they want a commit.
+Do not assume.
 
 ## Step 1: Gather Context
 
