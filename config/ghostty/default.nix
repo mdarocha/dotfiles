@@ -15,6 +15,9 @@
       theme = "iTerm2 Solarized Dark";
       font-family = "Hack Nerd Font";
       cursor-style = "block";
+      # Shell integration overrides cursor-style by default; opt out so the
+      # static setting above takes effect.
+      shell-integration-features = "no-cursor";
     };
   };
 }
