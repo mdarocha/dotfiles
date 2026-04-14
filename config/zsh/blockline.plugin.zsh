@@ -100,7 +100,7 @@ blockline_jobs() {
 }
 
 blockline_vcs_info() {
-    local branch="⑂"
+    local branch=$'\ue0a0'
     local merging="m"
 
     local staged="+"
