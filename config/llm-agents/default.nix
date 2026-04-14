@@ -11,7 +11,6 @@ in
 {
   imports = [
     ./sandbox
-    ./opencode
     ./copilot-cli
     ./oh-my-pi
   ];

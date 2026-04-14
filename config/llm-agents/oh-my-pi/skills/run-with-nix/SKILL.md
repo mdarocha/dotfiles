@@ -1,7 +1,6 @@
 ---
 name: run-with-nix
 description: Find and run programs that aren't installed on the system using nix-locate and nix run, without permanently installing anything. Use when a command is not found, a tool is missing, a binary is not in PATH, or the user asks to run something without installing it. Also use when encountering "command not found" errors, or when needing to find which Nix package provides a specific program. This skill should be used proactively whenever a program isn't available.
-user-invocable: false
 ---
 
 # Run programs with Nix

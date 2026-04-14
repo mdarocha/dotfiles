@@ -58,10 +58,6 @@ let
         "."
         "~/.nix-profile"
         "~/.omp"
-        "~/.local/share/opencode"
-        "~/.local/state/opencode"
-        "~/.cache/opencode"
-        "~/.config/opencode"
         "~/.config/gh"
         "~/.config/git"
         "~/.cache/nix"
@@ -79,9 +75,6 @@ let
         "/tmp"
         "~/.omp"
         "~/.cache/nix"
-        "~/.local/share/opencode"
-        "~/.local/state/opencode"
-        "~/.cache/opencode"
 
         # Required for private NuGet artifact feeds.
         "~/.local/share/MicrosoftCredentialProvider"
@@ -109,7 +102,7 @@ let
         }
     )
     // {
-      # Allow opencode web to bind to a local port and serve the web UI.
+      # Allow omp (and other sandboxed agents) to bind to a local port.
       # TODO: The reverse bridge hardcodes port 4096 — only one sandboxed
       # instance can expose a local port at a time. Implement dynamic port
       # allocation (pick a free host port, pass it through to the sandbox).
