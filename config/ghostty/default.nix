@@ -18,6 +18,7 @@
       # Shell integration overrides cursor-style by default; opt out so the
       # static setting above takes effect.
       shell-integration-features = "no-cursor";
+      keybind = "ctrl+enter=unbind";
     };
   };
 }
