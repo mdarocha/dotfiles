@@ -152,6 +152,7 @@ in
           "Model metadata" = [ "models.dev" ];
           "NuGet" = [ "api.nuget.org" ];
           "Figma" = [ "figma.com" "*.figma.com" ];
+          "Contentful" = [ "contentful.com" "*.contentful.com" "api.contentful.com" "cdn.contentful.com" "preview.contentful.com" "images.ctfassets.net" "*.ctfassets.net" ];
         };
       };
 
