@@ -143,12 +143,12 @@ in
         description = "Allowed outbound domains grouped by display label. Keys are category names shown in agent instructions; values are lists of domain patterns.";
         default = {
           "GitHub" = [ "github.com" "*.github.com" "*.githubusercontent.com" ];
-          "GitHub Copilot" = [ "*.githubcopilot.com" "default.exp-tas.com" ];
-          "npm" = [ "registry.npmjs.org" "registry.npmjs.com" "npmjs.org" "npmjs.com" "registry.yarnpkg.com" "yarnpkg.com" ];
+          "GitHub Copilot" = [ "*.githubcopilot.com" "*.*.githubcopilot.com" ];
+          "npm" = [ "registry.npmjs.org" "registry.npmjs.com" "npmjs.org" "npmjs.com" "registry.yarnpkg.com" "yarnpkg.com" "api.npmjs.org" ];
           "Python" = [ "pypi.org" "pypi.python.org" "files.pythonhosted.org" "*.pythonhosted.org" ];
           "Nix" = [ "cache.nixos.org" "cache.numtide.com" "*.cachix.org" "install.determinate.systems" ];
           "Azure DevOps" = [ "dev.azure.com" "*.dev.azure.com" "*.visualstudio.com" "*.vsassets.io" "login.microsoftonline.com" ];
-          "MCP tools" = [ "mcp.grep.app" "mcp.exa.ai" ];
+          "MCP tools" = [ "mcp.grep.app" "mcp.exa.ai" "websetsmcp.exa.ai" "api.exa.ai" ];
           "Model metadata" = [ "models.dev" ];
           "NuGet" = [ "api.nuget.org" ];
           "Figma" = [ "figma.com" "*.figma.com" ];
