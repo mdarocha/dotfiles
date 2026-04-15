@@ -107,53 +107,7 @@ let
       # instance can expose a local port at a time. Implement dynamic port
       # allocation (pick a free host port, pass it through to the sandbox).
       allowLocalBinding = true;
-      allowedDomains = [
-        # GitHub
-        "github.com"
-        "*.github.com"
-        "*.githubusercontent.com"
-
-        # GitHub Copilot
-        "*.githubcopilot.com"
-        "default.exp-tas.com"
-
-        # npm
-        "registry.npmjs.org"
-        "registry.npmjs.com"
-        "npmjs.org"
-        "npmjs.com"
-        "registry.yarnpkg.com"
-        "yarnpkg.com"
-
-        # Python / pip
-        "pypi.org"
-        "pypi.python.org"
-        "files.pythonhosted.org"
-        "*.pythonhosted.org"
-
-        # Nix
-        "cache.nixos.org"
-        "cache.numtide.com"
-        "*.cachix.org"
-        "install.determinate.systems"
-
-        # Azure DevOps
-        "dev.azure.com"
-        "*.dev.azure.com"
-        "*.visualstudio.com"
-        "*.vsassets.io"
-        "login.microsoftonline.com"
-
-        # MCP tools
-        "mcp.grep.app"
-        "mcp.exa.ai"
-
-        # Model metadata
-        "models.dev"
-
-        # NuGet
-        "api.nuget.org"
-      ];
+      allowedDomains = lib.flatten (lib.attrValues cfg.sandbox.allowedDomainGroups);
       deniedDomains = [ ];
     };
   };
@@ -182,6 +136,23 @@ in
         type = types.bool;
         default = true;
         description = "Whether to wrap llm-agent tools with the Anthropic sandbox runtime (srt).";
+      };
+
+      allowedDomainGroups = mkOption {
+        type = types.attrsOf (types.listOf types.str);
+        description = "Allowed outbound domains grouped by display label. Keys are category names shown in agent instructions; values are lists of domain patterns.";
+        default = {
+          "GitHub" = [ "github.com" "*.github.com" "*.githubusercontent.com" ];
+          "GitHub Copilot" = [ "*.githubcopilot.com" "default.exp-tas.com" ];
+          "npm" = [ "registry.npmjs.org" "registry.npmjs.com" "npmjs.org" "npmjs.com" "registry.yarnpkg.com" "yarnpkg.com" ];
+          "Python" = [ "pypi.org" "pypi.python.org" "files.pythonhosted.org" "*.pythonhosted.org" ];
+          "Nix" = [ "cache.nixos.org" "cache.numtide.com" "*.cachix.org" "install.determinate.systems" ];
+          "Azure DevOps" = [ "dev.azure.com" "*.dev.azure.com" "*.visualstudio.com" "*.vsassets.io" "login.microsoftonline.com" ];
+          "MCP tools" = [ "mcp.grep.app" "mcp.exa.ai" ];
+          "Model metadata" = [ "models.dev" ];
+          "NuGet" = [ "api.nuget.org" ];
+          "Figma" = [ "figma.com" "*.figma.com" ];
+        };
       };
 
       wrapPackage = mkOption {
