@@ -18,7 +18,11 @@
       # Shell integration overrides cursor-style by default; opt out so the
       # static setting above takes effect.
       shell-integration-features = "no-cursor";
-      keybind = "ctrl+enter=unbind";
+      keybind = [
+        # oh-my-pi: Kitty keyboard protocol compatibility
+        "alt+backspace=text:\x1b\x7f"
+        "shift+enter=text:\n"
+      ];
     };
   };
 }
