@@ -68,6 +68,48 @@ gh pr comment 123 --body "Comment text"
 gh pr ready 123
 ```
 
+## PR Review Threads
+
+GitHub has no dedicated `gh pr` subcommand for resolving review comment threads.
+Use the GraphQL API via `gh api graphql`.
+
+> **Confirmation rule:** Only run the resolve mutation when the user has explicitly
+> requested it (e.g. "mark the comment as resolved", "resolve that thread").
+> In all other cases — such as when reviewing a PR or summarising feedback —
+> list the threads for context but ask for confirmation before resolving anything.
+
+```bash
+# Readonly — list review threads with their IDs and resolution state
+gh api graphql -f query='
+query($owner: String!, $repo: String!, $pr: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100) {
+        nodes {
+          id
+          isResolved
+          comments(first: 1) { nodes { body } }
+        }
+      }
+    }
+  }
+}
+' -f owner=OWNER -f repo=REPO -F pr=NUMBER
+
+# Mutating — resolve a single thread by its node ID (from the query above)
+gh api graphql -f query='
+mutation($id: ID!) {
+  resolveReviewThread(input: {threadId: $id}) {
+    thread { id isResolved }
+  }
+}
+' -f id="PRT_kwDO..."
+```
+
+The node ID looks like `PRT_kwDO...` and is returned by the `reviewThreads` query above.
+To resolve all unresolved threads in one pass, pipe the query result through `jq` to
+extract IDs, then loop and call the mutation for each.
+
 ## Issues
 
 ```bash
