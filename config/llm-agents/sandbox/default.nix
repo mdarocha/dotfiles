@@ -62,6 +62,7 @@ let
         "~/.config/git"
         "~/.cache/nix"
         "~/.cache/nix-index"
+        "~/.cache/puppeteer"
 
         # Required for private NuGet artifact feeds.
         "~/.nuget"
