@@ -38,6 +38,14 @@ in
         3. **codesearch** (fallback): Use the `codesearch` tool when the grep MCP doesn't return good results.
            It uses semantic/neural search (via Exa AI) rather than pattern matching, so it can find
            conceptually relevant code, documentation, and examples even when you don't know the exact syntax.
+
+        ## Documentation search
+
+        Use the **context7 MCP** to fetch current, version-accurate documentation for any library, framework,
+        SDK, API, CLI tool, or cloud service — including well-known ones like React, Next.js, Prisma, Django,
+        Spring Boot, or Tailwind. Prefer this over web search for library docs, since your training data may
+        not reflect recent changes. Use it for: API syntax, configuration, version migration, library-specific
+        debugging, setup instructions, and CLI tool usage.
       '';
 
       ".omp/agent/skills/commit/SKILL.md".source = ./skills/commit/SKILL.md;
