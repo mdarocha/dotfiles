@@ -150,6 +150,7 @@ in
           "Nix" = [ "cache.nixos.org" "cache.numtide.com" "*.cachix.org" "install.determinate.systems" ];
           "Azure DevOps" = [ "dev.azure.com" "*.dev.azure.com" "*.visualstudio.com" "*.vsassets.io" "login.microsoftonline.com" ];
           "MCP tools" = [ "mcp.grep.app" "mcp.exa.ai" "websetsmcp.exa.ai" "api.exa.ai" ];
+          "Microsoft Learn" = [ "learn.microsoft.com" ];
           "Model metadata" = [ "models.dev" ];
           "NuGet" = [ "api.nuget.org" ];
           "Figma" = [ "figma.com" "*.figma.com" ];
