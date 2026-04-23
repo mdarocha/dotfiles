@@ -10,23 +10,19 @@ sandboxing, and skills on top.
 
 ## Submodules
 
-- **Sandbox** (`sandbox/`) — wraps agent binaries in Anthropic's
-  [sandbox-runtime][srt] (bubblewrap + seccomp). Restricts filesystem access,
+- **Sandbox** (`sandbox/`) — wraps agent binaries in
+  [agent-sandbox.nix][srt] (bubblewrap + seccomp). Restricts filesystem access,
   allowlists network domains, and exposes a `wrapPackage` helper.
+  Key options:
+  - `sandbox.enable` — toggle sandboxing on/off (default: `true`)
+  - `sandbox.allowedDomainGroups` — grouped outbound network allowlist (default groups: GitHub, GitHub Copilot, npm, Python, Nix, Azure DevOps, MCP tools, docs, NuGet, Figma, Contentful, models.dev)
+  - `sandbox.allowedPackages` — packages available on PATH inside the sandbox (default: git, gh, nix, python3, nodejs, bun, coreutils, curl, jq, ripgrep, fd, …)
+  - `sandbox.wrapPackage` — helper `name: pkg → wrappedPkg` used by other submodules
 
-- **Copilot CLI** (`copilot-cli/`) — sandbox wrapper around `copilot`.
+- **Copilot CLI** (`copilot-cli/`) — installs [`copilot-cli`][copilot-cli] and wraps the `copilot` binary with the sandbox.
 
-- **oh-my-pi** (`oh-my-pi/`) — sandbox wrapper around `omp` from [oh-my-pi][omp].
-  Installs skills (commit, gh-cli, run-with-nix) and injects sandbox rules as `~/.omp/agent/AGENTS.md`.
+- **oh-my-pi** (`oh-my-pi/`) — installs and configures `omp` from [oh-my-pi][omp].
 
-[srt]: https://github.com/anthropic-experimental/sandbox-runtime
+[srt]: https://github.com/archie-judd/agent-sandbox.nix
 [omp]: https://github.com/can1357/oh-my-pi
-
-## Patches
-
-### sandbox-runtime (`sandbox/patches/`)
-
-| Patch | Why |
-|---|---|
-| `srt-implement-allowlocalbinding-linux` | `allowLocalBinding` is macOS-only. Adds a reverse socat bridge so sandbox-bound ports are reachable from the host on Linux. |
-| `srt-fix-dangerous-files-paths` | Resolves home-only `DANGEROUS_FILES` to `$HOME`. CWD files use `git check-ignore`: gitignored paths always denied; tracked paths denied only when they exist. |
+[copilot-cli]: https://github.com/github/copilot-cli

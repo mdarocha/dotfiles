@@ -16,6 +16,8 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    agent-sandbox.url = "github:archie-judd/agent-sandbox.nix";
+
     # zsh plugins
     oh-my-zsh = {
       url = "github:ohmyzsh/ohmyzsh/master";
@@ -39,6 +41,7 @@
       nixpkgs,
       home-manager,
       llm-agents,
+      agent-sandbox,
       ...
     }:
     {

@@ -2,133 +2,80 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 
 let
   inherit (lib)
-    getExe'
-    mkIf
     mkOption
     types
     ;
 
-  patched-sandbox-runtime = pkgs.llm-agents.sandbox-runtime.overrideAttrs (old: {
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.gnupatch ];
-    postInstall = (old.postInstall or "") + ''
-      # Implement allowLocalBinding on Linux. Upstream only wires it for macOS
-      # (Seatbelt). On Linux, bwrap --unshare-net creates an isolated network
-      # namespace so bound ports are invisible from the host. This patch adds a
-      # reverse socat bridge (host TCP:4096 <-> Unix socket <-> sandbox
-      # TCP:localhost:4096) mirroring the existing outbound proxy architecture.
-      # See: https://github.com/anthropic-experimental/sandbox-runtime/issues/165
-      patch -p1 -d $out < ${./patches/srt-implement-allowlocalbinding-linux.patch}
-
-      # Fix dangerous_files path resolution and ghost mount-point avoidance.
-      # Upstream resolves all DANGEROUS_FILES relative to cwd, but shell configs
-      # (.bashrc, .gitconfig, etc.) belong in $HOME — always denied there.
-      # CWD files/dirs use git-ignore to decide: gitignored paths are always
-      # denied (even non-existent); tracked paths only denied when they exist
-      # (avoids ghost mount-point files for intentionally tracked content).
-      patch -p1 -d $out < ${./patches/srt-fix-dangerous-files-paths.patch}
-    '';
-  });
-
   cfg = config.mdarocha.llm-agents;
 
-  anthropic-sandbox-runtime-settings = {
-    filesystem = {
-      # Broad denies as recommended by sandbox-runtime README.
-      # Fixed upstream in 0.0.46: --tmpfs on an ancestor no longer
-      # clobbers --bind mounts for allowWrite paths underneath it.
-      denyRead = [
-        "/home"
-        "/var"
-        "/run"
-        "/etc/shadow"
-        "/etc/gshadow"
-        "/etc/sudoers"
-        "/etc/sudoers.d"
-        "/etc/ssh"
-        "/etc/ssl/private"
-        "/etc/security"
-      ];
-      allowRead = [
-        "/nix"
-        "."
-        "~/.nix-profile"
-        "~/.omp"
-        "~/.config/gh"
-        "~/.copilot"
-        "~/.config/git"
-        "~/.cache/nix"
-        "~/.cache/nix-index"
-        "~/.cache/puppeteer"
+  # Instantiate agent-sandbox.nix for the current platform. The library
+  # exposes per-system attrsets from its flake output so we index by
+  # pkgs.system here rather than threading a second pkgs argument through.
+  # TODO: this is ugly, improve
+  agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
-        # Required for private NuGet artifact feeds.
-        "~/.nuget"
-        "~/.dotnet"
-        "~/.local/share/MicrosoftCredentialProvider"
-        "~/.local/.IdentityService"
-        "~/.microsoft/usersecrets"
-      ];
-      allowWrite = [
-        "."
-        "/tmp"
-        "~/.omp"
-        "~/.cache/nix"
-        "~/.copilot"
+  # The proxy inside agent-sandbox.nix performs suffix-based domain matching:
+  # "github.com" already covers api.github.com, raw.github.com, etc.
+  # allowedDomains list uses "*.foo.com" prefixes which the proxy
+  # does not interpret as wildcards — it would match literally. Strip all
+  # leading "*." segments so every entry becomes the bare registrable domain.
+  # TODO: fix this somehow
+  stripWildcardPrefix =
+    d: if lib.hasPrefix "*." d then stripWildcardPrefix (lib.removePrefix "*." d) else d;
 
-        # Required for private NuGet artifact feeds.
-        "~/.local/share/MicrosoftCredentialProvider"
-        "~/.local/.IdentityService"
-      ];
-      denyWrite = [ ];
-    };
-    network = {
-      # Nix needs Unix sockets to communicate with the daemon.
-      # On Linux, srt uses seccomp BPF to block socket(AF_UNIX, ...) at the syscall level,
-      # so allowUnixSockets for specific paths doesn't help — the syscall is blocked
-      # before connect(). We must disable the filter entirely.
-      # On macOS, srt uses Seatbelt which can filter by path, so we can allowlist.
-    }
-    // (
-      if pkgs.stdenv.isLinux then
-        {
-          allowAllUnixSockets = true;
-        }
-      else
-        {
-          allowUnixSockets = [
-            "/nix/var/nix/daemon-socket/socket"
-          ];
-        }
-    )
-    // {
-      # Allow omp (and other sandboxed agents) to bind to a local port.
-      # TODO: The reverse bridge hardcodes port 4096 — only one sandboxed
-      # instance can expose a local port at a time. Implement dynamic port
-      # allocation (pick a free host port, pass it through to the sandbox).
-      allowLocalBinding = true;
-      allowedDomains = lib.flatten (lib.attrValues cfg.sandbox.allowedDomainGroups);
-      deniedDomains = [ ];
-    };
-  };
+  normalizedAllowedDomains = lib.unique (
+    map stripWildcardPrefix (lib.flatten (lib.attrValues cfg.sandbox.allowedDomainGroups))
+  );
+
+  # Directories the sandboxed agent may read and write. All paths are
+  # bind-mounted read-write (agent-sandbox.nix has no separate read-only
+  # stateDir concept). Shared across omp and copilot-cli.
+  sharedStateDirs = [
+    # Agent configs
+    "$HOME/.omp"
+    "$HOME/.copilot"
+
+    # Misc configs
+    "$HOME/.config/gh"
+    "$HOME/.config/git"
+
+    # Caches
+    "$HOME/.npm"
+    "$HOME/.cache/nix"
+    "$HOME/.cache/nix-index"
+    "$HOME/.cache/puppeteer"
+
+    # Private NuGet artifact feeds.
+    "$HOME/.nuget"
+    "$HOME/.dotnet"
+    "$HOME/.local/share/MicrosoftCredentialProvider"
+    "$HOME/.local/.IdentityService"
+    "$HOME/.microsoft/usersecrets"
+
+    # Nix daemon Unix socket and config.
+    # We expose the it so the nix binary inside the sandbox can connect to the host daemon.
+    # TODO
+    #"/nix/var/nix/daemon-socket"
+    #"/etc/nix"
+  ];
 
   wrapWithSandbox =
     name: pkg:
-    pkgs.runCommand name
-      {
-        nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
-      }
-      ''
-        mkdir -p $out/bin
-        # -- separates srt flags from the wrapped command,
-        # so that flags like --help are passed to the wrapped binary, not srt
-        makeBinaryWrapper ${getExe' patched-sandbox-runtime "srt"} $out/bin/${name} \
-          --add-flags -- \
-          --add-flags ${getExe' pkg name}
-      '';
+    agentSandbox.mkSandbox {
+      inherit pkg;
+      binName = name;
+      outName = name;
+      allowedPackages = cfg.sandbox.allowedPackages;
+      stateDirs = sharedStateDirs;
+      restrictNetwork = true;
+      allowedDomains = normalizedAllowedDomains;
+    };
 
   maybeSandbox = name: pkg: if cfg.sandbox.enable then wrapWithSandbox name pkg else pkg;
 in
@@ -138,26 +85,103 @@ in
       enable = mkOption {
         type = types.bool;
         default = true;
-        description = "Whether to wrap llm-agent tools with the Anthropic sandbox runtime (srt).";
+        description = "Whether to wrap llm-agent tools with bubblewrap (Linux) or Seatbelt (macOS) via agent-sandbox.nix.";
       };
 
       allowedDomainGroups = mkOption {
         type = types.attrsOf (types.listOf types.str);
         description = "Allowed outbound domains grouped by display label. Keys are category names shown in agent instructions; values are lists of domain patterns.";
         default = {
-          "GitHub" = [ "github.com" "*.github.com" "*.githubusercontent.com" ];
-          "GitHub Copilot" = [ "*.githubcopilot.com" "*.*.githubcopilot.com" ];
-          "npm" = [ "registry.npmjs.org" "registry.npmjs.com" "npmjs.org" "npmjs.com" "registry.yarnpkg.com" "yarnpkg.com" "api.npmjs.org" ];
-          "Python" = [ "pypi.org" "pypi.python.org" "files.pythonhosted.org" "*.pythonhosted.org" ];
-          "Nix" = [ "cache.nixos.org" "cache.numtide.com" "*.cachix.org" "install.determinate.systems" ];
-          "Azure DevOps" = [ "dev.azure.com" "*.dev.azure.com" "*.visualstudio.com" "*.vsassets.io" "login.microsoftonline.com" ];
-          "MCP tools" = [ "mcp.grep.app" "mcp.context7.com" "mcp.exa.ai" "websetsmcp.exa.ai" "api.exa.ai" ];
-          "Documentation" = [ "learn.microsoft.com" "developers.google.com" "docs.github.com" ];
+          "GitHub" = [
+            "github.com"
+            "*.github.com"
+            "*.githubusercontent.com"
+          ];
+          "GitHub Copilot" = [
+            "*.githubcopilot.com"
+            "*.*.githubcopilot.com"
+          ];
+          "npm" = [
+            "registry.npmjs.org"
+            "registry.npmjs.com"
+            "npmjs.org"
+            "npmjs.com"
+            "registry.yarnpkg.com"
+            "yarnpkg.com"
+            "api.npmjs.org"
+          ];
+          "Python" = [
+            "pypi.org"
+            "pypi.python.org"
+            "files.pythonhosted.org"
+            "*.pythonhosted.org"
+          ];
+          "Nix" = [
+            "channels.nixos.org"
+            "cache.nixos.org"
+            "cache.numtide.com"
+            "*.cachix.org"
+            "install.determinate.systems"
+          ];
+          "Azure DevOps" = [
+            "dev.azure.com"
+            "*.dev.azure.com"
+            "*.visualstudio.com"
+            "*.vsassets.io"
+            "login.microsoftonline.com"
+          ];
+          "MCP tools" = [
+            "mcp.grep.app"
+            "mcp.context7.com"
+            "mcp.exa.ai"
+            "websetsmcp.exa.ai"
+            "api.exa.ai"
+          ];
+          "Documentation" = [
+            "learn.microsoft.com"
+            "developers.google.com"
+            "docs.github.com"
+          ];
           "Model metadata" = [ "models.dev" ];
           "NuGet" = [ "api.nuget.org" ];
-          "Figma" = [ "figma.com" "*.figma.com" ];
-          "Contentful" = [ "contentful.com" "*.contentful.com" "api.contentful.com" "cdn.contentful.com" "preview.contentful.com" "images.ctfassets.net" "*.ctfassets.net" ];
+          "Figma" = [
+            "figma.com"
+            "*.figma.com"
+          ];
+          "Contentful" = [
+            "contentful.com"
+            "*.contentful.com"
+            "api.contentful.com"
+            "cdn.contentful.com"
+            "preview.contentful.com"
+            "images.ctfassets.net"
+            "*.ctfassets.net"
+          ];
         };
+      };
+
+      allowedPackages = mkOption {
+        type = types.listOf types.package;
+        description = "Packages placed on PATH inside the agent sandbox. Add any tool the agent needs to invoke.";
+        default = with pkgs; [
+          git
+          gh
+          nix
+          python3
+          nodejs
+          bun
+          coreutils
+          findutils
+          gnused
+          gnugrep
+          gawk
+          curl
+          jq
+          ripgrep
+          fd
+          which
+          diffutils
+        ];
       };
 
       wrapPackage = mkOption {
@@ -165,18 +189,8 @@ in
         internal = true;
         readOnly = true;
         default = maybeSandbox;
-        description = "Function to conditionally wrap a package binary with the sandbox runtime.";
+        description = "Function to conditionally wrap a package binary with the sandbox.";
       };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    home.packages = mkIf cfg.sandbox.enable [
-      patched-sandbox-runtime
-    ];
-
-    home.file.".srt-settings.json" = mkIf cfg.sandbox.enable {
-      text = builtins.toJSON anthropic-sandbox-runtime-settings;
     };
   };
 }
