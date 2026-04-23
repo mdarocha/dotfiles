@@ -59,6 +59,7 @@ let
         "~/.nix-profile"
         "~/.omp"
         "~/.config/gh"
+        "~/.copilot"
         "~/.config/git"
         "~/.cache/nix"
         "~/.cache/nix-index"
@@ -76,6 +77,7 @@ let
         "/tmp"
         "~/.omp"
         "~/.cache/nix"
+        "~/.copilot"
 
         # Required for private NuGet artifact feeds.
         "~/.local/share/MicrosoftCredentialProvider"
