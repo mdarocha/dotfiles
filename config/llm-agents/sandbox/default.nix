@@ -63,6 +63,11 @@ let
     # TODO
     #"/nix/var/nix/daemon-socket"
     #"/etc/nix"
+
+    # Full Nix store read access. mkSandbox only supports rw bind-mounts
+    # (stateDirs); /nix/store is world-readable and root-owned so the sandbox
+    # cannot write to it in practice.
+    "/nix/store"
   ];
 
   wrapWithSandbox =
