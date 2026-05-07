@@ -72,15 +72,28 @@ let
 
   wrapWithSandbox =
     name: pkg:
-    agentSandbox.mkSandbox {
-      inherit pkg;
-      binName = name;
-      outName = name;
-      allowedPackages = cfg.sandbox.allowedPackages;
-      stateDirs = sharedStateDirs;
-      restrictNetwork = true;
-      allowedDomains = normalizedAllowedDomains;
-    };
+    let
+      sandboxed = agentSandbox.mkSandbox {
+        inherit pkg;
+        binName = name;
+        outName = name;
+        allowedPackages = cfg.sandbox.allowedPackages;
+        stateDirs = sharedStateDirs;
+        restrictNetwork = true;
+        allowedDomains = normalizedAllowedDomains;
+      };
+    in
+    # agent-sandbox.nix only creates /bin/sh inside bwrap; /usr/bin/env is absent.
+    # Scripts with #!/usr/bin/env shebangs fail without it. Patch the generated
+    # wrapper to add a --symlink for /usr/bin/env pointing at coreutils' env binary.
+    pkgs.runCommand "${name}-sandboxed" { nativeBuildInputs = [ pkgs.gnused ]; } ''
+      mkdir -p $out
+      cp -r ${sandboxed}/. $out/
+      chmod -R +w $out
+      sed -i -E \
+        's|(--symlink [^ ]*/bin/bash /bin/sh)|(--symlink ${pkgs.coreutils}/bin/env /usr/bin/env \1)|' \
+        "$out/bin/${name}"
+    '';
 
   maybeSandbox = name: pkg: if cfg.sandbox.enable then wrapWithSandbox name pkg else pkg;
 in
