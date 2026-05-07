@@ -91,7 +91,7 @@ let
       cp -r ${sandboxed}/. $out/
       chmod -R +w $out
       sed -i -E \
-        's|(--symlink [^ ]*/bin/bash /bin/sh)|(--symlink ${pkgs.coreutils}/bin/env /usr/bin/env \1)|' \
+        's|(--symlink [^ ]*/bin/bash /bin/sh)|--symlink ${pkgs.coreutils}/bin/env /usr/bin/env \1|' \
         "$out/bin/${name}"
     '';
 
