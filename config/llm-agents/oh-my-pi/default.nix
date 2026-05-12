@@ -26,6 +26,16 @@ in
         `medium.com`, generic web search result domains. Do not attempt to fetch pages
         from these sites -- the requests will fail silently or time out.
 
+        ## Localhost / loopback isolation
+
+        The sandbox network namespace is isolated from the host. `localhost` (`127.0.0.1`)
+        inside the sandbox is the **sandbox's own loopback** — it does **not** reach services
+        running on the host machine. The host is only reachable via the pasta gateway
+        (`10.0.2.2`), which is itself proxy-filtered and not useful for dev servers.
+
+        Consequence: if a task requires a locally-running service (dev server, test server,
+        database, etc.), **the agent must start it** via `bash` inside the current session.
+        Asking the user to start it on their machine and then connecting to it will not work.
         ## Code search tool selection
 
         When searching for code outside the current project, choose the right tool:

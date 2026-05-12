@@ -87,6 +87,15 @@ let
           # Nix-provided binary so Puppeteer never tries to download Chrome.
           PUPPETEER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
           PUPPETEER_SKIP_DOWNLOAD = "true";
+          # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
+          # (sandbox-local loopback, isolated from the host). Without these,
+          # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
+          # 403 for 127.0.0.1 because it is not in the allowlist.
+          # 127.0.0.1 stays on `lo` inside the sandbox (ip route get 127.0.0.1
+          # → dev lo) and cannot reach host services; host is only reachable
+          # via 10.0.2.2 (pasta gateway), which remains proxy-filtered.
+          NO_PROXY = "127.0.0.1,localhost";
+          no_proxy = "127.0.0.1,localhost";
         };
       };
     in
