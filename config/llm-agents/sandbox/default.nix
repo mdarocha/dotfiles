@@ -49,7 +49,6 @@ let
     "$HOME/.npm"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
-    "$HOME/.cache/puppeteer"
 
     # Private NuGet artifact feeds.
     "$HOME/.nuget"
@@ -81,6 +80,14 @@ let
         stateDirs = sharedStateDirs;
         restrictNetwork = true;
         allowedDomains = normalizedAllowedDomains;
+        extraEnv = {
+          # Used by karma-chrome-launcher when running Angular unit tests.
+          CHROME_BIN = "${pkgs.chromium}/bin/chromium";
+          # Used by Puppeteer (OMP browser tools). Point directly at the
+          # Nix-provided binary so Puppeteer never tries to download Chrome.
+          PUPPETEER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
+          PUPPETEER_SKIP_DOWNLOAD = "true";
+        };
       };
     in
     # agent-sandbox.nix only creates /bin/sh inside bwrap; /usr/bin/env is absent.
@@ -199,6 +206,7 @@ in
           fd
           which
           diffutils
+          chromium
         ];
       };
 
