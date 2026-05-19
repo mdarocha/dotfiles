@@ -71,45 +71,32 @@ let
 
   wrapWithSandbox =
     name: pkg:
-    let
-      sandboxed = agentSandbox.mkSandbox {
-        inherit pkg;
-        binName = name;
-        outName = name;
-        allowedPackages = cfg.sandbox.allowedPackages;
-        stateDirs = sharedStateDirs;
-        restrictNetwork = true;
-        allowedDomains = normalizedAllowedDomains;
-        extraEnv = {
-          # Used by karma-chrome-launcher when running Angular unit tests.
-          CHROME_BIN = "${pkgs.chromium}/bin/chromium";
-          # Used by Puppeteer (OMP browser tools). Point directly at the
-          # Nix-provided binary so Puppeteer never tries to download Chrome.
-          PUPPETEER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
-          PUPPETEER_SKIP_DOWNLOAD = "true";
-          # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
-          # (sandbox-local loopback, isolated from the host). Without these,
-          # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
-          # 403 for 127.0.0.1 because it is not in the allowlist.
-          # 127.0.0.1 stays on `lo` inside the sandbox (ip route get 127.0.0.1
-          # → dev lo) and cannot reach host services; host is only reachable
-          # via 10.0.2.2 (pasta gateway), which remains proxy-filtered.
-          NO_PROXY = "127.0.0.1,localhost";
-          no_proxy = "127.0.0.1,localhost";
-        };
+    agentSandbox.mkSandbox {
+      inherit pkg;
+      binName = name;
+      outName = name;
+      allowedPackages = cfg.sandbox.allowedPackages;
+      stateDirs = sharedStateDirs;
+      restrictNetwork = true;
+      allowedDomains = normalizedAllowedDomains;
+      extraEnv = {
+        # Used by karma-chrome-launcher when running Angular unit tests.
+        CHROME_BIN = "${pkgs.chromium}/bin/chromium";
+        # Used by Puppeteer (OMP browser tools). Point directly at the
+        # Nix-provided binary so Puppeteer never tries to download Chrome.
+        PUPPETEER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
+        PUPPETEER_SKIP_DOWNLOAD = "true";
+        # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
+        # (sandbox-local loopback, isolated from the host). Without these,
+        # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
+        # 403 for 127.0.0.1 because it is not in the allowlist.
+        # 127.0.0.1 stays on `lo` inside the sandbox (ip route get 127.0.0.1
+        # → dev lo) and cannot reach host services; host is only reachable
+        # via 10.0.2.2 (pasta gateway), which remains proxy-filtered.
+        NO_PROXY = "127.0.0.1,localhost";
+        no_proxy = "127.0.0.1,localhost";
       };
-    in
-    # agent-sandbox.nix only creates /bin/sh inside bwrap; /usr/bin/env is absent.
-    # Scripts with #!/usr/bin/env shebangs fail without it. Patch the generated
-    # wrapper to add a --symlink for /usr/bin/env pointing at coreutils' env binary.
-    pkgs.runCommand "${name}-sandboxed" { nativeBuildInputs = [ pkgs.gnused ]; } ''
-      mkdir -p $out
-      cp -r ${sandboxed}/. $out/
-      chmod -R +w $out
-      sed -i -E \
-        's|(--symlink [^ ]*/bin/bash /bin/sh)|--symlink ${pkgs.coreutils}/bin/env /usr/bin/env \1|' \
-        "$out/bin/${name}"
-    '';
+    };
 
   maybeSandbox = name: pkg: if cfg.sandbox.enable then wrapWithSandbox name pkg else pkg;
 in

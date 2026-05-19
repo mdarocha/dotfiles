@@ -16,7 +16,7 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
-    agent-sandbox.url = "github:archie-judd/agent-sandbox.nix";
+    agent-sandbox.url = "github:mdarocha/agent-sandbox.nix";
 
     # zsh plugins
     oh-my-zsh = {
