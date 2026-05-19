@@ -17,7 +17,11 @@ in
         errors for any domain not listed below.
 
         Allowed domains:
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: domains: "- ${name}: ${lib.concatMapStringsSep ", " (d: "`${d}`") domains}") cfg.sandbox.allowedDomainGroups)}
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (
+            name: domains: "- ${name}: ${lib.concatMapStringsSep ", " (d: "`${d}`") domains}"
+          ) cfg.sandbox.allowedDomainGroups
+        )}
 
         Notably **not** allowed: `opencode.ai`, `reddit.com`, `stackoverflow.com`,
         `medium.com`, generic web search result domains. Do not attempt to fetch pages

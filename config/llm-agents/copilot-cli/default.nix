@@ -20,8 +20,8 @@ in
         ".copilot/AGENTS.md".text = cfg.common.agentInstructions;
       }
       # Write each skill to ~/.copilot/skills/<name>/SKILL.md
-      (lib.mapAttrs' (name: src:
-        lib.nameValuePair ".copilot/skills/${name}/SKILL.md" { source = src; }
+      (lib.mapAttrs' (
+        name: src: lib.nameValuePair ".copilot/skills/${name}/SKILL.md" { source = src; }
       ) cfg.common.skills)
     ];
   };

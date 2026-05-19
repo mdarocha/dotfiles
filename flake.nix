@@ -195,18 +195,6 @@
             config.allowUnfree = true;
             overlays = [
               llm-agents.overlays.default
-              (
-                final: prev: {
-                  # OMP currently requires Bun >= 1.3.14.
-                  bun = prev.bun.overrideAttrs (_old: {
-                    version = "1.3.14";
-                    src = final.fetchurl {
-                      url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip";
-                      hash = "sha256-lR7iruhV8IWVruxiJSJqKY0/6oOj3NZGXAnLzN9+hI8=";
-                    };
-                  });
-                }
-              )
             ];
           };
 

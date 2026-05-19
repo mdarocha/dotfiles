@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   cfg = config.mdarocha.llm-agents;
@@ -16,8 +21,8 @@ in
         ".omp/agent/AGENTS.md".text = cfg.common.agentInstructions;
       }
       # Write each skill to ~/.omp/agent/skills/<name>/SKILL.md
-      (lib.mapAttrs' (name: src:
-        lib.nameValuePair ".omp/agent/skills/${name}/SKILL.md" { source = src; }
+      (lib.mapAttrs' (
+        name: src: lib.nameValuePair ".omp/agent/skills/${name}/SKILL.md" { source = src; }
       ) cfg.common.skills)
     ];
   };
