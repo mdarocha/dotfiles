@@ -95,6 +95,11 @@ let
         # via 10.0.2.2 (pasta gateway), which remains proxy-filtered.
         NO_PROXY = "127.0.0.1,localhost";
         no_proxy = "127.0.0.1,localhost";
+        # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
+        # fonts. Without a valid config file the sandbox sees no fonts and Chrome
+        # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
+        # correctly inside the sandbox.
+        FONTCONFIG_FILE = "${pkgs.fontconfig}/etc/fonts/fonts.conf";
       };
     };
 
