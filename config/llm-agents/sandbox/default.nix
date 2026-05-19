@@ -45,11 +45,11 @@ let
     "$HOME/.config/gh"
     "$HOME/.config/git"
 
-    # npm config
+    # npm / bun config and caches
     "$HOME/.npmrc"
-
-    # Caches
     "$HOME/.npm"
+    "$HOME/.bun/install/cache"
+    "$HOME/.bunfig.toml"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
 
@@ -138,6 +138,7 @@ in
             "registry.yarnpkg.com"
             "yarnpkg.com"
             "api.npmjs.org"
+            "npm.fontawesome.com"
           ];
           "Python" = [
             "pypi.org"
