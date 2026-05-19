@@ -45,6 +45,9 @@ let
     "$HOME/.config/gh"
     "$HOME/.config/git"
 
+    # npm config
+    "$HOME/.npmrc"
+
     # Caches
     "$HOME/.npm"
     "$HOME/.cache/nix"
