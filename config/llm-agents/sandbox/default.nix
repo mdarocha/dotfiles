@@ -139,6 +139,7 @@ in
             "yarnpkg.com"
             "api.npmjs.org"
             "npm.fontawesome.com"
+            "dl.fontawesome.com"
           ];
           "Python" = [
             "pypi.org"
@@ -159,6 +160,7 @@ in
             "*.visualstudio.com"
             "*.vsassets.io"
             "login.microsoftonline.com"
+            "blob.core.windows.net"
           ];
           "MCP tools" = [
             "mcp.grep.app"
