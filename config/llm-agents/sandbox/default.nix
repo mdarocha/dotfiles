@@ -99,7 +99,7 @@ let
         # fonts. Without a valid config file the sandbox sees no fonts and Chrome
         # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
         # correctly inside the sandbox.
-        FONTCONFIG_FILE = "${pkgs.fontconfig}/etc/fonts/fonts.conf";
+        FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
       };
     };
 
