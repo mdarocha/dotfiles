@@ -87,7 +87,7 @@ attempt=1
 while [ "$attempt" -le "$retries" ]; do
     echo "Attempt $attempt/$retries..."
 
-    if /nix/var/nix/profiles/default/bin/nix run .#apply; then
+    if /nix/var/nix/profiles/default/bin/nix run --accept-flake-config .#apply; then
         break
     fi
     status=$?
