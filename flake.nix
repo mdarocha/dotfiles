@@ -201,6 +201,7 @@
             config.allowUnfree = true;
             overlays = [
               llm-agents.overlays.default
+              (import ./overlays/default.nix)
             ];
           };
 

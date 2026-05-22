@@ -33,6 +33,13 @@ let
     map stripWildcardPrefix (lib.flatten (lib.attrValues cfg.sandbox.allowedDomainGroups))
   );
 
+  # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
+  # to pkgs.python3Packages via the repo's nixpkgs overlay.
+  pythonEvalEnv = pkgs.python3.withPackages (ps: [
+    ps.ipykernel
+    ps.jupyter_kernel_gateway
+  ]);
+
   # Directories the sandboxed agent may read and write. All paths are
   # bind-mounted read-write (agent-sandbox.nix has no separate read-only
   # stateDir concept). Shared across omp and copilot-cli.
@@ -44,6 +51,11 @@ let
     # Misc configs
     "$HOME/.config/gh"
     "$HOME/.config/git"
+
+    # Nix user config and profile state. Created if absent so nix commands
+    # (registry, config, nix-env) persist their state across sandbox runs.
+    "$HOME/.config/nix"
+    "$HOME/.local/state/nix"
 
     # npm / bun config and caches
     "$HOME/.npmrc"
@@ -60,15 +72,15 @@ let
     "$HOME/.local/.IdentityService"
     "$HOME/.microsoft/usersecrets"
 
-    # Nix daemon Unix socket and config.
-    # We expose the it so the nix binary inside the sandbox can connect to the host daemon.
-    # TODO
-    #"/nix/var/nix/daemon-socket"
-    #"/etc/nix"
+    # System Nix configuration. /etc/nix exists but is outside the default
+    # sandbox mount tree; bind-mounting it lets the nix binary read
+    # nix.conf, registry.json, machines, etc.
+    "/etc/nix"
 
-    # Full Nix store read access. mkSandbox only supports rw bind-mounts
-    # (stateDirs); /nix/store is world-readable and root-owned so the sandbox
-    # cannot write to it in practice.
+    # Full Nix store. mkSandbox only supports rw bind-mounts (stateDirs);
+    # /nix/store is world-readable and root-owned so the sandbox cannot
+    # write to it in practice. Mounting the whole store lets the nix binary
+    # access any store path, including the Python eval environment below.
     "/nix/store"
   ];
 
@@ -103,6 +115,11 @@ let
         # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
         # correctly inside the sandbox.
         FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
+        # Python eval environment for OMP's eval tool. Setting VIRTUAL_ENV to
+        # this Nix-built env causes the OMP runtime to prepend its bin/ to PATH,
+        # making `python3 -m kernel_gateway` and `ipykernel` available without
+        # any pip install step at runtime.
+        VIRTUAL_ENV = "${pythonEvalEnv}";
       };
     };
 
