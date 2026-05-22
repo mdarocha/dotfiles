@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1779196316,
-        "narHash": "sha256-OPssUklqn7FuqnrXA5jt8yOn8QUOXClzVm03d0hwAAw=",
+        "lastModified": 1779472219,
+        "narHash": "sha256-tDvYjEmM7/63l23AzDNj3QncEcOhXIfh7l20jD3iD0g=",
         "owner": "mdarocha",
         "repo": "agent-sandbox.nix",
-        "rev": "ec18c54a17041b6e48940a6bb451ed1a195f01a4",
+        "rev": "87e721ad20e4392b50a537b74ddc85bc51f23cb2",
         "type": "github"
       },
       "original": {
