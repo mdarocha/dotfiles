@@ -65,6 +65,10 @@ let
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
 
+    # Rust / Cargo registry and build cache
+    "$HOME/.cargo"
+    "$HOME/.rustup"
+
     # Private NuGet artifact feeds.
     "$HOME/.nuget"
     "$HOME/.dotnet"
@@ -171,6 +175,11 @@ in
             "*.cachix.org"
             "install.determinate.systems"
           ];
+          "Rust" = [
+            "crates.io"
+            "static.crates.io"
+            "index.crates.io"
+          ];
           "Azure DevOps" = [
             "dev.azure.com"
             "*.dev.azure.com"
@@ -231,6 +240,10 @@ in
           which
           diffutils
           chromium
+          cargo
+          rustc
+          rustfmt
+          clippy
         ];
       };
 
