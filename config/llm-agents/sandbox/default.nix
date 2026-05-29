@@ -35,9 +35,12 @@ let
 
   # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
   # to pkgs.python3Packages via the repo's nixpkgs overlay.
+  # openai-whisper is required for OMP's STT (speech-to-text) feature;
+  # baking it in here avoids the broken `pip install` path at runtime.
   pythonEvalEnv = pkgs.python3.withPackages (ps: [
     ps.ipykernel
     ps.jupyter_kernel_gateway
+    ps.openai-whisper
   ]);
 
   # Directories the sandboxed agent may read and write. All paths are
