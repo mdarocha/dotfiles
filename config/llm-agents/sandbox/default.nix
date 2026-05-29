@@ -67,6 +67,7 @@ let
     "$HOME/.bunfig.toml"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
+    "$HOME/.cache/whisper"
 
     # Rust / Cargo registry and build cache
     "$HOME/.cargo"
