@@ -138,10 +138,10 @@ let
       #   direct ALSA access; silently ignored if WSLg is not running.
       # --bind-try: expose the WSLg runtime dir (PulseAudio socket lives
       #   inside); silently ignored if WSLg is not running.
-      extraBwrapArgs = ''
-        --dev-bind-try /dev/snd /dev/snd
-        --bind-try /mnt/wslg /mnt/wslg
-      '';
+      extraBwrapArgs = [
+        "--dev-bind-try /dev/snd /dev/snd"
+        "--bind-try /mnt/wslg /mnt/wslg"
+      ];
     };
 
   maybeSandbox = name: pkg: if cfg.sandbox.enable then wrapWithSandbox name pkg else pkg;
