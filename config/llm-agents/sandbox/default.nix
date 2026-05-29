@@ -197,6 +197,11 @@ in
             "static.crates.io"
             "index.crates.io"
           ];
+          # openai-whisper downloads model weights from this CDN on first use.
+          # Weights are cached at ~/.cache/whisper and only fetched once per model.
+          "Whisper models" = [
+            "openaipublic.azureedge.net"
+          ];
           "Azure DevOps" = [
             "dev.azure.com"
             "*.dev.azure.com"
