@@ -228,7 +228,7 @@ in
           git
           gh
           nix
-          python3
+          pythonEvalEnv
           nodejs
           bun
           coreutils
