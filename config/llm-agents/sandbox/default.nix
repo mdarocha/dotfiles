@@ -244,6 +244,8 @@ in
           rustc
           rustfmt
           clippy
+          # ffmpeg: required for OMP voice mode (audio encode/decode)
+          ffmpeg
         ];
       };
 
