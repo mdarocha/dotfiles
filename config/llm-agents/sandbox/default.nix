@@ -268,6 +268,12 @@ in
           clippy
           # ffmpeg: required for OMP voice mode (audio encode/decode)
           ffmpeg
+          # binutils: strings, objdump — binary inspection
+          binutils
+          # file: file-type detection
+          file
+          # procps: ps, pgrep, pkill — process inspection
+          procps
         ];
       };
 
