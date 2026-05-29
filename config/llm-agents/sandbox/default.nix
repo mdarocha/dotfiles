@@ -128,7 +128,20 @@ let
         # making `python3 -m kernel_gateway` and `ipykernel` available without
         # any pip install step at runtime.
         VIRTUAL_ENV = "${pythonEvalEnv}";
+        # OMP speech-to-text uses ffmpeg to capture from a microphone.
+        # On WSL2 with WSLg, PulseAudio is exposed at this socket path.
+        # Point the PulseAudio client library here so ffmpeg -f pulse works.
+        PULSE_SERVER = "unix:/mnt/wslg/PulseServer";
       };
+      # Audio device access for OMP speech-to-text (WSL2 / WSLg).
+      # --dev-bind-try: pass /dev/snd char devices into the sandbox for
+      #   direct ALSA access; silently ignored if WSLg is not running.
+      # --bind-try: expose the WSLg runtime dir (PulseAudio socket lives
+      #   inside); silently ignored if WSLg is not running.
+      extraBwrapArgs = ''
+        --dev-bind-try /dev/snd /dev/snd
+        --bind-try /mnt/wslg /mnt/wslg
+      '';
     };
 
   maybeSandbox = name: pkg: if cfg.sandbox.enable then wrapWithSandbox name pkg else pkg;
