@@ -52,6 +52,14 @@ let
   # ephemeral tmpfs, so the DB is recreated fresh each session with the
   # correct per-session CA. No-ops gracefully when the cert file is absent
   # (i.e. when restrictNetwork = false and no proxy is running).
+  #
+  # --no-sandbox: Chromium tries to create its own inner sandbox via a second
+  #   layer of user namespaces. That nested-namespace creation is blocked
+  #   inside bwrap's user namespace. The flag disables Chromium's sandbox;
+  #   security is still provided by the surrounding bwrap sandbox.
+  # --disable-dev-shm-usage: bwrap gives the sandbox a fresh /tmp tmpfs and a
+  #   minimal /dev, so /dev/shm may be absent or very small. This flag makes
+  #   Chromium write shared memory blobs to /tmp instead, avoiding crashes.
   chromiumWrapper = pkgs.writeShellScriptBin "chromium" ''
     if [ -f /tmp/sandbox-ca-cert.pem ]; then
       NSS_DB="$HOME/.pki/nssdb"
@@ -63,7 +71,7 @@ let
         -n "sandbox-proxy-ca" -t "C,," \
         -i /tmp/sandbox-ca-cert.pem 2>/dev/null || true
     fi
-    exec ${pkgs.chromium}/bin/chromium "$@"
+    exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
   '';
 
   # Directories the sandboxed agent may read and write. All paths are
@@ -159,11 +167,35 @@ let
       # Audio device access for OMP speech-to-text (WSL2 / WSLg).
       # --dev-bind-try: pass /dev/snd char devices into the sandbox for
       #   direct ALSA access; silently ignored if WSLg is not running.
-      # --bind-try: expose the WSLg runtime dir (PulseAudio socket lives
-      #   inside); silently ignored if WSLg is not running.
+      # --bind-try /mnt/wslg: expose the WSLg runtime dir (PulseAudio socket
+      #   lives inside); silently ignored if WSLg is not running.
+      #
+      # Display/GPU forwarding for OMP browser tools (Puppeteer/Chromium):
+      #   agent-sandbox.nix runs `--clearenv` so NO host environment variables
+      #   reach the sandbox unless explicitly forwarded. extraEnv only supports
+      #   static Nix strings (baked at eval time), so dynamic runtime vars like
+      #   DISPLAY must be forwarded via extraBwrapArgs, where shell variable
+      #   references ($DISPLAY etc.) are expanded by the wrapper script before
+      #   bwrap runs --clearenv. Empty values are harmless: headless Chromium
+      #   ignores DISPLAY, and bwrap accepts --setenv NAME "".
+      #
+      # --bind-try /tmp/.X11-unix: expose the X11 socket (WSLg provides it at
+      #   /tmp/.X11-unix/X0). bwrap creates a fresh /tmp tmpfs so the socket is
+      #   invisible without this mount. Silently ignored on native Linux without
+      #   an X server.
+      # --setenv DISPLAY "$DISPLAY": pass the runtime X11 display address.
+      # --bind-try /run/user /run/user: expose the XDG runtime dir tree (Wayland
+      #   socket at $XDG_RUNTIME_DIR/wayland-0 lives here on WSLg with systemd).
+      # --setenv WAYLAND_DISPLAY / XDG_RUNTIME_DIR: pass the Wayland socket name
+      #   and runtime dir so Chromium can use Wayland when available.
       extraBwrapArgs = [
         "--dev-bind-try /dev/snd /dev/snd"
         "--bind-try /mnt/wslg /mnt/wslg"
+        "--bind-try /tmp/.X11-unix /tmp/.X11-unix"
+        "--bind-try /run/user /run/user"
+        "--setenv DISPLAY \"$DISPLAY\""
+        "--setenv WAYLAND_DISPLAY \"$WAYLAND_DISPLAY\""
+        "--setenv XDG_RUNTIME_DIR \"$XDG_RUNTIME_DIR\""
       ];
     };
 
