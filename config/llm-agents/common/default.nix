@@ -66,7 +66,7 @@ in
       description = "Map of skill name to SKILL.md source path. Each skill is written to all configured agents.";
       default = {
         commit = ./skills/commit/SKILL.md;
-        gh-cli = ./skills/gh-cli/SKILL.md;
+        github = ./skills/github/SKILL.md;
         run-with-nix = ./skills/run-with-nix/SKILL.md;
       };
     };

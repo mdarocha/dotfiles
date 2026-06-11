@@ -1,9 +1,15 @@
 ---
-name: gh-cli
-description: Use the GitHub CLI (gh) to interact with GitHub. Load when working with issues, pull requests, repositories, code search, Actions, CI status, projects, releases, or gists. Triggers include "create a PR", "open a pull request", "open an issue", "check CI", "list PRs", "merge", "review", "check workflow status", "GitHub Actions", or any task involving GitHub - even if the user doesn't mention "gh" explicitly.
+name: github
+description: Interact with GitHub — PRs, issues, Actions, repos, code search, releases, and gists. Load on any GitHub-related task, including "create a PR", "open an issue", "check CI", "list PRs", "merge", "review", "check workflow status", "GitHub Actions", "search code", any `gh` CLI usage, any `github` tool call, or any mention of GitHub resources like issues, pull requests, or repositories.
+user-invocable: false
 ---
 
 # GitHub CLI (gh)
+
+> **Prefer native tools when available:** If the session provides a `github` tool or a GitHub MCP server,
+> use those instead of shelling out to `gh` — they are structured, faster, and don't require subprocess
+> overhead. Fall back to `gh` only for operations those tools don't cover (e.g. GraphQL mutations,
+> bulk operations, release management, variable management).
 
 Use the `gh` CLI to interact with GitHub from the command line. Always prefer `gh` over
 raw API calls or web browser interaction.
