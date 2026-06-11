@@ -10,9 +10,7 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
-    home.packages = [
-      (cfg.sandbox.wrapPackage "omp" pkgs.llm-agents.omp)
-    ];
+    home.packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
 
     home.file = lib.mkMerge [
       {

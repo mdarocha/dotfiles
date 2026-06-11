@@ -10,9 +10,7 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
-    home.packages = [
-      (cfg.sandbox.wrapPackage "copilot" pkgs.llm-agents.copilot-cli)
-    ];
+    home.packages = cfg.sandbox.wrapPackages "copilot" pkgs.llm-agents.copilot-cli;
 
     home.file = lib.mkMerge [
       {

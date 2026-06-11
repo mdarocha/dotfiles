@@ -144,6 +144,12 @@ let
       ];
     };
 
+  nosandboxVariant =
+    name: pkg:
+    pkgs.writeShellScriptBin "${name}-nosandbox" ''
+      exec ${pkg}/bin/${name} "$@"
+    '';
+
   maybeSandbox = name: pkg: if cfg.sandbox.enable then wrapWithSandbox name pkg else pkg;
 in
 {
@@ -277,12 +283,15 @@ in
         ];
       };
 
-      wrapPackage = mkOption {
-        type = types.functionTo (types.functionTo types.package);
+      wrapPackages = mkOption {
+        type = types.functionTo (types.functionTo (types.listOf types.package));
         internal = true;
         readOnly = true;
-        default = maybeSandbox;
-        description = "Function to conditionally wrap a package binary with the sandbox.";
+        default = name: pkg: [
+          (maybeSandbox name pkg)
+          (nosandboxVariant name pkg)
+        ];
+        description = "Function to wrap a package binary with the sandbox and also produce an unsandboxed variant named <name>-nosandbox.";
       };
     };
   };
