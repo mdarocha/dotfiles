@@ -68,6 +68,8 @@ in
         commit = ./skills/commit/SKILL.md;
         github = ./skills/github/SKILL.md;
         run-with-nix = ./skills/run-with-nix/SKILL.md;
+        verify = ./skills/verify/SKILL.md;
+        simplify = ./skills/simplify/SKILL.md;
       };
     };
   };
