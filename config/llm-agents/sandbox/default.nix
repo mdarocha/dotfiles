@@ -43,6 +43,29 @@ let
     ps.openai-whisper
   ]);
 
+  # Chromium wrapper that imports the sandbox proxy CA into Chromium's NSS
+  # cert store before launch. The proxy is a TLS-intercepting MITM whose CA
+  # is trusted by Node/curl via NODE_EXTRA_CA_CERTS / SSL_CERT_FILE, but
+  # Chromium uses its own NSS database (~/.pki/nssdb) and ignores those vars.
+  # Importing the cert here keeps full certificate verification intact — only
+  # the proxy CA is trusted, not arbitrary certs. The sandbox $HOME is an
+  # ephemeral tmpfs, so the DB is recreated fresh each session with the
+  # correct per-session CA. No-ops gracefully when the cert file is absent
+  # (i.e. when restrictNetwork = false and no proxy is running).
+  chromiumWrapper = pkgs.writeShellScriptBin "chromium" ''
+    if [ -f /tmp/sandbox-ca-cert.pem ]; then
+      NSS_DB="$HOME/.pki/nssdb"
+      if [ ! -d "$NSS_DB" ]; then
+        mkdir -p "$NSS_DB"
+        ${pkgs.nss.tools}/bin/certutil -d "sql:$NSS_DB" -N --empty-password 2>/dev/null
+      fi
+      ${pkgs.nss.tools}/bin/certutil -d "sql:$NSS_DB" -A \
+        -n "sandbox-proxy-ca" -t "C,," \
+        -i /tmp/sandbox-ca-cert.pem 2>/dev/null || true
+    fi
+    exec ${pkgs.chromium}/bin/chromium "$@"
+  '';
+
   # Directories the sandboxed agent may read and write. All paths are
   # bind-mounted read-write (agent-sandbox.nix has no separate read-only
   # stateDir concept). Shared across omp and copilot-cli.
@@ -104,10 +127,10 @@ let
       allowedDomains = normalizedAllowedDomains;
       extraEnv = {
         # Used by karma-chrome-launcher when running Angular unit tests.
-        CHROME_BIN = "${pkgs.chromium}/bin/chromium";
+        CHROME_BIN = "${chromiumWrapper}/bin/chromium";
         # Used by Puppeteer (OMP browser tools). Point directly at the
         # Nix-provided binary so Puppeteer never tries to download Chrome.
-        PUPPETEER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
+        PUPPETEER_EXECUTABLE_PATH = "${chromiumWrapper}/bin/chromium";
         PUPPETEER_SKIP_DOWNLOAD = "true";
         # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
         # (sandbox-local loopback, isolated from the host). Without these,
@@ -267,7 +290,7 @@ in
           fd
           which
           diffutils
-          chromium
+          chromiumWrapper
           cargo
           rustc
           rustfmt
