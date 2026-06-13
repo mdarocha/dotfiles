@@ -11,4 +11,8 @@ if [[ "${WSL_DISTRO_NAME:-}" != "" ]]; then
     CONFIGURATION="wsl"
 fi
 
+if [[ "${CLAUDECODE:-}" == "1" ]]; then
+    CONFIGURATION="claude"
+fi
+
 export CONFIGURATION
