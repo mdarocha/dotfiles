@@ -1,23 +1,23 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "friday"
-      time: "21:00"
-      timezone: "Etc/UTC"
+      interval: weekly
+      day: friday
+      time: 21:00
+      timezone: Etc/UTC
     labels:
-      - "automated"
-  - package-ecosystem: "nix"
-    directory: "/"
+      - automated
+  - package-ecosystem: nix
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "friday"
-      time: "21:00"
-      timezone: "Etc/UTC"
+      interval: weekly
+      day: friday
+      time: 21:00
+      timezone: Etc/UTC
     labels:
-      - "automated"
+      - automated
     groups:
       nix-dependencies:
         patterns:
