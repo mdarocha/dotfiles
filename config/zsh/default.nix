@@ -6,8 +6,15 @@
   ...
 }:
 
+let
+  cfg = config.mdarocha.zsh;
+in
 {
   imports = [ ./nix-index ];
+
+  options.mdarocha.zsh = {
+    autoDirectenvAllow = lib.mkEnableOption "auto direnv allow on shell start";
+  };
 
   programs.direnv = {
     enable = true;
@@ -35,26 +42,6 @@
 
     initContent = lib.mkMerge [
       (lib.mkOrder 500 ''
-        # Auto-allow direnv for repos owned by the current GitHub user.
-        # Used in ephemeral environments (Codespaces, Claude Code) where
-        # trust is already implied by the session setup.
-        _auto_direnv_allow() {
-          [ -f .envrc ] || return 0
-          local remote_url owner trusted_user
-          remote_url=$(git config --get remote.origin.url 2>/dev/null || true)
-          [ -n "$remote_url" ] || return 0
-          owner=$(echo "$remote_url" | sed -E 's|.*(github\.com)[:/]([^/]+)/.*|\2|')
-          [ -n "$owner" ] || return 0
-          trusted_user="''${GITHUB_USER:-}"
-          if [ -z "$trusted_user" ] && command -v gh >/dev/null 2>&1; then
-            trusted_user=$(gh api user --jq .login 2>/dev/null || true)
-          fi
-          [ -n "$trusted_user" ] || return 0
-          if [ "$owner" = "$trusted_user" ]; then
-            direnv allow .
-          fi
-        }
-
         if [[ "''${CODESPACES:-}" == "true" ]]; then
           # This file contains logic to cd to the project directory on login
           . /etc/profile.d/codespaces.sh
@@ -69,17 +56,16 @@
               decodedValue=$(echo $value | base64 -d)
               export $key="$decodedValue"
           done < /workspaces/.codespaces/shared/.env-secrets
-
-          _auto_direnv_allow
-        fi
-
-        if [[ "''${CLAUDE_CODE_REMOTE:-}" == "true" ]]; then
-          _auto_direnv_allow
         fi
 
         # use zsh in nix shell
         export SHELL=${pkgs.zsh}/bin/zsh
       '')
+      (lib.mkIf cfg.autoDirectenvAllow (lib.mkOrder 550 ''
+        if [ -f .envrc ]; then
+          direnv allow .
+        fi
+      ''))
       (lib.mkOrder 1200 ''
         export CLICOLOR=1
         autoload -Uz colors && colors

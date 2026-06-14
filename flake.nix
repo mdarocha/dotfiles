@@ -243,6 +243,7 @@
 
           codespace = mkHomeManagerConfiguration {
             mdarocha.vscode.enable = true;
+            mdarocha.zsh.autoDirectenvAllow = true;
 
             home = {
               username = "codespace";
@@ -262,6 +263,8 @@
           };
 
           claude = mkHomeManagerConfiguration {
+            mdarocha.zsh.autoDirectenvAllow = true;
+
             home = {
               username = "user";
               homeDirectory = "/home/user";
