@@ -73,7 +73,7 @@
           _auto_direnv_allow
         fi
 
-        if [[ "''${CLAUDECODE:-}" == "1" ]]; then
+        if [[ "''${CLAUDE_CODE_REMOTE:-}" == "true" ]]; then
           _auto_direnv_allow
         fi
 
