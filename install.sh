@@ -4,6 +4,16 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+# Support running via curl | bash: if not executing from a file, clone the repo first
+if [[ ! -f "${BASH_SOURCE[0]:-}" ]]; then
+    DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
+    if [ ! -d "$DOTFILES_DIR/.git" ]; then
+        echo "📥 Cloning dotfiles repository to $DOTFILES_DIR..."
+        git clone https://github.com/mdarocha/dotfiles "$DOTFILES_DIR"
+    fi
+    exec bash "$DOTFILES_DIR/install.sh"
+fi
+
 pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
 
 install_nix() {
@@ -57,7 +67,7 @@ echo "🔨 Setting up for $CONFIGURATION..."
 
 echo "⚙️  Setting up Nix..."
 case "$CONFIGURATION" in
-    "codespace")
+    "codespace" | "claude")
         install_nix linux \
             --init none \
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
@@ -106,6 +116,9 @@ echo "⚙️  Changing the shell to nix-managed zsh..."
 case "$CONFIGURATION" in
     "codespace")
         sudo chsh "$(id -un)" --shell "/home/codespace/.nix-profile/bin/zsh"
+        ;;
+    "claude")
+        sudo chsh "$(id -un)" --shell "/home/$USER/.nix-profile/bin/zsh"
         ;;
     "wsl")
         if ! grep "/home/$USER/.nix-profile/bin/zsh" "/etc/shells"; then
