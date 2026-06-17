@@ -33,15 +33,19 @@ install_nix() {
 }
 
 install_nix_codespace_workarounds() {
-    # Fixes issue with "suspicous owner or permissions" error
+    # Fixes issue with "suspicious owner or permissions" error
     if ! command -v setfacl &> /dev/null; then
-        echo "🔨 Installing ACL..."
-        sudo apt-get update || true
-        sudo apt-get install -y --no-install-recommends acl
-        sudo rm -rf /var/lib/apt/lists/*
+        if command -v apt-get &> /dev/null; then
+            echo "🔨 Installing ACL..."
+            sudo apt-get update || true
+            sudo apt-get install -y --no-install-recommends acl
+            sudo rm -rf /var/lib/apt/lists/*
+        fi
     fi
 
-    sudo setfacl -k /tmp
+    if command -v setfacl &> /dev/null; then
+        sudo setfacl -k /tmp
+    fi
 }
 
 install_nix_daemon_initd_service() {
