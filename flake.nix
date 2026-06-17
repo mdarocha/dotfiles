@@ -266,8 +266,8 @@
             mdarocha.zsh.autoDirectenvAllow = true;
 
             home = {
-              username = "user";
-              homeDirectory = "/home/user";
+              username = "root";
+              homeDirectory = "/root";
 
               # required, otherwise the "nix" binary cannot be found in $PATH
               sessionVariablesExtra = ''
