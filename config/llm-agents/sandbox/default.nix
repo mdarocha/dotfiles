@@ -282,6 +282,7 @@ in
             "learn.microsoft.com"
             "developers.google.com"
             "docs.github.com"
+            "mdn.mozilla.net"
           ];
           "Model metadata" = [ "models.dev" ];
           "NuGet" = [ "api.nuget.org" ];
