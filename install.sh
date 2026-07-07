@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-USER="${USER:-$(id -un)}"
+export USER="${USER:-$(id -un)}"
 
 # Support running via curl | bash: if not executing from a file, clone the repo first
 if [[ ! -f "${BASH_SOURCE[0]:-}" ]]; then
