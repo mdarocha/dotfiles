@@ -16,6 +16,9 @@ in
         to an allowlist of domains. WebFetch and other HTTP requests will fail with connection
         errors for any domain not listed below.
 
+        Domains use suffix matching: an entry like `github.com` also covers `api.github.com`,
+        `raw.github.com`, and any other subdomain.
+
         Allowed domains:
         ${lib.concatStringsSep "\n" (
           lib.mapAttrsToList (

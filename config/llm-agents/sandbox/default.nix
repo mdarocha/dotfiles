@@ -20,19 +20,6 @@ let
   # TODO: this is ugly, improve
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
-  # The proxy inside agent-sandbox.nix performs suffix-based domain matching:
-  # "github.com" already covers api.github.com, raw.github.com, etc.
-  # allowedDomains list uses "*.foo.com" prefixes which the proxy
-  # does not interpret as wildcards — it would match literally. Strip all
-  # leading "*." segments so every entry becomes the bare registrable domain.
-  # TODO: fix this somehow
-  stripWildcardPrefix =
-    d: if lib.hasPrefix "*." d then stripWildcardPrefix (lib.removePrefix "*." d) else d;
-
-  normalizedAllowedDomains = lib.unique (
-    map stripWildcardPrefix (lib.flatten (lib.attrValues cfg.sandbox.allowedDomainGroups))
-  );
-
   # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
   # to pkgs.python3Packages via the repo's nixpkgs overlay.
   pythonEvalEnv = pkgs.python3.withPackages (ps: [
@@ -122,7 +109,7 @@ let
 
       rwDirs = sharedRwDirs;
 
-      allowedDomains = normalizedAllowedDomains;
+      allowedDomains = lib.flatten (lib.attrValues cfg.sandbox.allowedDomainGroups);
 
       env = {
         # Used by karma-chrome-launcher when running Angular unit tests.
@@ -166,54 +153,41 @@ in
         default = true;
         description = "Whether to wrap llm-agent tools with bubblewrap (Linux) or Seatbelt (macOS) via agent-sandbox.nix.";
       };
-
       allowedDomainGroups = mkOption {
         type = types.attrsOf (types.listOf types.str);
-        description = "Allowed outbound domains grouped by display label. Keys are category names shown in agent instructions; values are lists of domain patterns.";
+        description = "Allowed outbound domains, grouped for display in agent instructions. Entries are bare domains; the proxy matches by suffix so 'foo.com' also covers any *.foo.com subdomain.";
         default = {
           "GitHub" = [
             "github.com"
-            "*.github.com"
-            "*.githubusercontent.com"
+            "githubusercontent.com"
           ];
           "GitHub Copilot" = [
-            "*.githubcopilot.com"
-            "*.*.githubcopilot.com"
+            "githubcopilot.com"
           ];
           "npm" = [
-            "registry.npmjs.org"
-            "registry.npmjs.com"
             "npmjs.org"
             "npmjs.com"
-            "registry.yarnpkg.com"
             "yarnpkg.com"
-            "api.npmjs.org"
-            "npm.fontawesome.com"
-            "dl.fontawesome.com"
+            "fontawesome.com"
           ];
           "Python" = [
             "pypi.org"
-            "pypi.python.org"
-            "files.pythonhosted.org"
-            "*.pythonhosted.org"
+            "python.org"
+            "pythonhosted.org"
           ];
           "Nix" = [
-            "channels.nixos.org"
-            "cache.nixos.org"
-            "cache.numtide.com"
-            "*.cachix.org"
-            "install.determinate.systems"
+            "nixos.org"
+            "numtide.com"
+            "cachix.org"
+            "determinate.systems"
           ];
           "Rust" = [
             "crates.io"
-            "static.crates.io"
-            "index.crates.io"
           ];
           "Azure DevOps" = [
             "dev.azure.com"
-            "*.dev.azure.com"
-            "*.visualstudio.com"
-            "*.vsassets.io"
+            "visualstudio.com"
+            "vsassets.io"
             "login.microsoftonline.com"
             "blob.core.windows.net"
           ];
@@ -234,16 +208,10 @@ in
           "NuGet" = [ "api.nuget.org" ];
           "Figma" = [
             "figma.com"
-            "*.figma.com"
           ];
           "Contentful" = [
             "contentful.com"
-            "*.contentful.com"
-            "api.contentful.com"
-            "cdn.contentful.com"
-            "preview.contentful.com"
-            "images.ctfassets.net"
-            "*.ctfassets.net"
+            "ctfassets.net"
           ];
         };
       };
