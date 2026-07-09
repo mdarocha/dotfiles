@@ -35,12 +35,9 @@ let
 
   # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
   # to pkgs.python3Packages via the repo's nixpkgs overlay.
-  # openai-whisper is required for OMP's STT (speech-to-text) feature;
-  # baking it in here avoids the broken `pip install` path at runtime.
   pythonEvalEnv = pkgs.python3.withPackages (ps: [
     ps.ipykernel
     ps.jupyter_kernel_gateway
-    ps.openai-whisper
   ]);
 
   # Chromium wrapper that imports the sandbox proxy CA into Chromium's NSS
@@ -51,7 +48,7 @@ let
   # the proxy CA is trusted, not arbitrary certs. The sandbox $HOME is an
   # ephemeral tmpfs, so the DB is recreated fresh each session with the
   # correct per-session CA. No-ops gracefully when the cert file is absent
-  # (i.e. when restrictNetwork = false and no proxy is running).
+  # (i.e. when no allowedDomains is set and no proxy is running).
   #
   # --no-sandbox: Chromium tries to create its own inner sandbox via a second
   #   layer of user namespaces. That nested-namespace creation is blocked
@@ -74,10 +71,8 @@ let
     exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
   '';
 
-  # Directories the sandboxed agent may read and write. All paths are
-  # bind-mounted read-write (agent-sandbox.nix has no separate read-only
-  # stateDir concept). Shared across omp and copilot-cli.
-  sharedStateDirs = [
+  # Directories the sandboxed agent may read and write. Shared across omp and copilot-cli.
+  sharedRwDirs = [
     # Agent configs
     "$HOME/.omp"
     "$HOME/.copilot"
@@ -98,7 +93,6 @@ let
     "$HOME/.bunfig.toml"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
-    "$HOME/.cache/whisper"
 
     # Rust / Cargo registry and build cache
     "$HOME/.cargo"
@@ -110,17 +104,6 @@ let
     "$HOME/.local/share/MicrosoftCredentialProvider"
     "$HOME/.local/.IdentityService"
     "$HOME/.microsoft/usersecrets"
-
-    # System Nix configuration. /etc/nix exists but is outside the default
-    # sandbox mount tree; bind-mounting it lets the nix binary read
-    # nix.conf, registry.json, machines, etc.
-    "/etc/nix"
-
-    # Full Nix store. mkSandbox only supports rw bind-mounts (stateDirs);
-    # /nix/store is world-readable and root-owned so the sandbox cannot
-    # write to it in practice. Mounting the whole store lets the nix binary
-    # access any store path, including the Python eval environment below.
-    "/nix/store"
   ];
 
   wrapWithSandbox =
@@ -129,11 +112,19 @@ let
       inherit pkg;
       binName = name;
       outName = name;
+
       allowedPackages = cfg.sandbox.allowedPackages;
-      stateDirs = sharedStateDirs;
-      restrictNetwork = true;
+
+      allowNix = true;
+      # Bind system nix config read-only so the agent inherits experimental
+      # features (nix-command, flakes) and substituter/registry settings.
+      roFiles = [ "/etc/nix/nix.conf" ];
+
+      rwDirs = sharedRwDirs;
+
       allowedDomains = normalizedAllowedDomains;
-      extraEnv = {
+
+      env = {
         # Used by karma-chrome-launcher when running Angular unit tests.
         CHROME_BIN = "${chromiumWrapper}/bin/chromium";
         # Used by Puppeteer (OMP browser tools). Point directly at the
@@ -144,9 +135,6 @@ let
         # (sandbox-local loopback, isolated from the host). Without these,
         # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
         # 403 for 127.0.0.1 because it is not in the allowlist.
-        # 127.0.0.1 stays on `lo` inside the sandbox (ip route get 127.0.0.1
-        # → dev lo) and cannot reach host services; host is only reachable
-        # via 10.0.2.2 (pasta gateway), which remains proxy-filtered.
         NO_PROXY = "127.0.0.1,localhost";
         no_proxy = "127.0.0.1,localhost";
         # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
@@ -159,44 +147,7 @@ let
         # making `python3 -m kernel_gateway` and `ipykernel` available without
         # any pip install step at runtime.
         VIRTUAL_ENV = "${pythonEvalEnv}";
-        # OMP speech-to-text uses ffmpeg to capture from a microphone.
-        # On WSL2 with WSLg, PulseAudio is exposed at this socket path.
-        # Point the PulseAudio client library here so ffmpeg -f pulse works.
-        PULSE_SERVER = "unix:/mnt/wslg/PulseServer";
       };
-      # Audio device access for OMP speech-to-text (WSL2 / WSLg).
-      # --dev-bind-try: pass /dev/snd char devices into the sandbox for
-      #   direct ALSA access; silently ignored if WSLg is not running.
-      # --bind-try /mnt/wslg: expose the WSLg runtime dir (PulseAudio socket
-      #   lives inside); silently ignored if WSLg is not running.
-      #
-      # Display/GPU forwarding for OMP browser tools (Puppeteer/Chromium):
-      #   agent-sandbox.nix runs `--clearenv` so NO host environment variables
-      #   reach the sandbox unless explicitly forwarded. extraEnv only supports
-      #   static Nix strings (baked at eval time), so dynamic runtime vars like
-      #   DISPLAY must be forwarded via extraBwrapArgs, where shell variable
-      #   references ($DISPLAY etc.) are expanded by the wrapper script before
-      #   bwrap runs --clearenv. Empty values are harmless: headless Chromium
-      #   ignores DISPLAY, and bwrap accepts --setenv NAME "".
-      #
-      # --bind-try /tmp/.X11-unix: expose the X11 socket (WSLg provides it at
-      #   /tmp/.X11-unix/X0). bwrap creates a fresh /tmp tmpfs so the socket is
-      #   invisible without this mount. Silently ignored on native Linux without
-      #   an X server.
-      # --setenv DISPLAY "$DISPLAY": pass the runtime X11 display address.
-      # --bind-try /run/user /run/user: expose the XDG runtime dir tree (Wayland
-      #   socket at $XDG_RUNTIME_DIR/wayland-0 lives here on WSLg with systemd).
-      # --setenv WAYLAND_DISPLAY / XDG_RUNTIME_DIR: pass the Wayland socket name
-      #   and runtime dir so Chromium can use Wayland when available.
-      extraBwrapArgs = [
-        "--dev-bind-try /dev/snd /dev/snd"
-        "--bind-try /mnt/wslg /mnt/wslg"
-        "--bind-try /tmp/.X11-unix /tmp/.X11-unix"
-        "--bind-try /run/user /run/user"
-        "--setenv DISPLAY \"$DISPLAY\""
-        "--setenv WAYLAND_DISPLAY \"$WAYLAND_DISPLAY\""
-        "--setenv XDG_RUNTIME_DIR \"$XDG_RUNTIME_DIR\""
-      ];
     };
 
   nosandboxVariant =
@@ -258,11 +209,6 @@ in
             "static.crates.io"
             "index.crates.io"
           ];
-          # openai-whisper downloads model weights from this CDN on first use.
-          # Weights are cached at ~/.cache/whisper and only fetched once per model.
-          "Whisper models" = [
-            "openaipublic.azureedge.net"
-          ];
           "Azure DevOps" = [
             "dev.azure.com"
             "*.dev.azure.com"
@@ -308,7 +254,6 @@ in
         default = with pkgs; [
           git
           gh
-          nix
           pythonEvalEnv
           nodejs
           bun
@@ -328,8 +273,6 @@ in
           rustc
           rustfmt
           clippy
-          # ffmpeg: required for OMP voice mode (audio encode/decode)
-          ffmpeg
           # binutils: strings, objdump — binary inspection
           binutils
           # file: file-type detection
