@@ -61,6 +61,25 @@ in
         Spring Boot, or Tailwind. Prefer this over web search for library docs, since your training data may
         not reflect recent changes. Use it for: API syntax, configuration, version migration, library-specific
         debugging, setup instructions, and CLI tool usage.
+
+        ## Comments
+
+        - Comment *why*, not *what*. Delete any comment that only restates what the code
+          plainly does — assume the reader can read code.
+        - Never describe the edit or its history; the diff and git log record that. Banned:
+          `// changed from ...`, `// was previously ...`, `// removed ...`, `// renamed ...`,
+          `// updated to ...`, `// new`, `// now handles ...`, `// (old logic below)`.
+        - When editing, write code as if it had always been this way. Don't annotate what
+          changed vs. the old version. Match the surrounding comment density.
+        - Never leave commented-out code. Delete it. No block-by-block walkthroughs or
+          decorative banners.
+        - Keep inline comments only for: non-obvious rationale, edge cases, business rules
+          not visible in the code, and workarounds (link the issue).
+        - Doc comments are the API contract for the public surface, not every private
+          helper — follow the file's existing convention. Document behavior, invariants,
+          units, and error/panic conditions; never restate the name and type
+          (`@param id — the id`). No empty or placeholder doc stubs. Use the language's
+          native format (rustdoc `///`, TSDoc `/** */`, XML `/// <summary>`).
       '';
     };
 
