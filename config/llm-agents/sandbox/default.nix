@@ -180,6 +180,7 @@ in
             "numtide.com"
             "cachix.org"
             "determinate.systems"
+            "devenv.sh"
           ];
           "Rust" = [
             "crates.io"
