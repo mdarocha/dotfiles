@@ -22,6 +22,10 @@ in
       (lib.mapAttrs' (
         name: src: lib.nameValuePair ".omp/agent/skills/${name}/SKILL.md" { source = src; }
       ) cfg.common.skills)
+      # Write each rule to ~/.omp/agent/rules/<name>.md
+      (lib.mapAttrs' (
+        name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }
+      ) cfg.common.rules)
     ];
   };
 }

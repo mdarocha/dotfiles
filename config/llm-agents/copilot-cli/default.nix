@@ -21,6 +21,10 @@ in
       (lib.mapAttrs' (
         name: src: lib.nameValuePair ".copilot/skills/${name}/SKILL.md" { source = src; }
       ) cfg.common.skills)
+      # Write each rule to ~/.copilot/rules/<name>.md
+      (lib.mapAttrs' (
+        name: src: lib.nameValuePair ".copilot/rules/${name}.md" { source = src; }
+      ) cfg.common.rules)
     ];
   };
 }

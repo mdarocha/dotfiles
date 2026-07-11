@@ -94,5 +94,13 @@ in
         simplify = ./skills/simplify/SKILL.md;
       };
     };
+
+    rules = mkOption {
+      type = types.attrsOf types.path;
+      description = "Map of rule name to source path. Each rule is written to all configured agents.";
+      default = {
+        no-nix-store-source-search = ./rules/no-nix-store-source-search.md;
+      };
+    };
   };
 }
