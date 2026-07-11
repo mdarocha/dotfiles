@@ -14,6 +14,16 @@ let
 
   cfg = config.mdarocha.llm-agents;
 
+  # Normalizes a domain group value to an attrset of domain → methods.
+  # A plain list of domain strings becomes { domain = "*"; … }; an explicit
+  # attrset (domain → "*" | ["GET" …]) is passed through unchanged.
+  normalizeDomainGroup =
+    value:
+    if builtins.isList value then
+      builtins.listToAttrs (map (d: { name = d; value = "*"; }) value)
+    else
+      value;
+
   # Instantiate agent-sandbox.nix for the current platform. The library
   # exposes per-system attrsets from its flake output so we index by
   # pkgs.system here rather than threading a second pkgs argument through.
@@ -109,7 +119,13 @@ let
 
       rwDirs = sharedRwDirs;
 
-      allowedDomains = lib.flatten (lib.attrValues cfg.sandbox.allowedDomainGroups);
+      allowedDomains =
+        let
+          merged = builtins.foldl' (acc: v: acc // normalizeDomainGroup v) { } (
+            lib.attrValues cfg.sandbox.allowedDomainGroups
+          );
+        in
+        if cfg.sandbox.allowGetAnywhere then merged // { "*" = [ "GET" "HEAD" ]; } else merged;
 
       env = {
         # Used by karma-chrome-launcher when running Angular unit tests.
@@ -154,16 +170,61 @@ in
         description = "Whether to wrap llm-agent tools with bubblewrap (Linux) or Seatbelt (macOS) via agent-sandbox.nix.";
       };
       allowedDomainGroups = mkOption {
-        type = types.attrsOf (types.listOf types.str);
-        description = "Allowed outbound domains, grouped for display in agent instructions. Entries are bare domains; the proxy matches by suffix so 'foo.com' also covers any *.foo.com subdomain.";
+        type = types.attrsOf (
+          types.either (types.listOf types.str) (
+            types.attrsOf (types.either types.str (types.listOf types.str))
+          )
+        );
+        description = ''
+          Allowed outbound domains, grouped for display in agent instructions.
+          Each group value is either:
+          - A list of domain suffixes (all HTTP methods allowed), or
+          - An attrset mapping each domain suffix to "*" (all methods) or a list
+            of allowed HTTP methods (e.g. ["GET" "HEAD"]).
+          The proxy matches by suffix so 'foo.com' also covers any *.foo.com subdomain.
+        '';
         default = {
+          "Azure DevOps" = [
+            "dev.azure.com"
+            "visualstudio.com"
+            "vsassets.io"
+            "login.microsoftonline.com"
+            "blob.core.windows.net"
+          ];
+          "Contentful" = [
+            "contentful.com"
+            "ctfassets.net"
+          ];
+          "Documentation" = {
+            "docs.github.com" = [ "GET" "HEAD" ];
+            "developers.google.com" = [ "GET" "HEAD" ];
+            "learn.microsoft.com" = [ "GET" "HEAD" ];
+            "mdn.mozilla.net" = [ "GET" "HEAD" ];
+          };
+          "Figma" = [ "figma.com" ];
           "GitHub" = [
             "github.com"
             "githubusercontent.com"
           ];
-          "GitHub Copilot" = [
-            "githubcopilot.com"
+          "GitHub Copilot" = [ "githubcopilot.com" ];
+          "MCP tools" = [
+            "mcp.grep.app"
+            "mcp.context7.com"
+            "mcp.exa.ai"
+            "websetsmcp.exa.ai"
+            "api.exa.ai"
           ];
+          "Model metadata" = {
+            "models.dev" = [ "GET" "HEAD" ];
+          };
+          "Nix" = [
+            "nixos.org"
+            "numtide.com"
+            "cachix.org"
+            "determinate.systems"
+            "devenv.sh"
+          ];
+          "NuGet" = [ "api.nuget.org" ];
           "npm" = [
             "npmjs.org"
             "npmjs.com"
@@ -175,46 +236,14 @@ in
             "python.org"
             "pythonhosted.org"
           ];
-          "Nix" = [
-            "nixos.org"
-            "numtide.com"
-            "cachix.org"
-            "determinate.systems"
-            "devenv.sh"
-          ];
-          "Rust" = [
-            "crates.io"
-          ];
-          "Azure DevOps" = [
-            "dev.azure.com"
-            "visualstudio.com"
-            "vsassets.io"
-            "login.microsoftonline.com"
-            "blob.core.windows.net"
-          ];
-          "MCP tools" = [
-            "mcp.grep.app"
-            "mcp.context7.com"
-            "mcp.exa.ai"
-            "websetsmcp.exa.ai"
-            "api.exa.ai"
-          ];
-          "Documentation" = [
-            "learn.microsoft.com"
-            "developers.google.com"
-            "docs.github.com"
-            "mdn.mozilla.net"
-          ];
-          "Model metadata" = [ "models.dev" ];
-          "NuGet" = [ "api.nuget.org" ];
-          "Figma" = [
-            "figma.com"
-          ];
-          "Contentful" = [
-            "contentful.com"
-            "ctfassets.net"
-          ];
+          "Rust" = [ "crates.io" ];
         };
+      };
+
+      allowGetAnywhere = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Allow GET and HEAD requests to any domain. Enables unrestricted web browsing and searching without listing every destination. When enabled, a wildcard entry for GET and HEAD is prepended to the proxy allowlist.";
       };
 
       allowedPackages = mkOption {

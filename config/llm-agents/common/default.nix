@@ -3,6 +3,24 @@
 let
   cfg = config.mdarocha.llm-agents;
   inherit (lib) mkOption types;
+
+  # Renders one domain group value as a human-readable string for the agent.
+  # A plain list becomes "`d1`, `d2`" (any method implied).
+  # An attrset renders each domain with its method constraint if not "*".
+  renderDomainGroup =
+    value:
+    if builtins.isList value then
+      lib.concatMapStringsSep ", " (d: "`${d}`") value
+    else
+      lib.concatStringsSep ", " (
+        lib.mapAttrsToList (
+          domain: methods:
+          if methods == "*" then
+            "`${domain}`"
+          else
+            "`${domain}` (${lib.concatStringsSep ", " methods} only)"
+        ) value
+      );
 in
 {
   options.mdarocha.llm-agents.common = {
@@ -13,22 +31,20 @@ in
         ## Sandbox network restrictions
 
         You are running inside a sandboxed environment. Outbound network access is restricted
-        to an allowlist of domains. WebFetch and other HTTP requests will fail with connection
-        errors for any domain not listed below.
+        by a filtering proxy. WebFetch and other HTTP requests will fail with connection
+        errors for any disallowed domain or method.
 
         Domains use suffix matching: an entry like `github.com` also covers `api.github.com`,
         `raw.github.com`, and any other subdomain.
 
-        Allowed domains:
+        ${if cfg.sandbox.allowGetAnywhere then "GET and HEAD requests are allowed to **any** domain — use these freely for web search and browsing." else ""}
+        All other methods are restricted to the domains below:
+
         ${lib.concatStringsSep "\n" (
           lib.mapAttrsToList (
-            name: domains: "- ${name}: ${lib.concatMapStringsSep ", " (d: "`${d}`") domains}"
+            name: value: "- ${name}: ${renderDomainGroup value}"
           ) cfg.sandbox.allowedDomainGroups
         )}
-
-        Notably **not** allowed: `opencode.ai`, `reddit.com`, `stackoverflow.com`,
-        `medium.com`, generic web search result domains. Do not attempt to fetch pages
-        from these sites -- the requests will fail silently or time out.
 
         ## Localhost / loopback isolation
 
