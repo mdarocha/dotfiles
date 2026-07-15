@@ -200,7 +200,7 @@
             system = "x86_64-linux";
             config.allowUnfree = true;
             overlays = [
-              llm-agents.overlays.default
+              llm-agents.overlays.shared-nixpkgs
               (import ./overlays/default.nix)
             ];
           };
