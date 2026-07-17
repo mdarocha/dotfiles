@@ -35,28 +35,51 @@ let
   # TODO: this is ugly, improve
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
-  # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
-  # to pkgs.python3Packages via the repo's nixpkgs overlay.
-  pythonEvalEnv = pkgs.python3.withPackages (ps: [
-    ps.ipykernel
-    ps.jupyter_kernel_gateway
+  # Python package names for the eval environment. This single list drives
+  # both the Nix environment (pythonEvalEnv) and the agent instructions
+  # (sandbox.pythonPackageNames) so they never drift apart.
+  pythonEvalPackageNames = [
+    "ipykernel"
+    "jupyter_kernel_gateway"
 
     # PDF skill
-    ps.pypdf
-    ps.pdfplumber
-    ps.reportlab
-    ps.pillow
-    ps.pandas
-    ps.pytesseract
-    ps.pdf2image
-    ps.pypdfium2
+    "pypdf"
+    "pdfplumber"
+    "reportlab"
+    "pillow"
+    "pandas"
+    "pytesseract"
+    "pdf2image"
+    "pypdfium2"
 
     # DOCX/PPTX/XLSX skills
-    ps.openpyxl
-    ps.defusedxml
-    ps.lxml
-    ps.python-pptx
-  ]);
+    "openpyxl"
+    "defusedxml"
+    "lxml"
+    "python-pptx"
+
+    # Data processing and analysis
+    "numpy"
+    "matplotlib"
+    "pyyaml"
+    "toml"
+
+    # HTTP and web
+    "requests"
+    "beautifulsoup4"
+
+    # General utilities
+    "python-dateutil"
+    "chardet"
+    "jsonschema"
+    "jinja2"
+  ];
+
+  # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
+  # to pkgs.python3Packages via the repo's nixpkgs overlay.
+  pythonEvalEnv = pkgs.python3.withPackages (
+    ps: map (name: ps.${name}) pythonEvalPackageNames
+  );
 
   # Chromium wrapper that imports the sandbox proxy CA into Chromium's NSS
   # cert store before launch. The proxy is a TLS-intercepting MITM whose CA
@@ -330,6 +353,37 @@ in
           tesseract
           imagemagick
         ];
+      };
+
+      packageDescriptions = mkOption {
+        type = types.listOf types.str;
+        internal = true;
+        readOnly = true;
+        description = "Human-readable names of sandbox packages, auto-derived for agent instructions.";
+        default =
+          let
+            cleanName = raw:
+              let
+                # Strip "-wrapper" suffix (e.g. binutils-wrapper → binutils)
+                s1 = lib.removeSuffix "-wrapper" raw;
+                # Strip version-env suffix (e.g. python3-3.14.6-env → python3)
+                s2 = let m = builtins.match "(.+)-[0-9].*" s1;
+                     in if m != null then builtins.head m else s1;
+              in s2;
+            getName = p:
+              if p ? pname then cleanName p.pname
+              else if p ? name then cleanName p.name
+              else null;
+          in
+          builtins.filter (n: n != null) (map getName cfg.sandbox.allowedPackages);
+      };
+
+      pythonPackageNames = mkOption {
+        type = types.listOf types.str;
+        internal = true;
+        readOnly = true;
+        description = "Python package names available in the sandbox eval environment, auto-derived for agent instructions.";
+        default = pythonEvalPackageNames;
       };
 
       wrapPackages = mkOption {

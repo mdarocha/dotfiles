@@ -30,13 +30,86 @@ in
       type = types.str;
       description = "Common agent instructions injected as AGENTS.md for all configured agents.";
       default = ''
-        ## Sandbox network restrictions
+        ## Sandbox detection
 
-        You are running inside a sandboxed environment. Outbound network access is restricted
-        by a filtering proxy. WebFetch and other HTTP requests will fail with connection
-        errors for any disallowed domain or method.
+        You may be running inside a sandboxed environment or directly on the host.
+        **You MUST determine which mode you are in before relying on any sandbox-specific
+        rule below.** Check once at session start:
 
-        Domains use suffix matching: an entry like `github.com` also covers `api.github.com`,
+        ```bash
+        basename "$(readlink /proc/self/exe 2>/dev/null || echo "$0")"
+        ```
+
+        - If the output contains `-nosandbox`, you are **outside** the sandbox.
+          Skip every section marked **(sandbox only)** — network is unrestricted,
+          localhost reaches the host, and you manage dependencies yourself (pip, npm, etc.).
+          The sandbox package list below does NOT apply; you have whatever the host provides.
+        - Otherwise you are **inside** the sandbox. All **(sandbox only)** rules apply.
+
+        ## Available CLI tools (sandbox only)
+
+        Inside the sandbox, **only** the packages listed below are on PATH (plus `nix`
+        itself). No other binaries are available. Do not assume tools exist — check this
+        list first. If you need a tool not listed here, use `nix run nixpkgs#<package>`
+        or `nix shell nixpkgs#<package>` to get it temporarily.
+
+        ${lib.concatMapStringsSep ", " (n: "`${n}`") cfg.sandbox.packageDescriptions}
+
+        These packages are **not** present in the `-nosandbox` variant — that variant
+        inherits whatever the host system provides on PATH.
+
+        ## Python execution environment (sandbox only)
+
+        Python dependencies are **pre-installed by the sandbox** via a Nix-managed
+        environment. The `eval` tool's Python kernel already has access to every
+        provisioned package. You MUST NOT install packages at runtime — `pip install`,
+        `uv pip install`, `pip install --user`, `python -m pip`, or any other package
+        manager invocation will fail or produce results silently discarded when the
+        session ends.
+
+        Pre-installed Python packages: ${lib.concatMapStringsSep ", " (n: "`${n}`") cfg.sandbox.pythonPackageNames}
+
+        If a task requires a package not listed above:
+        1. Tell the user which package is missing and that it must be added to the
+           sandbox config (`pythonEvalEnv` in `config/llm-agents/sandbox/default.nix`).
+        2. Do NOT work around the absence by downloading wheels, vendoring source, or
+           running `pip` with `--target`.
+
+        **WRONG:**
+        ```python
+        import subprocess
+        subprocess.run(["pip", "install", "requests"])  # FAILS: no pip, no network to PyPI
+        ```
+
+        **RIGHT:**
+        ```python
+        import pandas as pd  # already available, just import it
+        df = pd.read_csv("data.csv")
+        ```
+
+        ## direnv and devenv (sandbox only)
+
+        `direnv` and `devenv` are **not** in the sandbox PATH. In most cases you do
+        **not need them** — the sandbox already provides the common development tools
+        listed above (git, node, cargo, python, etc.). Only reach for direnv/devenv
+        when the project requires project-specific tools or environment variables that
+        are not already on PATH.
+
+        If you do need them:
+        - **direnv:** `nix run nixpkgs#direnv -- allow . && eval "$(nix run nixpkgs#direnv -- export bash)"`
+        - **devenv:** `nix run github:cachix/devenv -- shell` or `nix develop`
+        - **nix develop:** If the project has a `flake.nix` with `devShells`, use
+          `nix develop --command <cmd>` directly — `nix` is always available.
+
+        Outside the sandbox (`-nosandbox`), direnv and devenv work normally if installed
+        on the host.
+
+        ## Network restrictions (sandbox only)
+
+        Outbound network access is restricted by a filtering proxy. HTTP requests will
+        fail with connection errors for any disallowed domain or method.
+
+        Domains use suffix matching: `github.com` also covers `api.github.com`,
         `raw.github.com`, and any other subdomain.
 
         ${
@@ -53,16 +126,32 @@ in
           ) cfg.sandbox.allowedDomainGroups
         )}
 
-        ## Localhost / loopback isolation
+        ## Localhost / loopback isolation (sandbox only)
 
         The sandbox network namespace is isolated from the host. `localhost` (`127.0.0.1`)
-        inside the sandbox is the **sandbox's own loopback** -- it does **not** reach services
-        running on the host machine. The host is only reachable via the pasta gateway
-        (`10.0.2.2`), which is itself proxy-filtered and not useful for dev servers.
+        inside the sandbox is the **sandbox's own loopback** — it does **not** reach services
+        running on the host machine.
 
-        Consequence: if a task requires a locally-running service (dev server, test server,
-        database, etc.), **the agent must start it** via `bash` inside the current session.
+        Consequence: if a task requires a locally-running service (dev server, database,
+        etc.), **the agent must start it** via `bash` inside the current session.
         Asking the user to start it on their machine and then connecting to it will not work.
+
+        ## WSL environment
+
+        When running under WSL (Windows Subsystem for Linux), Windows filesystem paths
+        are available under `/mnt/c`, `/mnt/d`, etc. You can read and write files on the
+        Windows side directly — for example, `ls /mnt/c/Users` lists Windows user
+        directories. Check for WSL by inspecting the kernel version:
+
+        ```bash
+        grep -qi microsoft /proc/version 2>/dev/null && echo "WSL" || echo "native"
+        ```
+
+        **Important:** `/mnt/c` is **not** available inside the sandbox. The sandbox
+        isolates the filesystem — only explicitly bound directories are visible. If a
+        task requires reading or writing Windows-side files, you must run in the
+        `-nosandbox` variant, or ask the user to copy the files into the Linux filesystem
+        first.
 
         ## Code search tool selection
 
