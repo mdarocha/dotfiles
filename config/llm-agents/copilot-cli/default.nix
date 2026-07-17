@@ -17,9 +17,9 @@ in
         # Inject common instructions as the global agent context file.
         ".copilot/AGENTS.md".text = cfg.common.agentInstructions;
       }
-      # Write each skill to ~/.copilot/skills/<name>/SKILL.md
+      # Symlink each skill directory to ~/.copilot/skills/<name>/
       (lib.mapAttrs' (
-        name: src: lib.nameValuePair ".copilot/skills/${name}/SKILL.md" { source = src; }
+        name: dir: lib.nameValuePair ".copilot/skills/${name}" { source = dir; }
       ) cfg.common.skills)
       # Write each rule to ~/.copilot/rules/<name>.md
       (lib.mapAttrs' (

@@ -62,11 +62,13 @@ in
           # use zsh in nix shell
           export SHELL=${pkgs.zsh}/bin/zsh
         '')
-        (lib.mkIf cfg.autoDirectenvAllow (lib.mkOrder 550 ''
-          if [ -f .envrc ]; then
-            direnv allow .
-          fi
-        ''))
+        (lib.mkIf cfg.autoDirectenvAllow (
+          lib.mkOrder 550 ''
+            if [ -f .envrc ]; then
+              direnv allow .
+            fi
+          ''
+        ))
         (lib.mkOrder 1200 ''
           export CLICOLOR=1
           autoload -Uz colors && colors

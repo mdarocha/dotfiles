@@ -18,9 +18,9 @@ in
         # oh-my-pi discovers AGENTS.md files via universal config discovery.
         ".omp/agent/AGENTS.md".text = cfg.common.agentInstructions;
       }
-      # Write each skill to ~/.omp/agent/skills/<name>/SKILL.md
+      # Symlink each skill directory to ~/.omp/agent/skills/<name>/
       (lib.mapAttrs' (
-        name: src: lib.nameValuePair ".omp/agent/skills/${name}/SKILL.md" { source = src; }
+        name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
       ) cfg.common.skills)
       # Write each rule to ~/.omp/agent/rules/<name>.md
       (lib.mapAttrs' (

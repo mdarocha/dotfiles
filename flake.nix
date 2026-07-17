@@ -24,6 +24,11 @@
 
     agent-sandbox.url = "github:mdarocha/agent-sandbox.nix";
 
+    anthropics-skills = {
+      url = "github:anthropics/skills";
+      flake = false;
+    };
+
     # zsh plugins
     oh-my-zsh = {
       url = "github:ohmyzsh/ohmyzsh/master";
@@ -94,35 +99,33 @@
           "run-packages" =
             let
               homePath =
-                (
-                  home-manager.lib.homeManagerConfiguration {
-                    extraSpecialArgs = { inherit inputs; };
-                    pkgs = self.homeConfigurations.linux.pkgs;
-                    modules = [
-                      ./config
-                      (
-                        { lib, ... }:
-                        let
-                          inherit (lib) mkDefault;
-                        in
-                        {
-                          home = {
-                            username = mkDefault "marek";
-                            homeDirectory = mkDefault "/home/marek";
-                          };
-                        }
-                      )
+                (home-manager.lib.homeManagerConfiguration {
+                  extraSpecialArgs = { inherit inputs; };
+                  pkgs = self.homeConfigurations.linux.pkgs;
+                  modules = [
+                    ./config
+                    (
+                      { lib, ... }:
+                      let
+                        inherit (lib) mkDefault;
+                      in
                       {
-                        mdarocha = {
-                          llm-agents = {
-                            enable = true;
-                            sandbox.enable = false;
-                          };
+                        home = {
+                          username = mkDefault "marek";
+                          homeDirectory = mkDefault "/home/marek";
                         };
                       }
-                    ];
-                  }
-                ).config.home.path;
+                    )
+                    {
+                      mdarocha = {
+                        llm-agents = {
+                          enable = true;
+                          sandbox.enable = false;
+                        };
+                      };
+                    }
+                  ];
+                }).config.home.path;
             in
             pkgs.runCommand "run-packages" { } ''
               export HOME="$TMPDIR/home"

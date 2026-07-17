@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  inputs,
+  ...
+}:
 
 let
   cfg = config.mdarocha.llm-agents;
@@ -15,10 +20,7 @@ let
       lib.concatStringsSep ", " (
         lib.mapAttrsToList (
           domain: methods:
-          if methods == "*" then
-            "`${domain}`"
-          else
-            "`${domain}` (${lib.concatStringsSep ", " methods} only)"
+          if methods == "*" then "`${domain}`" else "`${domain}` (${lib.concatStringsSep ", " methods} only)"
         ) value
       );
 in
@@ -37,7 +39,12 @@ in
         Domains use suffix matching: an entry like `github.com` also covers `api.github.com`,
         `raw.github.com`, and any other subdomain.
 
-        ${if cfg.sandbox.allowGetAnywhere then "GET and HEAD requests are allowed to **any** domain — use these freely for web search and browsing." else ""}
+        ${
+          if cfg.sandbox.allowGetAnywhere then
+            "GET and HEAD requests are allowed to **any** domain — use these freely for web search and browsing."
+          else
+            ""
+        }
         All other methods are restricted to the domains below:
 
         ${lib.concatStringsSep "\n" (
@@ -101,13 +108,18 @@ in
 
     skills = mkOption {
       type = types.attrsOf types.path;
-      description = "Map of skill name to SKILL.md source path. Each skill is written to all configured agents.";
+      description = "Map of skill name to source directory. Each skill is symlinked into all configured agents.";
       default = {
-        commit = ./skills/commit/SKILL.md;
-        github = ./skills/github/SKILL.md;
-        run-with-nix = ./skills/run-with-nix/SKILL.md;
-        verify = ./skills/verify/SKILL.md;
-        simplify = ./skills/simplify/SKILL.md;
+        commit = ./skills/commit;
+        github = ./skills/github;
+        run-with-nix = ./skills/run-with-nix;
+        verify = ./skills/verify;
+        simplify = ./skills/simplify;
+        pdf = "${inputs.anthropics-skills}/skills/pdf";
+        docx = "${inputs.anthropics-skills}/skills/docx";
+        pptx = "${inputs.anthropics-skills}/skills/pptx";
+        xlsx = "${inputs.anthropics-skills}/skills/xlsx";
+        frontend-design = "${inputs.anthropics-skills}/skills/frontend-design";
       };
     };
 

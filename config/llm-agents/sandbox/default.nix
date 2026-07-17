@@ -20,7 +20,12 @@ let
   normalizeDomainGroup =
     value:
     if builtins.isList value then
-      builtins.listToAttrs (map (d: { name = d; value = "*"; }) value)
+      builtins.listToAttrs (
+        map (d: {
+          name = d;
+          value = "*";
+        }) value
+      )
     else
       value;
 
@@ -35,6 +40,22 @@ let
   pythonEvalEnv = pkgs.python3.withPackages (ps: [
     ps.ipykernel
     ps.jupyter_kernel_gateway
+
+    # PDF skill
+    ps.pypdf
+    ps.pdfplumber
+    ps.reportlab
+    ps.pillow
+    ps.pandas
+    ps.pytesseract
+    ps.pdf2image
+    ps.pypdfium2
+
+    # DOCX/PPTX/XLSX skills
+    ps.openpyxl
+    ps.defusedxml
+    ps.lxml
+    ps.python-pptx
   ]);
 
   # Chromium wrapper that imports the sandbox proxy CA into Chromium's NSS
@@ -125,7 +146,16 @@ let
             lib.attrValues cfg.sandbox.allowedDomainGroups
           );
         in
-        if cfg.sandbox.allowGetAnywhere then merged // { "*" = [ "GET" "HEAD" ]; } else merged;
+        if cfg.sandbox.allowGetAnywhere then
+          merged
+          // {
+            "*" = [
+              "GET"
+              "HEAD"
+            ];
+          }
+        else
+          merged;
 
       env = {
         # Used by karma-chrome-launcher when running Angular unit tests.
@@ -196,10 +226,22 @@ in
             "ctfassets.net"
           ];
           "Documentation" = {
-            "docs.github.com" = [ "GET" "HEAD" ];
-            "developers.google.com" = [ "GET" "HEAD" ];
-            "learn.microsoft.com" = [ "GET" "HEAD" ];
-            "mdn.mozilla.net" = [ "GET" "HEAD" ];
+            "docs.github.com" = [
+              "GET"
+              "HEAD"
+            ];
+            "developers.google.com" = [
+              "GET"
+              "HEAD"
+            ];
+            "learn.microsoft.com" = [
+              "GET"
+              "HEAD"
+            ];
+            "mdn.mozilla.net" = [
+              "GET"
+              "HEAD"
+            ];
           };
           "Figma" = [ "figma.com" ];
           "GitHub" = [
@@ -215,7 +257,10 @@ in
             "api.exa.ai"
           ];
           "Model metadata" = {
-            "models.dev" = [ "GET" "HEAD" ];
+            "models.dev" = [
+              "GET"
+              "HEAD"
+            ];
           };
           "Nix" = [
             "nixos.org"
@@ -277,6 +322,13 @@ in
           file
           # procps: ps, pgrep, pkill — process inspection
           procps
+          # PDF/office skills: CLI tools for document processing
+          poppler-utils
+          qpdf
+          pandoc
+          libreoffice-still
+          tesseract
+          imagemagick
         ];
       };
 
