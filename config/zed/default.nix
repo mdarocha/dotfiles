@@ -73,7 +73,7 @@ in
         local dest="$3"
         local backup_suffix="$4"
 
-        if [ ! -f "$existing_file" ]; then
+        if [ ! -f "$existing_file" ] || [ ! -s "$existing_file" ]; then
           ${pkgs.jq}/bin/jq --tab '.' "$nix_file" > "$dest"
           return 0
         fi
@@ -89,7 +89,7 @@ in
         only_in_existing=$(${pkgs.jq}/bin/jq -r -n \
           --slurpfile nix "$nix_file" \
           --slurpfile old "$existing_file" \
-          '($old[0] | keys_unsorted) - ($nix[0] | keys_unsorted) | .[]')
+          '(($old[0] // {}) | keys_unsorted) - (($nix[0] // {}) | keys_unsorted) | .[]')
 
         if [ -n "$only_in_existing" ]; then
           echo "WARNING: zed settings: the following top-level keys exist in the current settings.json but are not defined by Nix (they are preserved):"
@@ -103,8 +103,8 @@ in
         overwritten=$(${pkgs.jq}/bin/jq -r -n \
           --slurpfile nix "$nix_file" \
           --slurpfile old "$existing_file" \
-          '($nix[0] | keys_unsorted) as $nk |
-           $old[0] as $o | $nix[0] as $n |
+          '($nix[0] // {} | keys_unsorted) as $nk |
+           ($old[0] // {}) as $o | ($nix[0] // {}) as $n |
            $nk[] | select($o[.] != null and ($o[.] | tojson) != ($n[.] | tojson))')
 
         if [ -n "$overwritten" ]; then
@@ -118,7 +118,7 @@ in
         ${pkgs.jq}/bin/jq --tab -n \
           --slurpfile old "$existing_file" \
           --slurpfile nix "$nix_file" \
-          '$old[0] * $nix[0]' > "$tmp" && mv "$tmp" "$dest"
+          '($old[0] // {}) * ($nix[0] // {})' > "$tmp" && mv "$tmp" "$dest"
       }
 
       # ---------------------------------------------------------------------------
@@ -134,7 +134,7 @@ in
         local dest="$3"
         local backup_suffix="$4"
 
-        if [ ! -f "$existing_file" ]; then
+        if [ ! -f "$existing_file" ] || [ ! -s "$existing_file" ]; then
           ${pkgs.jq}/bin/jq --tab '.' "$nix_file" > "$dest"
           return 0
         fi
@@ -148,7 +148,7 @@ in
         if ! ${pkgs.jq}/bin/jq -n \
             --slurpfile nix "$nix_file" \
             --slurpfile old "$existing_file" \
-            '$nix[0] == $old[0]' | grep -q true; then
+            '($nix[0] // []) == ($old[0] // [])' | grep -q true; then
           echo "WARNING: zed keymap: the existing keymap.json differs from the Nix-managed version and has been replaced (backup: $backup)"
         fi
 
