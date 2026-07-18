@@ -12,6 +12,7 @@
 
   edit_predictions = {
     mode = "eager";
+    provider = "copilot";
     copilot = {
       proxy = null;
       proxy_no_verify = null;
