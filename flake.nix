@@ -236,18 +236,24 @@
           linux = mkHomeManagerConfiguration {
             mdarocha = {
               llm-agents.enable = true;
-              #zed.enable = true;
+              zed.enable = true;
             };
           };
 
           wsl = mkHomeManagerConfiguration {
-            mdarocha.llm-agents.enable = true;
+            mdarocha = {
+              llm-agents.enable = true;
+              zed = {
+                enable = true;
+                configDir = "/mnt/c/Users/marek/AppData/Roaming/Zed";
+              };
+            };
           };
 
           deck = mkHomeManagerConfiguration {
             mdarocha = {
               llm-agents.enable = true;
-              #zed.enable = true;
+              zed.enable = true;
             };
 
             programs.git.settings.ghq.root = "~/sdcard/projects";
