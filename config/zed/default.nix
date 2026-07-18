@@ -78,6 +78,9 @@ in
           return 0
         fi
 
+        local tmp
+        tmp=$(mktemp)
+
         local backup="''${existing_file}.''${backup_suffix}"
         cp "$existing_file" "$backup"
 
@@ -115,7 +118,7 @@ in
         ${pkgs.jq}/bin/jq --tab -n \
           --slurpfile old "$existing_file" \
           --slurpfile nix "$nix_file" \
-          '$old[0] * $nix[0]' > "$dest"
+          '$old[0] * $nix[0]' > "$tmp" && mv "$tmp" "$dest"
       }
 
       # ---------------------------------------------------------------------------
@@ -136,6 +139,9 @@ in
           return 0
         fi
 
+        local tmp
+        tmp=$(mktemp)
+
         local backup="''${existing_file}.''${backup_suffix}"
         cp "$existing_file" "$backup"
 
@@ -146,7 +152,7 @@ in
           echo "WARNING: zed keymap: the existing keymap.json differs from the Nix-managed version and has been replaced (backup: $backup)"
         fi
 
-        ${pkgs.jq}/bin/jq --tab '.' "$nix_file" > "$dest"
+        ${pkgs.jq}/bin/jq --tab '.' "$nix_file" > "$tmp" && mv "$tmp" "$dest"
       }
 
       ZED_DIR="${cfg.configDir}"
