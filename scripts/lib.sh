@@ -15,4 +15,8 @@ if [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]; then
     CONFIGURATION="claude"
 fi
 
+if [[ -f /etc/os-release ]] && grep -q '^ID=steamos' /etc/os-release; then
+    CONFIGURATION="deck"
+fi
+
 export CONFIGURATION

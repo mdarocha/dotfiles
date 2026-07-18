@@ -38,7 +38,7 @@ in
 
       # ghq tool config
       ghq = {
-        root = "~/Projekty";
+        root = lib.mkDefault "~/Projekty";
       };
     };
 

@@ -244,6 +244,20 @@
             mdarocha.llm-agents.enable = true;
           };
 
+          deck = mkHomeManagerConfiguration {
+            mdarocha = {
+              llm-agents.enable = true;
+              #zed.enable = true;
+            };
+
+            programs.git.settings.ghq.root = "~/sdcard/projects";
+
+            home = {
+              username = "deck";
+              homeDirectory = "/home/deck";
+            };
+          };
+
           codespace = mkHomeManagerConfiguration {
             mdarocha.vscode.enable = true;
             mdarocha.zsh.autoDirectenvAllow = true;
