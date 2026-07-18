@@ -1,6 +1,12 @@
-{
+{ config, ... }: {
   auto_install_extensions = {
     catppuccin-icons = true;
+    nix = true;
+    html = true;
+    lua = true;
+    xml = true;
+    csharp = true;
+    zig = true;
     zed-legacy-themes = true;
   };
 
@@ -12,26 +18,26 @@
       enterprise_uri = null;
       enable_next_edit_suggestions = false;
     };
-    enabled_in_text_threads = false;
   };
 
   agent = {
     enable_feedback = false;
-    always_allow_tool_actions = false;
     default_profile = "write";
+    dock = "left";
     inline_assistant_model = {
       provider = "copilot_chat";
-      model = "claude-sonnet-4";
+      model = "claude-sonnet-4.6";
     };
     default_model = {
       provider = "copilot_chat";
-      model = "claude-sonnet-4";
+      model = "claude-sonnet-4.6";
     };
   };
 
-  features = {
-    edit_prediction_provider = "copilot";
-  };
+  project_panel.dock = "left";
+  outline_panel.dock = "left";
+  collaboration_panel.dock = "left";
+  git_panel.dock = "left";
 
   autosave = "on_window_change";
   restore_on_startup = "last_session";
@@ -96,7 +102,7 @@
     font_size = 14;
     line_height = "comfortable";
     shell = {
-      program = "/home/marek/.nix-profile/bin/zsh";
+      program = "${config.home.homeDirectory}/.nix-profile/bin/zsh";
     };
     toolbar = {
       breadcrumbs = false;

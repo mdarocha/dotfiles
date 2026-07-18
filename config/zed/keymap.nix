@@ -1,4 +1,4 @@
-[
+{ config, pkgs, lib, ... }: [
   {
     bindings = {
       # docks
@@ -42,7 +42,7 @@
         "vim::Literal"
         [
           "tab"
-          "\u0009"
+          "\t"
         ]
       ];
     };
@@ -54,7 +54,7 @@
     };
   }
   {
-    context = "(Editor && edit_prediction_conflict)";
+    context = "(Editor && (edit_prediction && (showing_completions || in_leading_whitespace)))";
     bindings = {
       "ctrl-y" = "editor::AcceptEditPrediction";
     };

@@ -18,8 +18,8 @@ let
 
   json = pkgs.formats.json { };
 
-  defaultSettings = import ./settings.nix;
-  defaultKeymap = import ./keymap.nix;
+  defaultSettings = import ./settings.nix { inherit config pkgs lib; };
+  defaultKeymap = import ./keymap.nix { inherit config pkgs lib; };
 
   mergedSettings = recursiveUpdate defaultSettings cfg.settings;
   mergedKeymap = defaultKeymap ++ cfg.keymap;
