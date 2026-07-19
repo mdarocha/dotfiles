@@ -258,6 +258,13 @@
 
             programs.git.settings.ghq.root = "~/sdcard/projects";
 
+            # ensure flatpak-installed app icons and .desktop files are visible
+            # to plasmashell (systemd user session doesn't source /etc/profile.d/flatpak.sh)
+            xdg.systemDirs.data = [
+              "/var/lib/flatpak/exports/share"
+              "\${HOME}/.local/share/flatpak/exports/share"
+            ];
+
             home = {
               username = "deck";
               homeDirectory = "/home/deck";
