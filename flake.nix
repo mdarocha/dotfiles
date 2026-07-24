@@ -293,7 +293,10 @@
           };
 
           claude = mkHomeManagerConfiguration {
-            mdarocha.zsh.autoDirectenvAllow = true;
+            mdarocha = {
+              llm-agents.claude-code-web.enable = true;
+              zsh.autoDirectenvAllow = true;
+            };
 
             home = {
               username = "root";
