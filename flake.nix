@@ -294,7 +294,7 @@
 
           claude = mkHomeManagerConfiguration {
             mdarocha = {
-              llm-agents.enable = true;
+              llm-agents.claude-code-web.enable = true;
               zsh.autoDirectenvAllow = true;
             };
 

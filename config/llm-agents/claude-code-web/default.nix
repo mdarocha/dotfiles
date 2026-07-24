@@ -6,13 +6,14 @@
 
 let
   cfg = config.mdarocha.llm-agents;
+  inherit (lib) mkEnableOption mkIf;
 in
 {
-  config = lib.mkIf cfg.enable {
+  options.mdarocha.llm-agents.claude-code-web.enable = mkEnableOption "Claude Code (web) agent config";
+
+  config = mkIf (cfg.enable || cfg.claude-code-web.enable) {
     home.file = lib.mkMerge [
       {
-        # Global instructions and hooks, applied to every repo/session on
-        # this machine — not tied to any single project's checkout.
         ".claude/CLAUDE.md".text = cfg.common.agentInstructions;
 
         ".claude/hooks/fix-nix-path.sh" = {
