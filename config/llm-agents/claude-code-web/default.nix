@@ -11,7 +11,7 @@ in
 {
   options.mdarocha.llm-agents.claude-code-web.enable = mkEnableOption "Claude Code (web) agent config";
 
-  config = mkIf (cfg.enable || cfg.claude-code-web.enable) {
+  config = mkIf cfg.claude-code-web.enable {
     home.file = lib.mkMerge [
       {
         ".claude/CLAUDE.md".text = cfg.common.agentInstructions;
