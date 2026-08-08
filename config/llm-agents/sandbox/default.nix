@@ -237,6 +237,11 @@ in
           The proxy matches by suffix so 'foo.com' also covers any *.foo.com subdomain.
         '';
         default = {
+          "Anthropic (Claude)" = [
+            "anthropic.com"
+            "claude.ai"
+            "claudeusercontent.com"
+          ];
           "Azure DevOps" = [
             "dev.azure.com"
             "visualstudio.com"
