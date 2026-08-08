@@ -279,6 +279,9 @@ in
             "websetsmcp.exa.ai"
             "api.exa.ai"
           ];
+          "Personal (mdarocha.pl)" = [
+            "mdarocha.pl"
+          ];
           "Model metadata" = {
             "models.dev" = [
               "GET"
