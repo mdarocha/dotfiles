@@ -60,6 +60,17 @@ in
   config = mkIf cfg.enable {
     home.activation.configure-zed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       # ---------------------------------------------------------------------------
+      # strip_jsonc EXISTING_FILE
+      #
+      # Zed writes JSONC: full-line `//` comments and trailing commas before a
+      # closing `}`/`]`, neither of which jq's strict JSON parser accepts.
+      # Strips both so the result parses as plain JSON. Printed to stdout.
+      # ---------------------------------------------------------------------------
+      strip_jsonc() {
+        grep -v '^\s*//' "$1" | sed -e ':a' -e 'N' -e '$!ba' -e 's/,\([[:space:]]*\n[[:space:]]*[]}]\)/\1/g'
+      }
+
+      # ---------------------------------------------------------------------------
       # merge_json_objects NIX_FILE EXISTING_FILE DEST BACKUP_SUFFIX
       #
       # Deep-merges two JSON object files (NIX wins on conflicts).
@@ -80,11 +91,11 @@ in
         local tmp
         tmp=$(mktemp)
 
-        # Zed may write JSONC (comments starting with //); strip comment-only
-        # lines so jq can parse the file as plain JSON.
+        # Zed writes JSONC (comments, trailing commas); sanitize to plain JSON
+        # so jq can parse it.
         local existing_json
         existing_json=$(mktemp)
-        grep -v '^\s*//' "$existing_file" > "$existing_json"
+        strip_jsonc "$existing_file" > "$existing_json"
 
         local backup="''${existing_file}.''${backup_suffix}"
         cp "$existing_file" "$backup"
@@ -150,9 +161,12 @@ in
         local backup="''${existing_file}.''${backup_suffix}"
         cp "$existing_file" "$backup"
 
+        local existing_json
+        existing_json=$(mktemp)
+        strip_jsonc "$existing_file" > "$existing_json"
         if ! ${pkgs.jq}/bin/jq -n \
             --slurpfile nix "$nix_file" \
-            --slurpfile old "$existing_file" \
+            --slurpfile old "$existing_json" \
             '($nix[0] // []) == ($old[0] // [])' | grep -q true; then
           echo "WARNING: zed keymap: the existing keymap.json differs from the Nix-managed version and has been replaced (backup: $backup)"
         fi
