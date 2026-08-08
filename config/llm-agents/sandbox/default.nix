@@ -301,6 +301,8 @@ in
             "devenv.sh"
           ];
           "NuGet" = [ "api.nuget.org" ];
+          "OMP" = [ "omp.sh" ];
+          "OpenRouter" = [ "openrouter.ai" ];
           "npm" = [
             "npmjs.org"
             "npmjs.com"
