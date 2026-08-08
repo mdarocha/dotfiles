@@ -22,8 +22,10 @@
 
   home.stateVersion = "24.05";
 
+  nix.registry.nixpkgs.flake = inputs.nixpkgs;
+
   systemd.user.sessionVariables = {
-    # synchronize NIX_PATH with the dotfiles' nixpkgs
+    # synchronize NIX_PATH with the dotfiles' nixpkgs (for <nixpkgs> angle-bracket lookups)
     NIX_PATH = lib.mkForce "nixpkgs=${inputs.nixpkgs}";
 
     # make sure libs from nixpkgs can be found
