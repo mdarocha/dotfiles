@@ -9,3 +9,16 @@ updates:
       timezone: Etc/UTC
     labels:
       - automated
+  - package-ecosystem: nix
+    directory: /
+    schedule:
+      interval: weekly
+      day: friday
+      time: "21:00"
+      timezone: Etc/UTC
+    labels:
+      - automated
+    groups:
+      nix-dependencies:
+        patterns:
+          - "*"
