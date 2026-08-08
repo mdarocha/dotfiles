@@ -121,7 +121,7 @@ in
           --slurpfile old "$existing_json" \
           '($nix[0] // {} | keys_unsorted) as $nk |
            ($old[0] // {}) as $o | ($nix[0] // {}) as $n |
-           $nk[] | select($o[.] != null and $o[.] != $n[.])
+           $nk[] | select($o[.] != null and $o[.] != $n[.])')
 
         if [ -n "$overwritten" ]; then
           echo "WARNING: zed settings: Nix overwrote the following top-level keys from the existing settings.json (backup: $backup):"
