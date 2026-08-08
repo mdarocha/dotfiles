@@ -237,7 +237,7 @@ in
           The proxy matches by suffix so 'foo.com' also covers any *.foo.com subdomain.
         '';
         default = {
-          "Anthropic (Claude)" = [
+          "Anthropic" = [
             "anthropic.com"
             "claude.ai"
             "claudeusercontent.com"
