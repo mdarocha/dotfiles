@@ -77,9 +77,14 @@ in
           ${pkgs.jq}/bin/jq --tab '.' "$nix_file" > "$dest"
           return 0
         fi
-
         local tmp
         tmp=$(mktemp)
+
+        # Zed may write JSONC (comments starting with //); strip comment-only
+        # lines so jq can parse the file as plain JSON.
+        local existing_json
+        existing_json=$(mktemp)
+        grep -v '^\s*//' "$existing_file" > "$existing_json"
 
         local backup="''${existing_file}.''${backup_suffix}"
         cp "$existing_file" "$backup"
@@ -88,7 +93,7 @@ in
         local only_in_existing
         only_in_existing=$(${pkgs.jq}/bin/jq -r -n \
           --slurpfile nix "$nix_file" \
-          --slurpfile old "$existing_file" \
+          --slurpfile old "$existing_json" \
           '(($old[0] // {}) | keys_unsorted) - (($nix[0] // {}) | keys_unsorted) | .[]')
 
         if [ -n "$only_in_existing" ]; then
@@ -102,7 +107,7 @@ in
         local overwritten
         overwritten=$(${pkgs.jq}/bin/jq -r -n \
           --slurpfile nix "$nix_file" \
-          --slurpfile old "$existing_file" \
+          --slurpfile old "$existing_json" \
           '($nix[0] // {} | keys_unsorted) as $nk |
            ($old[0] // {}) as $o | ($nix[0] // {}) as $n |
            $nk[] | select($o[.] != null and ($o[.] | tojson) != ($n[.] | tojson))')
@@ -116,7 +121,7 @@ in
 
         # Merge: existing first, nix on top (nix wins)
         ${pkgs.jq}/bin/jq --tab -n \
-          --slurpfile old "$existing_file" \
+          --slurpfile old "$existing_json" \
           --slurpfile nix "$nix_file" \
           '($old[0] // {}) * ($nix[0] // {})' > "$tmp" && mv "$tmp" "$dest"
       }
