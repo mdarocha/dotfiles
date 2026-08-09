@@ -34,17 +34,19 @@ in
 
         You may be running inside a sandboxed environment or directly on the host.
         **You MUST determine which mode you are in before relying on any sandbox-specific
-        rule below.** Check once at session start:
+        rule below.** Check the `MDAROCHA_AGENT_SANDBOX` environment variable once at
+        session start:
 
         ```bash
-        basename "$(readlink /proc/self/exe 2>/dev/null || echo "$0")"
+        echo "$MDAROCHA_AGENT_SANDBOX"
         ```
 
-        - If the output contains `-nosandbox`, you are **outside** the sandbox.
+        - `1` → you are **inside** the sandbox. All **(sandbox only)** rules apply.
+        - unset/empty → you are **outside** the sandbox (the `-nosandbox` variant).
           Skip every section marked **(sandbox only)** — network is unrestricted,
-          localhost reaches the host, and you manage dependencies yourself (pip, npm, etc.).
-          The sandbox package list below does NOT apply; you have whatever the host provides.
-        - Otherwise you are **inside** the sandbox. All **(sandbox only)** rules apply.
+          localhost reaches the host, and you manage dependencies yourself (pip, npm,
+          etc.). The sandbox's tool list below is also on PATH here (see the note in
+          that section), but it is not exhaustive — the host may provide more besides.
 
         ## Available CLI tools (sandbox only)
 
@@ -55,8 +57,8 @@ in
 
         ${lib.concatMapStringsSep ", " (n: "`${n}`") cfg.sandbox.packageDescriptions}
 
-        These packages are **not** present in the `-nosandbox` variant — that variant
-        inherits whatever the host system provides on PATH.
+        The `-nosandbox` variant prepends this same tool list onto PATH, so every
+        package above is available there too, on top of whatever else the host provides.
 
         ## Python execution environment (sandbox only)
 
@@ -66,6 +68,9 @@ in
         `uv pip install`, `pip install --user`, `python -m pip`, or any other package
         manager invocation will fail or produce results silently discarded when the
         session ends.
+
+        This applies in the `-nosandbox` variant too — it points `VIRTUAL_ENV` at
+        the same Nix-built environment, so `pip install` fails there identically.
 
         Pre-installed Python packages: ${lib.concatMapStringsSep ", " (n: "`${n}`") cfg.sandbox.pythonPackageNames}
 

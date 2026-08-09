@@ -181,6 +181,9 @@ let
           merged;
 
       env = {
+        # Lets agent instructions detect sandboxed vs. -nosandbox execution
+        # without relying on fragile process-name introspection.
+        MDAROCHA_AGENT_SANDBOX = "1";
         # Used by karma-chrome-launcher when running Angular unit tests.
         CHROME_BIN = "${chromiumWrapper}/bin/chromium";
         # Used by Puppeteer (OMP browser tools). Point directly at the
@@ -206,9 +209,23 @@ let
       };
     };
 
+  # PATH containing every sandbox tool's bin directory, prepended onto PATH
+  # for the -nosandbox variant so it has access to the same toolset as the
+  # sandboxed variant (see nosandboxVariant below).
+  sandboxToolsPath = lib.makeBinPath cfg.sandbox.allowedPackages;
+
   nosandboxVariant =
     name: pkg:
     pkgs.writeShellScriptBin "${name}-nosandbox" ''
+      # Prepend the sandbox's tool PATH so this unsandboxed variant has
+      # access to the same tools as the sandboxed variant (git, ripgrep,
+      # pandoc, …), in addition to whatever else the host provides.
+      export PATH="${sandboxToolsPath}:$PATH"
+      # Mirrors the sandboxed VIRTUAL_ENV wiring (see wrapWithSandbox above)
+      # so OMP's eval tool can find the Nix-built Python environment
+      # (ipykernel, kernel_gateway, …) even where the PATH prepend alone
+      # isn't enough for OMP to discover it.
+      export VIRTUAL_ENV="${pythonEvalEnv}"
       exec ${pkg}/bin/${name} "$@"
     '';
 
