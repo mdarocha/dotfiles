@@ -226,6 +226,11 @@ let
       # (ipykernel, kernel_gateway, …) even where the PATH prepend alone
       # isn't enough for OMP to discover it.
       export VIRTUAL_ENV="${pythonEvalEnv}"
+      # Also use nixpkgs chromium outside the sandbox
+      export CHROME_BIN="${chromiumWrapper}/bin/chromium"
+      export PUPPETEER_EXECUTABLE_PATH="${chromiumWrapper}/bin/chromium"
+      export PUPPETEER_SKIP_DOWNLOAD="true"
+
       exec ${pkg}/bin/${name} "$@"
     '';
 
