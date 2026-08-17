@@ -1,9 +1,3 @@
-# Default oh-my-pi settings, mirroring the live ~/.omp/agent/config.yml minus
-# keys that already equal omp's own built-in schema default (redundant - see
-# `omp config list --json` with an empty $HOME to dump the schema defaults)
-# and minus `modelRoles`, which changes often via the TUI/`/model` and
-# shouldn't fight with Nix on every apply. Override any of this per-machine
-# via `mdarocha.llm-agents.oh-my-pi.settings`.
 { ... }:
 {
   theme = {
