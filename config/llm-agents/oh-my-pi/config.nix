@@ -1,62 +1,27 @@
+# Default oh-my-pi settings, mirroring the live ~/.omp/agent/config.yml minus
+# keys that already equal omp's own built-in schema default (redundant - see
+# `omp config list --json` with an empty $HOME to dump the schema defaults)
+# and minus `modelRoles`, which changes often via the TUI/`/model` and
+# shouldn't fight with Nix on every apply. Override any of this per-machine
+# via `mdarocha.llm-agents.oh-my-pi.settings`.
 { ... }:
 {
   theme = {
     dark = "dark-solarized";
     light = "light-solarized";
   };
-
   symbolPreset = "nerd";
-  colorBlindMode = false;
-
-  statusLine = {
-    preset = "default";
-    separator = "powerline-thin";
-    showHookStatus = true;
-    sessionAccent = true;
-  };
-
-  images = {
-    autoResize = true;
-    blockImages = false;
-  };
-
-  display.showTokenUsage = false;
-
-  showHardwareCursor = true;
-  clearOnShrink = false;
   defaultThinkingLevel = "auto";
   hideThinkingBlock = true;
   steeringMode = "all";
   followUpMode = "all";
-  interruptMode = "immediate";
-  doubleEscapeAction = "tree";
   treeFilterMode = "no-tools";
-
-  contextPromotion.enabled = true;
-
+  contextPromotion = {
+    enabled = true;
+  };
   compaction = {
-    strategy = "snapcompact";
     thresholdPercent = 80;
-    thresholdTokens = -1;
-    handoffSaveToDisk = false;
-    remoteEnabled = true;
   };
-
-  edit = {
-    mode = "hashline";
-    fuzzyMatch = true;
-    hashlineAutoDropPureInsertDuplicates = true;
-  };
-
-  bashInterceptor.enabled = false;
-
-  python = {
-    toolMode = "both";
-    kernelMode = "session";
-  };
-
-  browser.enabled = true;
-
   task = {
     isolation = {
       mode = "rcopy";
@@ -64,13 +29,9 @@
       commits = "ai";
     };
     eager = "preferred";
-    batch = true;
     showResolvedModelBadge = true;
   };
-
   providers = {
-    codeSearch = "grep";
-    kimiApiFormat = "auto";
     webSearchOrder = [
       "exa"
       "anthropic"
@@ -96,86 +57,72 @@
       "mojeek"
       "public"
     ];
-    autoThinkingMaxEffort = "xhigh";
+    fetch = "native";
+    codeSearch = "grep";
   };
-
   retry = {
-    fallbackRevertPolicy = "cooldown-expiry";
-    fallbackChains."anthropic/*" = [ "github-copilot/*" ];
+    fallbackChains = {
+      "anthropic/*" = [
+        "github-copilot/*"
+      ];
+    };
     usageAwareFallback = true;
     usageReservePct = 5;
     usageReservePolicy = "auto";
   };
-
-  autoResume = false;
-
-  loop.mode = "prompt";
-
-  autocompleteMaxVisible = 5;
-
-  startup.checkUpdate = false;
-
-  ask.timeout = 0;
-
+  startup = {
+    checkUpdate = false;
+  };
   stt = {
     modelName = "base.en";
-    enabled = false;
   };
-
-  memory.backend = "mnemopi";
-
-  read.defaultLimit = 300;
-
+  memory = {
+    backend = "mnemopi";
+  };
   tools = {
     artifactSpillThreshold = 10;
     artifactTailBytes = 2.5;
     artifactHeadBytes = 2.5;
-    xdevDocs = "builtins";
   };
-
-  todo.remindersMax = 3;
-
-  renderMermaid.enabled = true;
-  calc.enabled = true;
-
   github = {
     enabled = true;
-    cache.enabled = true;
   };
-
-  mcp = { };
-
-  async.enabled = true;
-
-  grep = {
-    contextBefore = 1;
-    contextAfter = 3;
-  };
-
   setupVersion = 1;
-
   advisor = {
-    enabled = false;
     syncBacklog = "5";
   };
-
-  features.unexpectedStopDetection = true;
-
-  shellMinimizer.sourceOutlineLevel = "default";
-
-  terminal.showProgress = true;
-
-  tui.textSizing = true;
-
-  autolearn.enabled = false;
-
-  mnemopi.scoping = "per-project-tagged";
-
-  modelRoleStorage = "global";
-
-  security.enabled = true;
-
-  astGrep.enabled = false;
-
-  dev.autoqa = false;
+  features = {
+    unexpectedStopDetection = true;
+  };
+  terminal = {
+    showProgress = true;
+  };
+  tui = {
+    textSizing = true;
+  };
+  mnemopi = {
+    scoping = "per-project-tagged";
+    polyphonicRecall = true;
+    enhancedRecall = true;
+    proactiveLinking = true;
+  };
+  security = {
+    enabled = true;
+  };
+  dev = {
+    autoqa = false;
+  };
+  clearOnShrink = false;
+  edit = {
+    hashlineAutoDropPureInsertDuplicates = true;
+  };
+  python = {
+    toolMode = "both";
+  };
+  renderMermaid = {
+    enabled = true;
+  };
+  calc = {
+    enabled = true;
+  };
 }

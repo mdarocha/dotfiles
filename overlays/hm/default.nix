@@ -1,3 +1,3 @@
 {
-  imports = [ ./managed-config-file.nix ];
+  imports = [ ./managed-config ];
 }
