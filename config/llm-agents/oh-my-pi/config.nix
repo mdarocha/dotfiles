@@ -1,5 +1,3 @@
-# Grouped and ordered to match the `/settings` panel / `omp://settings.md`
-# catalog, so a section here maps 1:1 onto a section there.
 { ... }:
 {
   # Advisor
