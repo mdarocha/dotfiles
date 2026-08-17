@@ -7,8 +7,35 @@
 
 let
   cfg = config.mdarocha.llm-agents;
+
+  yaml = pkgs.formats.yaml { };
+
+  defaultConfig = import ./config.nix { inherit config pkgs lib; };
+  mergedConfig = lib.recursiveUpdate defaultConfig cfg.oh-my-pi.settings;
+
+  configFile = yaml.generate "config.yml" mergedConfig;
+
+  configMergeLib = import ../../lib/config-merge.nix { inherit pkgs; };
 in
 {
+  options.mdarocha.llm-agents.oh-my-pi = {
+    configDir = lib.mkOption {
+      type = lib.types.str;
+      default = "$HOME/.omp/agent";
+      description = ''
+        Path to the oh-my-pi agent configuration directory.
+      '';
+    };
+
+    settings = lib.mkOption {
+      default = { };
+      type = yaml.type;
+      description = ''
+        oh-my-pi config.yml settings to deep-merge with the defaults.
+      '';
+    };
+  };
+
   config = lib.mkIf cfg.enable {
     home.packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
 
@@ -27,5 +54,25 @@ in
         name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }
       ) cfg.common.rules)
     ];
+
+    home.activation.configure-oh-my-pi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      ${configMergeLib}
+
+      OMP_DIR="${cfg.oh-my-pi.configDir}"
+      mkdir -p "$OMP_DIR"
+
+      # Match the backup extension home-manager uses (exported by the apply script)
+      BACKUP_SUFFIX="''${HOME_MANAGER_BACKUP_EXT:-backup}"
+
+      echo "Configuring oh-my-pi agent (config dir: $OMP_DIR)..."
+
+      merge_yaml_objects "omp config" \
+        "${configFile}" \
+        "$OMP_DIR/config.yml" \
+        "$OMP_DIR/config.yml" \
+        "$BACKUP_SUFFIX"
+
+      echo "oh-my-pi configuration complete."
+    '';
   };
 }
