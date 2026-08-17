@@ -1,35 +1,15 @@
+# Grouped and ordered to match the `/settings` panel / `omp://settings.md`
+# catalog, so a section here maps 1:1 onto a section there.
 { ... }:
 {
-  theme = {
-    dark = "dark-solarized";
-    light = "light-solarized";
-  };
-  symbolPreset = "nerd";
+  # Advisor
+  advisor.syncBacklog = "5";
+
+  # Thinking
   defaultThinkingLevel = "auto";
   hideThinkingBlock = true;
-  steeringMode = "all";
-  followUpMode = "all";
-  treeFilterMode = "no-tools";
-  contextPromotion.enabled = true;
-  compaction.thresholdPercent = 80;
-  task = {
-    isolation = {
-      mode = "rcopy";
-      merge = "branch";
-      commits = "ai";
-    };
-    eager = "preferred";
-    showResolvedModelBadge = true;
-  };
-  providers = {
-    webSearchOrder = [
-      "exa"
-      "anthropic"
-      "perplexity"
-    ];
-    fetch = "native";
-    codeSearch = "grep";
-  };
+
+  # Retry and fallback
   retry = {
     fallbackChains = {
       "anthropic/*" = [
@@ -40,29 +20,72 @@
     usageReservePct = 5;
     usageReservePolicy = "auto";
   };
-  startup.checkUpdate = false;
-  memory.backend = "mnemopi";
+
+  # Tools and approvals
   tools = {
     artifactSpillThreshold = 10;
     artifactTailBytes = 2.5;
     artifactHeadBytes = 2.5;
   };
-  github.enabled = true;
-  advisor.syncBacklog = "5";
-  features.unexpectedStopDetection = true;
-  terminal.showProgress = true;
-  tui.textSizing = true;
+  calc.enabled = true;
+  renderMermaid.enabled = true;
+  security.enabled = true;
+
+  # Shell, eval, and LSP
+  python.toolMode = "both";
+
+  # Files: editing and reading
+  edit.hashlineAutoDropPureInsertDuplicates = true;
+
+  # Context, compaction, and memory
+  contextPromotion.enabled = true;
+  compaction.thresholdPercent = 80;
+  memory.backend = "mnemopi";
   mnemopi = {
     scoping = "per-project-tagged";
     polyphonicRecall = true;
     enhancedRecall = true;
     proactiveLinking = true;
   };
-  security.enabled = true;
-  dev.autoqa = false;
+
+  # Appearance and terminal
+  theme = {
+    dark = "dark-solarized";
+    light = "light-solarized";
+  };
+  symbolPreset = "nerd";
+  terminal.showProgress = true;
+  tui.textSizing = true;
   clearOnShrink = false;
-  edit.hashlineAutoDropPureInsertDuplicates = true;
-  python.toolMode = "both";
-  renderMermaid.enabled = true;
-  calc.enabled = true;
+
+  # Interaction
+  steeringMode = "all";
+  followUpMode = "all";
+  treeFilterMode = "no-tools";
+
+  # Providers and services
+  providers = {
+    webSearchOrder = [
+      "exa"
+      "anthropic"
+      "perplexity"
+    ];
+    fetch = "native";
+    codeSearch = "grep";
+  };
+
+  # Other groups (task.*, github.*, startup.*, features.*, dev.*)
+  task = {
+    isolation = {
+      mode = "rcopy";
+      merge = "branch";
+      commits = "ai";
+    };
+    eager = "preferred";
+    showResolvedModelBadge = true;
+  };
+  github.enabled = true;
+  startup.checkUpdate = false;
+  features.unexpectedStopDetection = true;
+  dev.autoqa = false;
 }
