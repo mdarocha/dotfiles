@@ -21,13 +21,8 @@ let
   defaultSettings = import ./settings.nix { inherit config pkgs lib; };
   defaultKeymap = import ./keymap.nix { inherit config pkgs lib; };
 
-  configMergeLib = import ../lib/config-merge.nix { inherit pkgs; };
-
   mergedSettings = recursiveUpdate defaultSettings cfg.settings;
   mergedKeymap = defaultKeymap ++ cfg.keymap;
-
-  settingsFile = json.generate "settings.json" mergedSettings;
-  keymapFile = json.generate "keymap.json" mergedKeymap;
 in
 {
   options.mdarocha.zed = {
@@ -60,30 +55,21 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.activation.configure-zed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      ${configMergeLib}
-
-      ZED_DIR="${cfg.configDir}"
-      mkdir -p "$ZED_DIR"
-
-      # Match the backup extension home-manager uses (exported by the apply script)
-      BACKUP_SUFFIX="''${HOME_MANAGER_BACKUP_EXT:-backup}"
-
-      echo "Configuring Zed editor (config dir: $ZED_DIR)..."
-
-      merge_json_objects "zed settings" \
-        "${settingsFile}" \
-        "$ZED_DIR/settings.json" \
-        "$ZED_DIR/settings.json" \
-        "$BACKUP_SUFFIX"
-
-      replace_json_array "zed keymap.json" \
-        "${keymapFile}" \
-        "$ZED_DIR/keymap.json" \
-        "$ZED_DIR/keymap.json" \
-        "$BACKUP_SUFFIX"
-
-      echo "Zed configuration complete."
-    '';
+    mdarocha.managedConfigFiles = {
+      zed-settings = {
+        configDir = cfg.configDir;
+        fileName = "settings.json";
+        format = "json";
+        label = "zed settings";
+        value = mergedSettings;
+      };
+      zed-keymap = {
+        configDir = cfg.configDir;
+        fileName = "keymap.json";
+        format = "json-array";
+        label = "zed keymap.json";
+        value = mergedKeymap;
+      };
+    };
   };
 }

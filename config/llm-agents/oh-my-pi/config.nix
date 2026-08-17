@@ -1,17 +1,5 @@
 { ... }:
 {
-  modelRoles = {
-    default = "anthropic/claude-sonnet-5";
-    smol = "anthropic/claude-haiku-4-5";
-    slow = "anthropic/claude-opus-4-8";
-    commit = "github-copilot/gpt-5-mini:low";
-    plan = "anthropic/claude-opus-4-8:high";
-    task = "anthropic/claude-sonnet-5";
-    advisor = "anthropic/claude-haiku-4-5:high";
-    designer = "anthropic/claude-opus-4-8:medium";
-    tiny = "github-copilot/gpt-5-mini:low";
-  };
-
   theme = {
     dark = "dark-solarized";
     light = "light-solarized";

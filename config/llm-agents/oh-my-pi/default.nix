@@ -12,10 +12,6 @@ let
 
   defaultConfig = import ./config.nix { inherit config pkgs lib; };
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.oh-my-pi.settings;
-
-  configFile = yaml.generate "config.yml" mergedConfig;
-
-  configMergeLib = import ../../lib/config-merge.nix { inherit pkgs; };
 in
 {
   options.mdarocha.llm-agents.oh-my-pi = {
@@ -55,24 +51,12 @@ in
       ) cfg.common.rules)
     ];
 
-    home.activation.configure-oh-my-pi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      ${configMergeLib}
-
-      OMP_DIR="${cfg.oh-my-pi.configDir}"
-      mkdir -p "$OMP_DIR"
-
-      # Match the backup extension home-manager uses (exported by the apply script)
-      BACKUP_SUFFIX="''${HOME_MANAGER_BACKUP_EXT:-backup}"
-
-      echo "Configuring oh-my-pi agent (config dir: $OMP_DIR)..."
-
-      merge_yaml_objects "omp config" \
-        "${configFile}" \
-        "$OMP_DIR/config.yml" \
-        "$OMP_DIR/config.yml" \
-        "$BACKUP_SUFFIX"
-
-      echo "oh-my-pi configuration complete."
-    '';
+    mdarocha.managedConfigFiles.oh-my-pi-config = {
+      configDir = cfg.oh-my-pi.configDir;
+      fileName = "config.yml";
+      format = "yaml";
+      label = "omp config";
+      value = mergedConfig;
+    };
   };
 }
