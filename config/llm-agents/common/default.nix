@@ -181,22 +181,37 @@ in
 
         ## Comments
 
-        - Comment *why*, not *what*. Delete any comment that only restates what the code
-          plainly does — assume the reader can read code.
+        - **No comment is the default.** Well-named code is self-documenting; a
+          comment must earn its place by adding something the code cannot say.
+          When unsure, leave it out. A clean, comment-free diff is the goal, not
+          a diff dense with narration.
+        - Do not add comments that restate what the code plainly does, label
+          obvious structure (`# Advisor`, `# imports`, `# helper`), preface a
+          file/section/function with a summary of itself, or announce what a
+          block is about to do. The reader can read the code.
         - Never describe the edit or its history; the diff and git log record that. Banned:
           `// changed from ...`, `// was previously ...`, `// removed ...`, `// renamed ...`,
           `// updated to ...`, `// new`, `// now handles ...`, `// (old logic below)`.
-        - When editing, write code as if it had always been this way. Don't annotate what
-          changed vs. the old version. Match the surrounding comment density.
+        - When editing, write code as if it had always been this way, and match the
+          surrounding comment density — do not introduce comments into a file that
+          deliberately has none.
         - Never leave commented-out code. Delete it. No block-by-block walkthroughs or
           decorative banners.
-        - Keep inline comments only for: non-obvious rationale, edge cases, business rules
-          not visible in the code, and workarounds (link the issue).
+        - A comment is warranted only when it explains something the code genuinely
+          cannot: non-obvious *why* behind a choice, a subtle edge case, a business
+          rule not visible locally, or a workaround (link the issue). If it merely
+          rephrases the code, delete it.
         - Doc comments are the API contract for the public surface, not every private
           helper — follow the file's existing convention. Document behavior, invariants,
           units, and error/panic conditions; never restate the name and type
           (`@param id — the id`). No empty or placeholder doc stubs. Use the language's
           native format (rustdoc `///`, TSDoc `/** */`, XML `/// <summary>`).
+        - Comments must be environment-agnostic. Never reference the current
+          sandbox, machine, or runtime environment (e.g. "the current sandbox
+          doesn't allow X", "since there's no network here"). A comment must hold
+          true no matter the hardware or environment the reader runs in. Only
+          mention an environment constraint when it is genuinely the sole thing
+          that makes the code make sense.
       '';
     };
 

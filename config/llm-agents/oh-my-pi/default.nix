@@ -7,8 +7,31 @@
 
 let
   cfg = config.mdarocha.llm-agents;
+
+  yaml = pkgs.formats.yaml { };
+
+  defaultConfig = import ./config.nix { inherit config pkgs lib; };
+  mergedConfig = lib.recursiveUpdate defaultConfig cfg.oh-my-pi.settings;
 in
 {
+  options.mdarocha.llm-agents.oh-my-pi = {
+    configDir = lib.mkOption {
+      type = lib.types.str;
+      default = "$HOME/.omp/agent";
+      description = ''
+        Path to the oh-my-pi agent configuration directory.
+      '';
+    };
+
+    settings = lib.mkOption {
+      default = { };
+      type = yaml.type;
+      description = ''
+        oh-my-pi config.yml settings to deep-merge with the defaults.
+      '';
+    };
+  };
+
   config = lib.mkIf cfg.enable {
     home.packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
 
@@ -27,5 +50,13 @@ in
         name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }
       ) cfg.common.rules)
     ];
+
+    mdarocha.managedConfigFiles.oh-my-pi-config = {
+      configDir = cfg.oh-my-pi.configDir;
+      fileName = "config.yml";
+      format = "yaml";
+      label = "omp config";
+      value = mergedConfig;
+    };
   };
 }

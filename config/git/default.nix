@@ -1,12 +1,10 @@
 {
+  config,
   lib,
   pkgs,
   ...
 }:
 
-let
-  inherit (lib) mkDefault;
-in
 {
   config.programs.gh = {
     enable = lib.mkDefault true;
@@ -23,8 +21,8 @@ in
     lfs.enable = true;
 
     settings = {
-      user.name = mkDefault "mdarocha";
-      user.email = mkDefault "git@mdarocha.pl";
+      user.name = lib.mkDefault "mdarocha";
+      user.email = lib.mkDefault "git@mdarocha.pl";
 
       # additional settings
       # mostly based on https://jvns.ca/blog/2024/02/16/popular-git-config-options
@@ -40,6 +38,10 @@ in
       ghq = {
         root = lib.mkDefault "~/Projekty";
       };
+    } // lib.optionalAttrs (config.programs.gh.enable && config.programs.gh.gitCredentialHelper.enable) {
+      # gh's credential helper only ever handles HTTPS auth; rewrite SSH
+      # remotes to HTTPS so `git push`/`fetch` work through it instead.
+      url."https://github.com/".insteadOf = "git@github.com:";
     };
 
     # include a machine-local config if available
