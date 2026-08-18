@@ -245,7 +245,7 @@
               llm-agents.enable = true;
               zed = {
                 enable = true;
-                configDir = "/mnt/c/Users/marek/AppData/Roaming/Zed";
+                configDir = "/mnt/c/Users/marek.darocha/AppData/Roaming/Zed";
               };
             };
           };
