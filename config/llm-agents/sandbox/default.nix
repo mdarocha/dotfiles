@@ -147,10 +147,7 @@ let
     "$HOME/.microsoft/usersecrets"
   ];
 
-  # Standard single-user-desktop location; not read from the live session
-  # since agent-sandbox.nix has no host-env passthrough. Read-only: the
-  # sandbox only needs to connect() to the socket, not write to its dir
-  # (Flatpak does the same ro-bind for Wayland).
+  # Standard single-user-desktop location, exposed in sandbox to allow clipboard access
   waylandRuntimeDir = "/run/user/1000";
   waylandDisplay = "wayland-0";
   waylandSocketPath = "${waylandRuntimeDir}/${waylandDisplay}";
@@ -216,6 +213,7 @@ let
           # making `python3 -m kernel_gateway` and `ipykernel` available without
           # any pip install step at runtime.
           VIRTUAL_ENV = "${pythonEvalEnv}";
+          # Expose to allow clipboard access
           WAYLAND_DISPLAY = waylandDisplay;
           XDG_RUNTIME_DIR = waylandRuntimeDir;
         };

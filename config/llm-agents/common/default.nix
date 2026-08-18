@@ -206,6 +206,12 @@ in
           units, and error/panic conditions; never restate the name and type
           (`@param id — the id`). No empty or placeholder doc stubs. Use the language's
           native format (rustdoc `///`, TSDoc `/** */`, XML `/// <summary>`).
+        - Comments must be environment-agnostic. Never reference the current
+          sandbox, machine, or runtime environment (e.g. "the current sandbox
+          doesn't allow X", "since there's no network here"). A comment must hold
+          true no matter the hardware or environment the reader runs in. Only
+          mention an environment constraint when it is genuinely the sole thing
+          that makes the code make sense.
       '';
     };
 
