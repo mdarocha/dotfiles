@@ -147,6 +147,14 @@ let
     "$HOME/.microsoft/usersecrets"
   ];
 
+  # Standard single-user-desktop location; not read from the live session
+  # since agent-sandbox.nix has no host-env passthrough. Read-only: the
+  # sandbox only needs to connect() to the socket, not write to its dir
+  # (Flatpak does the same ro-bind for Wayland).
+  waylandRuntimeDir = "/run/user/1000";
+  waylandDisplay = "wayland-0";
+  waylandSocketPath = "${waylandRuntimeDir}/${waylandDisplay}";
+
   wrapWithSandbox =
     name: pkg:
     agentSandbox.mkSandbox {
@@ -160,13 +168,9 @@ let
       # Bind system nix config read-only so the agent inherits experimental
       # features (nix-command, flakes) and substituter/registry settings.
       roFiles = [ "/etc/nix/nix.conf" ];
+      roDirs = [ waylandSocketPath ];
 
-      # Nix build-time strings can't be shell-expanded against the host's
-      # live environment (unlike rwDirs paths), so the compositor socket
-      # location can't be read at wrapper-launch time the way $HOME is.
-      # xdgRuntimeDir/display below are best-guess constants, overridable
-      # per-machine.
-      rwDirs = sharedRwDirs ++ lib.optional cfg.sandbox.wayland.enable "${cfg.sandbox.wayland.xdgRuntimeDir}/${cfg.sandbox.wayland.display}";
+      rwDirs = sharedRwDirs;
 
       allowedDomains =
         let
@@ -212,10 +216,8 @@ let
           # making `python3 -m kernel_gateway` and `ipykernel` available without
           # any pip install step at runtime.
           VIRTUAL_ENV = "${pythonEvalEnv}";
-        }
-        // lib.optionalAttrs cfg.sandbox.wayland.enable {
-          WAYLAND_DISPLAY = cfg.sandbox.wayland.display;
-          XDG_RUNTIME_DIR = cfg.sandbox.wayland.xdgRuntimeDir;
+          WAYLAND_DISPLAY = waylandDisplay;
+          XDG_RUNTIME_DIR = waylandRuntimeDir;
         };
     };
 
@@ -349,24 +351,6 @@ in
         type = types.bool;
         default = true;
         description = "Allow GET and HEAD requests to any domain. Enables unrestricted web browsing and searching without listing every destination. When enabled, a wildcard entry for GET and HEAD is prepended to the proxy allowlist.";
-      };
-
-      wayland = {
-        enable = mkOption {
-          type = types.bool;
-          default = true;
-          description = "Expose the Wayland compositor's clipboard socket into the sandbox (agent-sandbox.nix has no host-env passthrough, so xdgRuntimeDir/display below are fixed guesses rather than read from the live session).";
-        };
-        xdgRuntimeDir = mkOption {
-          type = types.str;
-          default = "/run/user/1000";
-          description = "XDG_RUNTIME_DIR to bind and export. Override if the host user's UID isn't 1000.";
-        };
-        display = mkOption {
-          type = types.str;
-          default = "wayland-0";
-          description = "WAYLAND_DISPLAY socket name under xdgRuntimeDir. Override if the compositor uses a different display name.";
-        };
       };
 
       allowedPackages = mkOption {
