@@ -161,7 +161,12 @@ let
       # features (nix-command, flakes) and substituter/registry settings.
       roFiles = [ "/etc/nix/nix.conf" ];
 
-      rwDirs = sharedRwDirs;
+      # Nix build-time strings can't be shell-expanded against the host's
+      # live environment (unlike rwDirs paths), so the compositor socket
+      # location can't be read at wrapper-launch time the way $HOME is.
+      # xdgRuntimeDir/display below are best-guess constants, overridable
+      # per-machine.
+      rwDirs = sharedRwDirs ++ lib.optional cfg.sandbox.wayland.enable "${cfg.sandbox.wayland.xdgRuntimeDir}/${cfg.sandbox.wayland.display}";
 
       allowedDomains =
         let
@@ -180,33 +185,38 @@ let
         else
           merged;
 
-      env = {
-        # Lets agent instructions detect sandboxed vs. -nosandbox execution
-        # without relying on fragile process-name introspection.
-        MDAROCHA_AGENT_SANDBOX = "1";
-        # Used by karma-chrome-launcher when running Angular unit tests.
-        CHROME_BIN = "${chromiumWrapper}/bin/chromium";
-        # Used by Puppeteer (OMP browser tools). Point directly at the
-        # Nix-provided binary so Puppeteer never tries to download Chrome.
-        PUPPETEER_EXECUTABLE_PATH = "${chromiumWrapper}/bin/chromium";
-        PUPPETEER_SKIP_DOWNLOAD = "true";
-        # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
-        # (sandbox-local loopback, isolated from the host). Without these,
-        # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
-        # 403 for 127.0.0.1 because it is not in the allowlist.
-        NO_PROXY = "127.0.0.1,localhost";
-        no_proxy = "127.0.0.1,localhost";
-        # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
-        # fonts. Without a valid config file the sandbox sees no fonts and Chrome
-        # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
-        # correctly inside the sandbox.
-        FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
-        # Python eval environment for OMP's eval tool. Setting VIRTUAL_ENV to
-        # this Nix-built env causes the OMP runtime to prepend its bin/ to PATH,
-        # making `python3 -m kernel_gateway` and `ipykernel` available without
-        # any pip install step at runtime.
-        VIRTUAL_ENV = "${pythonEvalEnv}";
-      };
+      env =
+        {
+          # Lets agent instructions detect sandboxed vs. -nosandbox execution
+          # without relying on fragile process-name introspection.
+          MDAROCHA_AGENT_SANDBOX = "1";
+          # Used by karma-chrome-launcher when running Angular unit tests.
+          CHROME_BIN = "${chromiumWrapper}/bin/chromium";
+          # Used by Puppeteer (OMP browser tools). Point directly at the
+          # Nix-provided binary so Puppeteer never tries to download Chrome.
+          PUPPETEER_EXECUTABLE_PATH = "${chromiumWrapper}/bin/chromium";
+          PUPPETEER_SKIP_DOWNLOAD = "true";
+          # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
+          # (sandbox-local loopback, isolated from the host). Without these,
+          # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
+          # 403 for 127.0.0.1 because it is not in the allowlist.
+          NO_PROXY = "127.0.0.1,localhost";
+          no_proxy = "127.0.0.1,localhost";
+          # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
+          # fonts. Without a valid config file the sandbox sees no fonts and Chrome
+          # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
+          # correctly inside the sandbox.
+          FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
+          # Python eval environment for OMP's eval tool. Setting VIRTUAL_ENV to
+          # this Nix-built env causes the OMP runtime to prepend its bin/ to PATH,
+          # making `python3 -m kernel_gateway` and `ipykernel` available without
+          # any pip install step at runtime.
+          VIRTUAL_ENV = "${pythonEvalEnv}";
+        }
+        // lib.optionalAttrs cfg.sandbox.wayland.enable {
+          WAYLAND_DISPLAY = cfg.sandbox.wayland.display;
+          XDG_RUNTIME_DIR = cfg.sandbox.wayland.xdgRuntimeDir;
+        };
     };
 
   # PATH containing every sandbox tool's bin directory, prepended onto PATH
@@ -339,6 +349,24 @@ in
         type = types.bool;
         default = true;
         description = "Allow GET and HEAD requests to any domain. Enables unrestricted web browsing and searching without listing every destination. When enabled, a wildcard entry for GET and HEAD is prepended to the proxy allowlist.";
+      };
+
+      wayland = {
+        enable = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Expose the Wayland compositor's clipboard socket into the sandbox (agent-sandbox.nix has no host-env passthrough, so xdgRuntimeDir/display below are fixed guesses rather than read from the live session).";
+        };
+        xdgRuntimeDir = mkOption {
+          type = types.str;
+          default = "/run/user/1000";
+          description = "XDG_RUNTIME_DIR to bind and export. Override if the host user's UID isn't 1000.";
+        };
+        display = mkOption {
+          type = types.str;
+          default = "wayland-0";
+          description = "WAYLAND_DISPLAY socket name under xdgRuntimeDir. Override if the compositor uses a different display name.";
+        };
       };
 
       allowedPackages = mkOption {
