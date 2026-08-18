@@ -1,13 +1,20 @@
 { ... }:
 {
-  # Advisor
-  advisor.syncBacklog = "5";
+  # appearance
+  theme = {
+    dark = "dark-solarized";
+    light = "light-solarized";
+  };
+  symbolPreset = "nerd";
+  terminal.showProgress = true;
+  tui.textSizing = true;
+  tui.renderMermaid = true;
+  task.showResolvedModelBadge = true;
 
-  # Thinking
+  # model
+  advisor.syncBacklog = "5";
   defaultThinkingLevel = "auto";
   hideThinkingBlock = true;
-
-  # Retry and fallback
   retry = {
     fallbackChains = {
       "anthropic/*" = [
@@ -19,25 +26,18 @@
     usageReservePolicy = "auto";
   };
 
-  # Tools and approvals
-  tools = {
-    artifactSpillThreshold = 10;
-    artifactTailBytes = 2.5;
-    artifactHeadBytes = 2.5;
-  };
-  calc.enabled = true;
-  renderMermaid.enabled = true;
-  security.enabled = true;
+  # interaction
+  steeringMode = "all";
+  followUpMode = "all";
+  treeFilterMode = "no-tools";
+  startup.checkUpdate = false;
+  features.unexpectedStopDetection = true;
 
-  # Shell, eval, and LSP
-  python.toolMode = "both";
-
-  # Files: editing and reading
-  edit.hashlineAutoDropPureInsertDuplicates = true;
-
-  # Context, compaction, and memory
+  # context
   contextPromotion.enabled = true;
   compaction.thresholdPercent = 80;
+
+  # memory
   memory.backend = "mnemopi";
   mnemopi = {
     scoping = "per-project-tagged";
@@ -46,33 +46,17 @@
     proactiveLinking = true;
   };
 
-  # Appearance and terminal
-  theme = {
-    dark = "dark-solarized";
-    light = "light-solarized";
+  # tools
+  tools = {
+    artifactSpillThreshold = 10;
+    artifactTailBytes = 2.5;
+    artifactHeadBytes = 2.5;
   };
-  symbolPreset = "nerd";
-  terminal.showProgress = true;
-  tui.textSizing = true;
-  clearOnShrink = false;
+  security.enabled = true;
+  github.enabled = true;
+  dev.autoqa = false;
 
-  # Interaction
-  steeringMode = "all";
-  followUpMode = "all";
-  treeFilterMode = "no-tools";
-
-  # Providers and services
-  providers = {
-    webSearchOrder = [
-      "exa"
-      "anthropic"
-      "perplexity"
-    ];
-    fetch = "native";
-    codeSearch = "grep";
-  };
-
-  # Other groups (task.*, github.*, startup.*, features.*, dev.*)
+  # tasks
   task = {
     isolation = {
       mode = "rcopy";
@@ -80,10 +64,15 @@
       commits = "ai";
     };
     eager = "preferred";
-    showResolvedModelBadge = true;
   };
-  github.enabled = true;
-  startup.checkUpdate = false;
-  features.unexpectedStopDetection = true;
-  dev.autoqa = false;
+
+  # providers
+  providers = {
+    webSearchOrder = [
+      "exa"
+      "anthropic"
+      "perplexity"
+    ];
+    fetch = "native";
+  };
 }
