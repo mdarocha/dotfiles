@@ -154,7 +154,7 @@
             let
               configurations = concatMapStringsSep "\n" (config: ''
                 echo "| \`${config.name}\` | $(
-                  nix path-info --json --closure-size ${config.value.activationPackage} \
+                  nix path-info --json --json-format 1 --closure-size ${config.value.activationPackage} \
                     | jq -r 'to_entries | first | .value.closureSize' | numfmt --to=si --suffix=B
                 ) |"
               '') (attrsToList self.homeConfigurations);
