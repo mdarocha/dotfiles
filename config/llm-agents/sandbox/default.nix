@@ -29,10 +29,6 @@ let
     else
       value;
 
-  # Instantiate agent-sandbox.nix for the current platform. Its flake only
-  # exposes per-system attrsets (`lib.<system>.mkSandbox`, mirroring its own
-  # `checks` output), so indexing by pkgs.system is the intended usage, not
-  # a workaround.
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
   # Python package names for the eval environment. This single list drives
@@ -110,8 +106,7 @@ let
     exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
   '';
 
-  # Directories the sandboxed agent may read and write. Shared across omp
-  # and copilot-cli. ensureAgentSandboxDirs (below) creates any of these
+  # Directories the sandboxed agent may read and write. Shared across all agents. ensureAgentSandboxDirs (below) creates any of these
   # that are missing so a freshly synced machine doesn't hard-fail at
   # sandbox launch — agent-sandbox.nix requires every declared rwDir /
   # rwFile to already exist on the host.
@@ -167,11 +162,6 @@ let
       allowedPackages = cfg.sandbox.allowedPackages;
 
       allowNix = true;
-      # /dev/dri passthrough so chromiumWrapper (Puppeteer/browser tooling)
-      # gets hardware-accelerated WebGL instead of silently falling back to
-      # software rendering. Requires host user membership in the "render"
-      # or "video" group; see agent-sandbox.nix's "Using GPU acceleration
-      # inside the sandbox" README section.
       allowGpu = true;
       # Bind system nix config read-only so the agent inherits experimental
       # features (nix-command, flakes) and substituter/registry settings.
