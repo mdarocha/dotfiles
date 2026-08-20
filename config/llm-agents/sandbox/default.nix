@@ -159,6 +159,20 @@ let
     "$HOME/.bunfig.toml"
   ];
 
+  # Read-only dirs/files bound into the sandbox. Host-owned paths under $HOME
+  # are pre-created by ensureAgentSandboxDirs below, same as sharedRwDirs /
+  # sharedRwFiles. System paths outside $HOME (e.g. /etc/nix/nix.conf) and
+  # runtime sockets (waylandSocketPath) are expected to already exist and are
+  # bound directly in wrapWithSandbox instead.
+  sharedRoDirs = [
+    "$HOME/.config/direnv"
+    "$HOME/.local/share/direnv"
+  ];
+
+  sharedRoFiles = [
+    "$HOME/.config/git/config"
+  ];
+
   # Standard single-user-desktop location, exposed in sandbox to allow clipboard access
   waylandRuntimeDir = "/run/user/1000";
   waylandDisplay = "wayland-0";
@@ -181,15 +195,8 @@ let
       # agent can't plant core.hooksPath / alias.* entries that would fire
       # host-side code on the next host `git` invocation — see the upstream
       # README's "Git identity" section.
-      roFiles = [
-        "/etc/nix/nix.conf"
-        "$HOME/.config/git/config"
-      ];
-      roDirs = [
-        waylandSocketPath
-        "$HOME/.config/direnv"
-        "$HOME/.local/share/direnv"
-      ];
+      roFiles = [ "/etc/nix/nix.conf" ] ++ sharedRoFiles;
+      roDirs = [ waylandSocketPath ] ++ sharedRoDirs;
 
       rwDirs = sharedRwDirs;
       rwFiles = sharedRwFiles;
@@ -475,16 +482,17 @@ in
   };
 
   config = lib.mkIf cfg.sandbox.enable {
-    # agent-sandbox.nix hard-errors at launch if a declared rwDir / rwFile
-    # is missing on the host. Create them here as a home-manager activation
-    # step instead of relying on the sandbox library to create them itself
-    # (upstream deliberately removed that: silently creating agent-declared
-    # paths at every launch risks masking typos as new state directories).
+    # agent-sandbox.nix hard-errors at launch if a declared rwDir / rwFile /
+    # roDir / roFile is missing on the host. Create them here as a
+    # home-manager activation step instead of relying on the sandbox library
+    # to create them itself (upstream deliberately removed that: silently
+    # creating agent-declared paths at every launch risks masking typos as
+    # new state directories).
     # See https://github.com/archie-judd/agent-sandbox.nix/pull/72.
     home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${p}"'') sharedRwDirs}
-      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') sharedRwFiles}
-      touch ${lib.concatMapStringsSep " " (p: ''"${p}"'') sharedRwFiles}
+      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwDirs ++ sharedRoDirs)}
+      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') (sharedRwFiles ++ sharedRoFiles)}
+      touch ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwFiles ++ sharedRoFiles)}
     '';
   };
 }
