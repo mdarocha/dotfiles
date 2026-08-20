@@ -141,6 +141,38 @@ in
         etc.), **the agent must start it** via `bash` inside the current session.
         Asking the user to start it on their machine and then connecting to it will not work.
 
+        ## Browser GPU acceleration (sandbox only)
+
+        `browser.headless` (config.yml, default `true`) controls whether the
+        sandboxed Chromium launches hidden or with a visible window. **Do not
+        rely on config.yml alone to determine the current value** — the key is
+        usually absent (using the schema default), and even when set, an
+        already-running browser daemon keeps whatever setting was active at
+        its own launch until it's restarted. Check the live process instead:
+
+        ```bash
+        ps aux | grep -o -- '--ozone-platform=headless' | head -1
+        ```
+
+        Non-empty output → hidden/headless mode is active. Empty output with
+        a `libexec/chromium/chromium` process present → visible mode is
+        active. No chromium process at all → the browser tool hasn't launched
+        yet this session; the mode is undetermined until first use.
+
+        Hidden mode forces software-only rendering, regardless of any sandbox
+        GPU passthrough config: passing `--headless=new` makes Chromium
+        auto-select `--ozone-platform=headless` internally, and that Ozone
+        backend forces SwiftShader unconditionally, so `/dev/dri` access,
+        `/sys`, and correct Mesa driver env vars all become irrelevant.
+        Visible mode skips `--headless=new` entirely, so Chromium falls back
+        to the sandbox's real Wayland socket (bound in for clipboard support)
+        and gets genuine hardware acceleration where the sandbox allows it.
+
+        To check actual GPU status, read `chrome://gpu`'s "Graphics Feature
+        Status" and `GPU0` fields, not `WEBGL_debug_renderer_info` /
+        `navigator.userAgent` — the browser tool spoofs those for
+        fingerprinting resistance regardless of the real backend.
+
         ## WSL environment
 
         When running under WSL (Windows Subsystem for Linux), Windows filesystem paths
