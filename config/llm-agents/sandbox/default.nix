@@ -77,9 +77,7 @@ let
 
   # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
   # to pkgs.python3Packages via the repo's nixpkgs overlay.
-  pythonEvalEnv = pkgs.python3.withPackages (
-    ps: map (name: ps.${name}) pythonEvalPackageNames
-  );
+  pythonEvalEnv = pkgs.python3.withPackages (ps: map (name: ps.${name}) pythonEvalPackageNames);
 
   # Chromium wrapper that imports the sandbox proxy CA into Chromium's NSS
   # cert store before launch. The proxy is a TLS-intercepting MITM whose CA
@@ -201,37 +199,36 @@ let
         else
           merged;
 
-      env =
-        {
-          # Lets agent instructions detect sandboxed vs. -nosandbox execution
-          # without relying on fragile process-name introspection.
-          MDAROCHA_AGENT_SANDBOX = "1";
-          # Used by karma-chrome-launcher when running Angular unit tests.
-          CHROME_BIN = "${chromiumWrapper}/bin/chromium";
-          # Used by Puppeteer (OMP browser tools). Point directly at the
-          # Nix-provided binary so Puppeteer never tries to download Chrome.
-          PUPPETEER_EXECUTABLE_PATH = "${chromiumWrapper}/bin/chromium";
-          PUPPETEER_SKIP_DOWNLOAD = "true";
-          # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
-          # (sandbox-local loopback, isolated from the host). Without these,
-          # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
-          # 403 for 127.0.0.1 because it is not in the allowlist.
-          NO_PROXY = "127.0.0.1,localhost";
-          no_proxy = "127.0.0.1,localhost";
-          # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
-          # fonts. Without a valid config file the sandbox sees no fonts and Chrome
-          # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
-          # correctly inside the sandbox.
-          FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
-          # Python eval environment for OMP's eval tool. Setting VIRTUAL_ENV to
-          # this Nix-built env causes the OMP runtime to prepend its bin/ to PATH,
-          # making `python3 -m kernel_gateway` and `ipykernel` available without
-          # any pip install step at runtime.
-          VIRTUAL_ENV = "${pythonEvalEnv}";
-          # Expose to allow clipboard access
-          WAYLAND_DISPLAY = waylandDisplay;
-          XDG_RUNTIME_DIR = waylandRuntimeDir;
-        };
+      env = {
+        # Lets agent instructions detect sandboxed vs. -nosandbox execution
+        # without relying on fragile process-name introspection.
+        MDAROCHA_AGENT_SANDBOX = "1";
+        # Used by karma-chrome-launcher when running Angular unit tests.
+        CHROME_BIN = "${chromiumWrapper}/bin/chromium";
+        # Used by Puppeteer (OMP browser tools). Point directly at the
+        # Nix-provided binary so Puppeteer never tries to download Chrome.
+        PUPPETEER_EXECUTABLE_PATH = "${chromiumWrapper}/bin/chromium";
+        PUPPETEER_SKIP_DOWNLOAD = "true";
+        # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
+        # (sandbox-local loopback, isolated from the host). Without these,
+        # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
+        # 403 for 127.0.0.1 because it is not in the allowlist.
+        NO_PROXY = "127.0.0.1,localhost";
+        no_proxy = "127.0.0.1,localhost";
+        # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
+        # fonts. Without a valid config file the sandbox sees no fonts and Chrome
+        # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
+        # correctly inside the sandbox.
+        FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
+        # Python eval environment for OMP's eval tool. Setting VIRTUAL_ENV to
+        # this Nix-built env causes the OMP runtime to prepend its bin/ to PATH,
+        # making `python3 -m kernel_gateway` and `ipykernel` available without
+        # any pip install step at runtime.
+        VIRTUAL_ENV = "${pythonEvalEnv}";
+        # Expose to allow clipboard access
+        WAYLAND_DISPLAY = waylandDisplay;
+        XDG_RUNTIME_DIR = waylandRuntimeDir;
+      };
     };
 
   # PATH containing every sandbox tool's bin directory, prepended onto PATH
@@ -419,18 +416,27 @@ in
         description = "Human-readable names of sandbox packages, auto-derived for agent instructions.";
         default =
           let
-            cleanName = raw:
+            cleanName =
+              raw:
               let
                 # Strip "-wrapper" suffix (e.g. binutils-wrapper → binutils)
                 s1 = lib.removeSuffix "-wrapper" raw;
                 # Strip version-env suffix (e.g. python3-3.14.6-env → python3)
-                s2 = let m = builtins.match "(.+)-[0-9].*" s1;
-                     in if m != null then builtins.head m else s1;
-              in s2;
-            getName = p:
-              if p ? pname then cleanName p.pname
-              else if p ? name then cleanName p.name
-              else null;
+                s2 =
+                  let
+                    m = builtins.match "(.+)-[0-9].*" s1;
+                  in
+                  if m != null then builtins.head m else s1;
+              in
+              s2;
+            getName =
+              p:
+              if p ? pname then
+                cleanName p.pname
+              else if p ? name then
+                cleanName p.name
+              else
+                null;
           in
           builtins.filter (n: n != null) (map getName cfg.sandbox.allowedPackages);
       };
