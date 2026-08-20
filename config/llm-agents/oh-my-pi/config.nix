@@ -35,7 +35,14 @@
 
   # context
   contextPromotion.enabled = true;
-  compaction.thresholdPercent = 80;
+  compaction = {
+    thresholdPercent = 80;
+    methodOrder = [
+      "snapcompact"
+      "remote"
+      "soft"
+    ];
+  };
 
   # memory
   memory.backend = "mnemopi";
@@ -75,4 +82,13 @@
     ];
     fetch = "native";
   };
+
+  # composer
+  composer.shape = "box";
+
+  # shell
+  bash.direnv = "auto";
+
+  # sharing
+  share.store = "gist";
 }
