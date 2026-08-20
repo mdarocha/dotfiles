@@ -25,7 +25,10 @@
     # Pending https://github.com/archie-judd/agent-sandbox.nix/pull/74
     # (allowGpu / /dev/dri passthrough). Track this branch until merged
     # upstream, then point back at "main".
-    agent-sandbox.url = "github:mdarocha/agent-sandbox.nix/feat/allow-gpu";
+    agent-sandbox = {
+      url = "github:mdarocha/agent-sandbox.nix/feat/allow-gpu";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     humanizer = {
       url = "github:blader/humanizer";
