@@ -29,10 +29,6 @@ let
     else
       value;
 
-  # Instantiate agent-sandbox.nix for the current platform. The library
-  # exposes per-system attrsets from its flake output so we index by
-  # pkgs.system here rather than threading a second pkgs argument through.
-  # TODO: this is ugly, improve
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
   # Python package names for the eval environment. This single list drives
@@ -77,9 +73,7 @@ let
 
   # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
   # to pkgs.python3Packages via the repo's nixpkgs overlay.
-  pythonEvalEnv = pkgs.python3.withPackages (
-    ps: map (name: ps.${name}) pythonEvalPackageNames
-  );
+  pythonEvalEnv = pkgs.python3.withPackages (ps: map (name: ps.${name}) pythonEvalPackageNames);
 
   # Chromium wrapper that imports the sandbox proxy CA into Chromium's NSS
   # cert store before launch. The proxy is a TLS-intercepting MITM whose CA
@@ -112,7 +106,10 @@ let
     exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
   '';
 
-  # Directories the sandboxed agent may read and write. Shared across omp and copilot-cli.
+  # Directories the sandboxed agent may read and write. Shared across all agents. ensureAgentSandboxDirs (below) creates any of these
+  # that are missing so a freshly synced machine doesn't hard-fail at
+  # sandbox launch — agent-sandbox.nix requires every declared rwDir /
+  # rwFile to already exist on the host.
   sharedRwDirs = [
     # Agent configs
     "$HOME/.omp"
@@ -120,18 +117,15 @@ let
 
     # Misc configs
     "$HOME/.config/gh"
-    "$HOME/.config/git"
 
-    # Nix user config and profile state. Created if absent so nix commands
-    # (registry, config, nix-env) persist their state across sandbox runs.
+    # Nix user config and profile state, so nix commands (registry, config,
+    # nix-env) persist their state across sandbox runs.
     "$HOME/.config/nix"
     "$HOME/.local/state/nix"
 
-    # npm / bun config and caches
-    "$HOME/.npmrc"
+    # npm / bun caches
     "$HOME/.npm"
     "$HOME/.bun/install/cache"
-    "$HOME/.bunfig.toml"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
 
@@ -145,6 +139,12 @@ let
     "$HOME/.local/share/MicrosoftCredentialProvider"
     "$HOME/.local/.IdentityService"
     "$HOME/.microsoft/usersecrets"
+  ];
+
+  # Individual rw files, alongside sharedRwDirs above.
+  sharedRwFiles = [
+    "$HOME/.npmrc"
+    "$HOME/.bunfig.toml"
   ];
 
   # Standard single-user-desktop location, exposed in sandbox to allow clipboard access
@@ -162,12 +162,21 @@ let
       allowedPackages = cfg.sandbox.allowedPackages;
 
       allowNix = true;
+      allowGpu = true;
       # Bind system nix config read-only so the agent inherits experimental
       # features (nix-command, flakes) and substituter/registry settings.
-      roFiles = [ "/etc/nix/nix.conf" ];
+      # Git identity config is also bound read-only (not a rwDir) so the
+      # agent can't plant core.hooksPath / alias.* entries that would fire
+      # host-side code on the next host `git` invocation — see the upstream
+      # README's "Git identity" section.
+      roFiles = [
+        "/etc/nix/nix.conf"
+        "$HOME/.config/git/config"
+      ];
       roDirs = [ waylandSocketPath ];
 
       rwDirs = sharedRwDirs;
+      rwFiles = sharedRwFiles;
 
       allowedDomains =
         let
@@ -186,37 +195,36 @@ let
         else
           merged;
 
-      env =
-        {
-          # Lets agent instructions detect sandboxed vs. -nosandbox execution
-          # without relying on fragile process-name introspection.
-          MDAROCHA_AGENT_SANDBOX = "1";
-          # Used by karma-chrome-launcher when running Angular unit tests.
-          CHROME_BIN = "${chromiumWrapper}/bin/chromium";
-          # Used by Puppeteer (OMP browser tools). Point directly at the
-          # Nix-provided binary so Puppeteer never tries to download Chrome.
-          PUPPETEER_EXECUTABLE_PATH = "${chromiumWrapper}/bin/chromium";
-          PUPPETEER_SKIP_DOWNLOAD = "true";
-          # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
-          # (sandbox-local loopback, isolated from the host). Without these,
-          # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
-          # 403 for 127.0.0.1 because it is not in the allowlist.
-          NO_PROXY = "127.0.0.1,localhost";
-          no_proxy = "127.0.0.1,localhost";
-          # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
-          # fonts. Without a valid config file the sandbox sees no fonts and Chrome
-          # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
-          # correctly inside the sandbox.
-          FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
-          # Python eval environment for OMP's eval tool. Setting VIRTUAL_ENV to
-          # this Nix-built env causes the OMP runtime to prepend its bin/ to PATH,
-          # making `python3 -m kernel_gateway` and `ipykernel` available without
-          # any pip install step at runtime.
-          VIRTUAL_ENV = "${pythonEvalEnv}";
-          # Expose to allow clipboard access
-          WAYLAND_DISPLAY = waylandDisplay;
-          XDG_RUNTIME_DIR = waylandRuntimeDir;
-        };
+      env = {
+        # Lets agent instructions detect sandboxed vs. -nosandbox execution
+        # without relying on fragile process-name introspection.
+        MDAROCHA_AGENT_SANDBOX = "1";
+        # Used by karma-chrome-launcher when running Angular unit tests.
+        CHROME_BIN = "${chromiumWrapper}/bin/chromium";
+        # Used by Puppeteer (OMP browser tools). Point directly at the
+        # Nix-provided binary so Puppeteer never tries to download Chrome.
+        PUPPETEER_EXECUTABLE_PATH = "${chromiumWrapper}/bin/chromium";
+        PUPPETEER_SKIP_DOWNLOAD = "true";
+        # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
+        # (sandbox-local loopback, isolated from the host). Without these,
+        # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
+        # 403 for 127.0.0.1 because it is not in the allowlist.
+        NO_PROXY = "127.0.0.1,localhost";
+        no_proxy = "127.0.0.1,localhost";
+        # Chromium-based tests (e.g. Angular/Karma) call fontconfig to enumerate
+        # fonts. Without a valid config file the sandbox sees no fonts and Chrome
+        # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
+        # correctly inside the sandbox.
+        FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
+        # Python eval environment for OMP's eval tool. Setting VIRTUAL_ENV to
+        # this Nix-built env causes the OMP runtime to prepend its bin/ to PATH,
+        # making `python3 -m kernel_gateway` and `ipykernel` available without
+        # any pip install step at runtime.
+        VIRTUAL_ENV = "${pythonEvalEnv}";
+        # Expose to allow clipboard access
+        WAYLAND_DISPLAY = waylandDisplay;
+        XDG_RUNTIME_DIR = waylandRuntimeDir;
+      };
     };
 
   # PATH containing every sandbox tool's bin directory, prepended onto PATH
@@ -404,18 +412,27 @@ in
         description = "Human-readable names of sandbox packages, auto-derived for agent instructions.";
         default =
           let
-            cleanName = raw:
+            cleanName =
+              raw:
               let
                 # Strip "-wrapper" suffix (e.g. binutils-wrapper → binutils)
                 s1 = lib.removeSuffix "-wrapper" raw;
                 # Strip version-env suffix (e.g. python3-3.14.6-env → python3)
-                s2 = let m = builtins.match "(.+)-[0-9].*" s1;
-                     in if m != null then builtins.head m else s1;
-              in s2;
-            getName = p:
-              if p ? pname then cleanName p.pname
-              else if p ? name then cleanName p.name
-              else null;
+                s2 =
+                  let
+                    m = builtins.match "(.+)-[0-9].*" s1;
+                  in
+                  if m != null then builtins.head m else s1;
+              in
+              s2;
+            getName =
+              p:
+              if p ? pname then
+                cleanName p.pname
+              else if p ? name then
+                cleanName p.name
+              else
+                null;
           in
           builtins.filter (n: n != null) (map getName cfg.sandbox.allowedPackages);
       };
@@ -439,5 +456,19 @@ in
         description = "Function to wrap a package binary with the sandbox and also produce an unsandboxed variant named <name>-nosandbox.";
       };
     };
+  };
+
+  config = lib.mkIf cfg.sandbox.enable {
+    # agent-sandbox.nix hard-errors at launch if a declared rwDir / rwFile
+    # is missing on the host. Create them here as a home-manager activation
+    # step instead of relying on the sandbox library to create them itself
+    # (upstream deliberately removed that: silently creating agent-declared
+    # paths at every launch risks masking typos as new state directories).
+    # See https://github.com/archie-judd/agent-sandbox.nix/pull/72.
+    home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${p}"'') sharedRwDirs}
+      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') sharedRwFiles}
+      touch ${lib.concatMapStringsSep " " (p: ''"${p}"'') sharedRwFiles}
+    '';
   };
 }
