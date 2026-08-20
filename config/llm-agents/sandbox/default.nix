@@ -101,6 +101,10 @@ let
     export LIBGL_DRIVERS_PATH="${pkgs.mesa}/lib/dri"
     export __EGL_VENDOR_LIBRARY_FILENAMES="${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json"
     export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/intel_icd.x86_64.json"
+    # Mesa's GBM loader (buffer allocation for EGL/Wayland surfaces) has its
+    # own separate search path from LIBGL_DRIVERS_PATH; without it ANGLE's
+    # EGL init fails with "MESA-LOADER: failed to open dri: .../gbm/dri_gbm.so".
+    export GBM_BACKENDS_PATH="${pkgs.mesa}/lib/gbm"
   '';
   chromiumWrapper = pkgs.writeShellScriptBin "chromium" ''
     if [ -f /tmp/sandbox-ca-cert.pem ]; then
