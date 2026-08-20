@@ -29,10 +29,10 @@ let
     else
       value;
 
-  # Instantiate agent-sandbox.nix for the current platform. The library
-  # exposes per-system attrsets from its flake output so we index by
-  # pkgs.system here rather than threading a second pkgs argument through.
-  # TODO: this is ugly, improve
+  # Instantiate agent-sandbox.nix for the current platform. Its flake only
+  # exposes per-system attrsets (`lib.<system>.mkSandbox`, mirroring its own
+  # `checks` output), so indexing by pkgs.system is the intended usage, not
+  # a workaround.
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
   # Python package names for the eval environment. This single list drives
@@ -112,7 +112,11 @@ let
     exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
   '';
 
-  # Directories the sandboxed agent may read and write. Shared across omp and copilot-cli.
+  # Directories the sandboxed agent may read and write. Shared across omp
+  # and copilot-cli. ensureAgentSandboxDirs (below) creates any of these
+  # that are missing so a freshly synced machine doesn't hard-fail at
+  # sandbox launch — agent-sandbox.nix requires every declared rwDir /
+  # rwFile to already exist on the host.
   sharedRwDirs = [
     # Agent configs
     "$HOME/.omp"
@@ -120,18 +124,15 @@ let
 
     # Misc configs
     "$HOME/.config/gh"
-    "$HOME/.config/git"
 
-    # Nix user config and profile state. Created if absent so nix commands
-    # (registry, config, nix-env) persist their state across sandbox runs.
+    # Nix user config and profile state, so nix commands (registry, config,
+    # nix-env) persist their state across sandbox runs.
     "$HOME/.config/nix"
     "$HOME/.local/state/nix"
 
-    # npm / bun config and caches
-    "$HOME/.npmrc"
+    # npm / bun caches
     "$HOME/.npm"
     "$HOME/.bun/install/cache"
-    "$HOME/.bunfig.toml"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
 
@@ -145,6 +146,12 @@ let
     "$HOME/.local/share/MicrosoftCredentialProvider"
     "$HOME/.local/.IdentityService"
     "$HOME/.microsoft/usersecrets"
+  ];
+
+  # Individual rw files, alongside sharedRwDirs above.
+  sharedRwFiles = [
+    "$HOME/.npmrc"
+    "$HOME/.bunfig.toml"
   ];
 
   # Standard single-user-desktop location, exposed in sandbox to allow clipboard access
@@ -164,10 +171,18 @@ let
       allowNix = true;
       # Bind system nix config read-only so the agent inherits experimental
       # features (nix-command, flakes) and substituter/registry settings.
-      roFiles = [ "/etc/nix/nix.conf" ];
+      # Git identity config is also bound read-only (not a rwDir) so the
+      # agent can't plant core.hooksPath / alias.* entries that would fire
+      # host-side code on the next host `git` invocation — see the upstream
+      # README's "Git identity" section.
+      roFiles = [
+        "/etc/nix/nix.conf"
+        "$HOME/.config/git/config"
+      ];
       roDirs = [ waylandSocketPath ];
 
       rwDirs = sharedRwDirs;
+      rwFiles = sharedRwFiles;
 
       allowedDomains =
         let
@@ -439,5 +454,19 @@ in
         description = "Function to wrap a package binary with the sandbox and also produce an unsandboxed variant named <name>-nosandbox.";
       };
     };
+  };
+
+  config = lib.mkIf cfg.sandbox.enable {
+    # agent-sandbox.nix hard-errors at launch if a declared rwDir / rwFile
+    # is missing on the host. Create them here as a home-manager activation
+    # step instead of relying on the sandbox library to create them itself
+    # (upstream deliberately removed that: silently creating agent-declared
+    # paths at every launch risks masking typos as new state directories).
+    # See https://github.com/archie-judd/agent-sandbox.nix/pull/72.
+    home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${p}"'') sharedRwDirs}
+      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') sharedRwFiles}
+      touch ${lib.concatMapStringsSep " " (p: ''"${p}"'') sharedRwFiles}
+    '';
   };
 }
