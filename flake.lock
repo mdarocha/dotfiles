@@ -5,15 +5,16 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1787133823,
-        "narHash": "sha256-hsRi1fueoDIfw9kYtdA7mJlF5yHrl7W5GQSDPGtRC/4=",
+        "lastModified": 1787254250,
+        "narHash": "sha256-IszrR9KAg/GcNB7hoy3Texj8VWrmCU7RX5gbhUTTxQE=",
         "owner": "mdarocha",
         "repo": "agent-sandbox.nix",
-        "rev": "6c9e5afa8c4f465540c1e909efc1b09f62be9dd3",
+        "rev": "f6f8afd0516780d2d97ead27b0f0ce46b01f4836",
         "type": "github"
       },
       "original": {
         "owner": "mdarocha",
+        "ref": "feat/allow-gpu",
         "repo": "agent-sandbox.nix",
         "type": "github"
       }
@@ -134,11 +135,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1787250729,
-        "narHash": "sha256-JLimTrx9N4ICfuPwd+MByJooJ+BUBpvelN3XHA+HL5E=",
+        "lastModified": 1787252197,
+        "narHash": "sha256-6K9jl0sl257ppTU+RG1eVIwEtkx7KEPutae+CMNtAW4=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "c6e14e071226a088986b0b7bc2bfcb09d62c1460",
+        "rev": "ab1f750326fab54710dcdbbf25cc1b37e2fc7347",
         "type": "github"
       },
       "original": {
