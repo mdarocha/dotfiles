@@ -139,6 +139,7 @@ let
     "$HOME/.bun/install/cache"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
+    "$HOME/.cache/direnv"
 
     # Rust / Cargo registry and build cache
     "$HOME/.cargo"
@@ -184,7 +185,11 @@ let
         "/etc/nix/nix.conf"
         "$HOME/.config/git/config"
       ];
-      roDirs = [ waylandSocketPath ];
+      roDirs = [
+        waylandSocketPath
+        "$HOME/.config/direnv"
+        "$HOME/.local/share/direnv"
+      ];
 
       rwDirs = sharedRwDirs;
       rwFiles = sharedRwFiles;
