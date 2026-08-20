@@ -24,6 +24,11 @@
 
     agent-sandbox.url = "github:mdarocha/agent-sandbox.nix";
 
+    humanizer = {
+      url = "github:blader/humanizer";
+      flake = false;
+    };
+
     anthropics-skills = {
       url = "github:anthropics/skills";
       flake = false;

@@ -229,6 +229,7 @@ in
         pptx = "${inputs.anthropics-skills}/skills/pptx";
         xlsx = "${inputs.anthropics-skills}/skills/xlsx";
         frontend-design = "${inputs.anthropics-skills}/skills/frontend-design";
+        humanizer = inputs.humanizer;
       };
     };
 
