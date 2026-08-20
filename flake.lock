@@ -109,6 +109,22 @@
         "type": "github"
       }
     },
+    "humanizer": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787119133,
+        "narHash": "sha256-n08pud3m9ka1Ymqv6qinSCUku975FM2LJRboi9ur5D4=",
+        "owner": "blader",
+        "repo": "humanizer",
+        "rev": "e2e92e7b4b8229253ed5c8e81dc65463fdeddda5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "blader",
+        "repo": "humanizer",
+        "type": "github"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -201,6 +217,7 @@
         "agent-sandbox": "agent-sandbox",
         "anthropics-skills": "anthropics-skills",
         "home-manager": "home-manager",
+        "humanizer": "humanizer",
         "llm-agents": "llm-agents",
         "nixpkgs": "nixpkgs_3",
         "oh-my-zsh": "oh-my-zsh",
