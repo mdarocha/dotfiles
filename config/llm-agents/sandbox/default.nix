@@ -92,6 +92,16 @@ let
   # --disable-dev-shm-usage: bwrap gives the sandbox a fresh /tmp tmpfs and a
   #   minimal /dev, so /dev/shm may be absent or very small. This flag makes
   #   Chromium write shared memory blobs to /tmp instead, avoiding crashes.
+  # Even with /dev/dri bound in (see allowGpu below), ANGLE falls back to
+  # SwiftShader unless it can also load a userspace GPU driver. The host
+  # isn't NixOS, so there's no /run/opengl-driver to bind in — point the
+  # loaders at nixpkgs' own Mesa build instead, which only needs /dev/dri
+  # ioctls to work and doesn't have to match the host's Mesa version.
+  mesaDriverEnv = ''
+    export LIBGL_DRIVERS_PATH="${pkgs.mesa}/lib/dri"
+    export __EGL_VENDOR_LIBRARY_FILENAMES="${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json"
+    export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/intel_icd.x86_64.json"
+  '';
   chromiumWrapper = pkgs.writeShellScriptBin "chromium" ''
     if [ -f /tmp/sandbox-ca-cert.pem ]; then
       NSS_DB="$HOME/.pki/nssdb"
@@ -103,6 +113,7 @@ let
         -n "sandbox-proxy-ca" -t "C,," \
         -i /tmp/sandbox-ca-cert.pem 2>/dev/null || true
     fi
+    ${mesaDriverEnv}
     exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
   '';
 
