@@ -167,6 +167,12 @@ let
       allowedPackages = cfg.sandbox.allowedPackages;
 
       allowNix = true;
+      # /dev/dri passthrough so chromiumWrapper (Puppeteer/browser tooling)
+      # gets hardware-accelerated WebGL instead of silently falling back to
+      # software rendering. Requires host user membership in the "render"
+      # or "video" group; see agent-sandbox.nix's "Using GPU acceleration
+      # inside the sandbox" README section.
+      allowGpu = true;
       # Bind system nix config read-only so the agent inherits experimental
       # features (nix-command, flakes) and substituter/registry settings.
       # Git identity config is also bound read-only (not a rwDir) so the

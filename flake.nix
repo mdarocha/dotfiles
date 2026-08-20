@@ -22,7 +22,10 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
-    agent-sandbox.url = "github:mdarocha/agent-sandbox.nix";
+    # Pending https://github.com/archie-judd/agent-sandbox.nix/pull/74
+    # (allowGpu / /dev/dri passthrough). Track this branch until merged
+    # upstream, then point back at "main".
+    agent-sandbox.url = "github:mdarocha/agent-sandbox.nix/feat/allow-gpu";
 
     anthropics-skills = {
       url = "github:anthropics/skills";
