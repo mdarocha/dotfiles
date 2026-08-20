@@ -31,6 +31,20 @@ let
 
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
+  # The sandbox's own nixpkgs pin only ever provides upstream Nix, never a
+  # byte-identical build of the host's actual Nix — Determinate Nix is a
+  # separate fork (github.com/DeterminateSystems/nix-src) with its own
+  # settings (e.g. `lazy-trees`) that upstream Nix doesn't recognize. Since
+  # `allowNix = true` already read-only binds /nix/store and /nix/var into
+  # the sandbox, the host's real Nix is reachable there — just not on PATH
+  # ahead of nixpkgs' own `nix`. Passing this symlink package first in
+  # `allowedPackages` makes the sandbox's `nix` resolve to the exact binary
+  # the host uses, following upgrades via the stable profile symlink.
+  determinateNixPassthrough = pkgs.runCommand "nix" { } ''
+    mkdir -p $out/bin
+    ln -s /nix/var/nix/profiles/default/bin/nix $out/bin/nix
+  '';
+
   # Python package names for the eval environment. This single list drives
   # both the Nix environment (pythonEvalEnv) and the agent instructions
   # (sandbox.pythonPackageNames) so they never drift apart.
@@ -395,6 +409,7 @@ in
         type = types.listOf types.package;
         description = "Packages placed on PATH inside the agent sandbox. Add any tool the agent needs to invoke.";
         default = with pkgs; [
+          determinateNixPassthrough
           git
           gh
           pythonEvalEnv
