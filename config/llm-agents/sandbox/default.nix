@@ -497,7 +497,9 @@ in
     home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       mkdir -p ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwDirs ++ sharedRoDirs)}
       mkdir -p ${lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') (sharedRwFiles ++ sharedRoFiles)}
-      touch ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwFiles ++ sharedRoFiles)}
+      for f in ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwFiles ++ sharedRoFiles)}; do
+        [ -e "$f" ] || touch "$f" || true
+      done
     '';
   };
 }
