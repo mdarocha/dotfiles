@@ -141,6 +141,28 @@ in
         etc.), **the agent must start it** via `bash` inside the current session.
         Asking the user to start it on their machine and then connecting to it will not work.
 
+        ## Git LFS and `.git/config` (sandbox only)
+
+        `.git/config` in a project checkout is **read-only** inside the sandbox. Any
+        write to it — `git config --local ...`, or `git lfs install` (which writes
+        local `filter.lfs.*` entries by default) — fails with "Device or resource
+        busy" / "Read-only file system". This is not repo-specific; it applies to
+        every checkout.
+
+        Consequences and workarounds:
+        - Configure LFS filters **globally** instead of locally:
+          `git lfs install --skip-repo` writes `filter.lfs.*` to `~/.gitconfig`
+          (writable) without touching the checkout's `.git/config`. Global filter
+          config is sufficient for `add`/`commit`/`push`/`checkout` to smudge/clean
+          LFS-tracked files correctly — per-repo `.git/config` entries are not
+          required.
+        - `git-lfs` is not on `$PATH` by default. Get it via
+          `nix run nixpkgs#git-lfs -- <args>`, or resolve the store path once with
+          `nix build nixpkgs#git-lfs --no-link --print-out-paths` and prepend
+          `<store-path>/bin` to `$PATH` for the rest of the session so bare
+          `git-lfs` calls (including the repo's `pre-push`/`post-commit` hooks)
+          resolve normally.
+
         ## Browser GPU acceleration
 
         This applies identically inside the sandbox and in the `-nosandbox` variant.
