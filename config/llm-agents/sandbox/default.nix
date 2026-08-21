@@ -396,6 +396,7 @@ in
         description = "Packages placed on PATH inside the agent sandbox. Add any tool the agent needs to invoke.";
         default = with pkgs; [
           git
+          git-lfs
           gh
           pythonEvalEnv
           nodejs

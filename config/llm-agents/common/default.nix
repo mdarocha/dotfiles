@@ -143,25 +143,18 @@ in
 
         ## Git LFS and `.git/config` (sandbox only)
 
-        `.git/config` in a project checkout is **read-only** inside the sandbox. Any
-        write to it — `git config --local ...`, or `git lfs install` (which writes
-        local `filter.lfs.*` entries by default) — fails with "Device or resource
+        `.git/config` in a project checkout is **read-only** inside the sandbox — any
+        write to it, e.g. `git config --local ...`, fails with "Device or resource
         busy" / "Read-only file system". This is not repo-specific; it applies to
         every checkout.
 
-        Consequences and workarounds:
-        - Configure LFS filters **globally** instead of locally:
-          `git lfs install --skip-repo` writes `filter.lfs.*` to `~/.gitconfig`
-          (writable) without touching the checkout's `.git/config`. Global filter
-          config is sufficient for `add`/`commit`/`push`/`checkout` to smudge/clean
-          LFS-tracked files correctly — per-repo `.git/config` entries are not
-          required.
-        - `git-lfs` is not on `$PATH` by default. Get it via
-          `nix run nixpkgs#git-lfs -- <args>`, or resolve the store path once with
-          `nix build nixpkgs#git-lfs --no-link --print-out-paths` and prepend
-          `<store-path>/bin` to `$PATH` for the rest of the session so bare
-          `git-lfs` calls (including the repo's `pre-push`/`post-commit` hooks)
-          resolve normally.
+        Do **not** run `git lfs install`: LFS filters are already configured
+        globally (`filter.lfs.*` in `~/.config/git/config`, provisioned by
+        home-manager's `programs.git.lfs.enable`), and that file is also a
+        read-only bind mount inside the sandbox, so `git lfs install` cannot write
+        to it either and is unnecessary — `add`/`commit`/`push`/`checkout` already
+        smudge/clean LFS-tracked files correctly without any per-repo
+        `.git/config` entries. `git-lfs` itself is on `$PATH`.
 
         ## Browser GPU acceleration
 
