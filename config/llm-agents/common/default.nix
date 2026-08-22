@@ -257,6 +257,55 @@ in
           true no matter the hardware or environment the reader runs in. Only
           mention an environment constraint when it is genuinely the sole thing
           that makes the code make sense.
+
+        ## Code style preferences
+
+        - Avoid magic numbers and strings: extract recurring or meaningful values
+          into named constants or enums. Leave self-explanatory, one-off values
+          inline — don't create a constant just to name something obvious. If a
+          value comes from an external spec (e.g. HTTP 200), name it regardless.
+        - Reduce nesting: prefer early return/continue over deeply nested
+          conditionals (avoid the arrow anti-pattern).
+        - Prefer enums over boolean parameters when a function takes more than one
+          flag — call sites read better as a named variant than a wall of
+          `true`/`false`.
+        - Give logical blocks of code room to breathe with blank lines; don't cram
+          unrelated statements together.
+        - Keep function names short and descriptive. A name that needs much more
+          than ~30 characters is usually a sign to find a better abstraction or
+          split the function, not to keep shortening the name.
+        - Treat visibility changes as a design decision: keep fields and functions
+          private unless external access is actually required. Ask before widening
+          an access modifier from private to internal/public.
+        - Encapsulate low-level mechanics (raw I/O, protocol parsing, direct
+          socket/DB access) behind a dedicated layer, and expose higher layers a
+          clean API in terms of domain concepts rather than implementation
+          details. Don't let a caller reach through an abstraction layer to talk
+          to what's underneath it directly.
+        - Always use braces on conditionals and loops, even for single-statement
+          bodies.
+        - When fixing a reported bug, first write a failing test that reproduces
+          it, confirm it fails, then write the fix and confirm the test passes.
+        - Don't touch code unrelated to the change you're making. Minimize the
+          number of changed lines — e.g. don't add comments or reformat a block
+          you didn't otherwise need to modify.
+
+        ## Communication style
+
+        - In prose meant for a human (chat replies, PR descriptions), use as few
+          words as possible — pick each word deliberately rather than padding.
+        - Skip superlatives and validation ("you're absolutely right", "great
+          question"). State the assessment plainly, including when something is
+          wrong.
+
+        ## Long sessions and context dilution
+
+        Instructions placed in the middle of a long context get less attention
+        than those at the start or end (the "lost in the middle" effect), and
+        code quality can visibly drift as a session grows. If you notice output
+        drifting from these instructions, re-read this file rather than trying to
+        course-correct piecemeal. Prefer starting a fresh session per
+        feature/task over one long session that accumulates unrelated context.
       '';
     };
 
