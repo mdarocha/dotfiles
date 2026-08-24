@@ -40,7 +40,6 @@
       flake = false;
     };
 
-    # zsh plugins
     oh-my-zsh = {
       url = "github:ohmyzsh/ohmyzsh/master";
       flake = false;

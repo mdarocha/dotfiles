@@ -34,7 +34,6 @@ in
           ];
         };
       }
-      # Symlink each skill directory to ~/.claude/skills/<name>/
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }
       ) cfg.common.skills)

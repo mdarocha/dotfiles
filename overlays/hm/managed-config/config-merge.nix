@@ -4,24 +4,20 @@
 # wins on conflicts; the previous file is backed up before being replaced.
 { pkgs }:
 ''
-  # ---------------------------------------------------------------------------
   # strip_jsonc EXISTING_FILE
   #
   # Some tools write JSONC: full-line `//` comments and trailing commas before
   # a closing `}`/`]`, neither of which jq's strict JSON parser accepts.
   # Strips both so the result parses as plain JSON. Printed to stdout.
-  # ---------------------------------------------------------------------------
   strip_jsonc() {
     grep -v '^\s*//' "$1" | sed -e ':a' -e 'N' -e '$!ba' -e 's/,\([[:space:]]*\n[[:space:]]*[]}]\)/\1/g'
   }
 
-  # ---------------------------------------------------------------------------
   # _config_diff_warn LABEL NIX_JSON EXISTING_JSON BACKUP
   #
   # Warns when the existing file has top-level keys Nix doesn't define, and
   # when Nix overwrote a top-level key whose value differed from the existing
   # one. Both inputs must already be plain JSON.
-  # ---------------------------------------------------------------------------
   _config_diff_warn() {
     local label="$1" nix_json="$2" existing_json="$3" backup="$4"
 
@@ -54,12 +50,10 @@
     fi
   }
 
-  # ---------------------------------------------------------------------------
   # merge_json_objects LABEL NIX_FILE EXISTING_FILE DEST BACKUP_SUFFIX
   #
   # Deep-merges two JSON(C) object files (Nix wins on conflicts). Backs up
   # EXISTING_FILE to EXISTING_FILE.BACKUP_SUFFIX before writing DEST.
-  # ---------------------------------------------------------------------------
   merge_json_objects() {
     local label="$1" nix_file="$2" existing_file="$3" dest="$4" backup_suffix="$5"
 
@@ -85,13 +79,11 @@
       '($old[0] // {}) * ($nix[0] // {})' > "$tmp" && mv "$tmp" "$dest"
   }
 
-  # ---------------------------------------------------------------------------
   # merge_yaml_objects LABEL NIX_FILE EXISTING_FILE DEST BACKUP_SUFFIX
   #
   # Same deep-merge as merge_json_objects, for plain YAML files. Converts
   # through JSON internally, so any comments in EXISTING_FILE are lost -
   # don't point this at a file whose hand-written comments matter.
-  # ---------------------------------------------------------------------------
   merge_yaml_objects() {
     local label="$1" nix_file="$2" existing_file="$3" dest="$4" backup_suffix="$5"
 
@@ -119,12 +111,10 @@
       '($old[0] // {}) * ($nix[0] // {})' | ${pkgs.yq-go}/bin/yq -P '.' - > "$tmp" && mv "$tmp" "$dest"
   }
 
-  # ---------------------------------------------------------------------------
   # replace_json_array LABEL NIX_FILE EXISTING_FILE DEST BACKUP_SUFFIX
   #
   # Replaces DEST with NIX_FILE (arrays cannot be meaningfully merged). Warns
   # when the existing file differs from the Nix-managed version.
-  # ---------------------------------------------------------------------------
   replace_json_array() {
     local label="$1" nix_file="$2" existing_file="$3" dest="$4" backup_suffix="$5"
 

@@ -55,19 +55,16 @@ blockline_nix() {
     local -r symbol_nix='󱄅'
     local -r symbol_direnv=''
 
-    # show if direnv active
     if [[ -n $DIRENV_DIR ]]; then
         echo "$SOL_BG[violet] ${symbol_direnv} direnv $RESET_BG"
         return
     fi
 
-    # show if in nix shell
     if echo "$PATH" | grep -qc '/nix/store'; then
         echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
         return
     fi
 
-    # show in in legacy nix-shell
     if [[ -n $IN_NIX_SHELL ]]; then
         echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
         return
@@ -165,25 +162,13 @@ blockline() {
 
     local block_prompt=""
 
-    # ssh info
     block_prompt+="$(blockline_ssh)"
-
-    # nix info
     block_prompt+="$(blockline_nix)"
-
-    # python env info
     block_prompt+="$(blockline_python_venv)"
-
-    # prompt directory
     block_prompt+="$SOL_BG[base1] %3~ $RESET_BG"
-
-    # jobs count
     block_prompt+="$(blockline_jobs)"
-
-    # version control info
     block_prompt+="$(blockline_vcs_info)"
 
-    # prompt char
     local symbol_color="%(?.$SOL_BG[green].$SOL_BG[red])"
     block_prompt+="$symbol_color $ $RESET_BG"
 

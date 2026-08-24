@@ -14,14 +14,11 @@ in
 
     home.file = lib.mkMerge [
       {
-        # Inject common instructions as the global agent context file.
         ".copilot/AGENTS.md".text = cfg.common.agentInstructions;
       }
-      # Symlink each skill directory to ~/.copilot/skills/<name>/
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".copilot/skills/${name}" { source = dir; }
       ) cfg.common.skills)
-      # Write each rule to ~/.copilot/rules/<name>.md
       (lib.mapAttrs' (
         name: src: lib.nameValuePair ".copilot/rules/${name}.md" { source = src; }
       ) cfg.common.rules)
