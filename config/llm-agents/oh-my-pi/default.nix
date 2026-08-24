@@ -37,15 +37,12 @@ in
 
     home.file = lib.mkMerge [
       {
-        # Inject common instructions as the global agent context file.
         # oh-my-pi discovers AGENTS.md files via universal config discovery.
         ".omp/agent/AGENTS.md".text = cfg.common.agentInstructions;
       }
-      # Symlink each skill directory to ~/.omp/agent/skills/<name>/
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
       ) cfg.common.skills)
-      # Write each rule to ~/.omp/agent/rules/<name>.md
       (lib.mapAttrs' (
         name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }
       ) cfg.common.rules)

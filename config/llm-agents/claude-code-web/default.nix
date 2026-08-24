@@ -9,7 +9,8 @@ let
   inherit (lib) mkEnableOption mkIf;
 in
 {
-  options.mdarocha.llm-agents.claude-code-web.enable = mkEnableOption "Claude Code (web) agent config";
+  options.mdarocha.llm-agents.claude-code-web.enable =
+    mkEnableOption "Claude Code (web) agent config";
 
   config = mkIf cfg.claude-code-web.enable {
     home.file = lib.mkMerge [
@@ -34,7 +35,6 @@ in
           ];
         };
       }
-      # Symlink each skill directory to ~/.claude/skills/<name>/
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }
       ) cfg.common.skills)

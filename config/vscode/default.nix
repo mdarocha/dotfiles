@@ -56,14 +56,10 @@ in
       # To work around this, we generate a script file - /tmp/dotfiles-setup-codespace-vscode.sh,
       # and execute it in the default .bashrc, so that it runs when the user opens the terminal
       # in VSCode, where the needed environment variables are setup.
-      # A marker file prevents duplicate execution.
-      # It's VERY hacky, but it works...
 
-      # Generate the setup script
       cat > /tmp/dotfiles-setup-codespace-vscode.sh << 'VSCODE_SETUP_EOF'
       #!/bin/bash
 
-      # Set VSCODE_FOLDER based on VSCODE_GIT_ASKPASS_NODE
       if [[ -n "''${VSCODE_GIT_ASKPASS_NODE:-}" ]]; then
         VSCODE_FOLDER="''${VSCODE_GIT_ASKPASS_NODE%/node}"
         echo "VS Code folder detected: $VSCODE_FOLDER"
@@ -102,7 +98,6 @@ in
     '';
 
     programs.bash.bashrcExtra = ''
-      # VS Code Codespaces setup
       if [[ -f /tmp/dotfiles-setup-codespace-vscode.sh ]]; then
         /tmp/dotfiles-setup-codespace-vscode.sh
       fi

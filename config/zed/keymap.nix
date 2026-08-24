@@ -1,12 +1,16 @@
-{ config, pkgs, lib, ... }: [
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+[
   {
     bindings = {
-      # docks
       "alt-c" = "workspace::ToggleCenteredLayout";
       "alt-l" = "workspace::ToggleLeftDock";
       "alt-r" = "workspace::ToggleRightDock";
       "alt-b" = "workspace::ToggleBottomDock";
-      # navigate between all panes
       "ctrl-w h" = "workspace::ActivatePaneLeft";
       "ctrl-w l" = "workspace::ActivatePaneRight";
       "ctrl-w k" = "workspace::ActivatePaneUp";
@@ -62,7 +66,6 @@
   {
     context = "Editor && vim_mode == normal";
     bindings = {
-      # lsp
       "shift-k" = "editor::Hover";
       "alt-enter" = "editor::ToggleCodeActions";
       "ctrl-]" = "editor::GoToImplementation";

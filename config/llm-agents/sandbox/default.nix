@@ -121,16 +121,13 @@ let
     exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
   '';
 
-  # Directories the sandboxed agent may read and write. Shared across all agents. ensureAgentSandboxDirs (below) creates any of these
-  # that are missing so a freshly synced machine doesn't hard-fail at
-  # sandbox launch — agent-sandbox.nix requires every declared rwDir /
-  # rwFile to already exist on the host.
+  # Directories the sandboxed agent may read and write, shared across all
+  # agents. ensureAgentSandboxDirs (below) creates any that are missing so a
+  # freshly synced machine doesn't hard-fail at sandbox launch —
+  # agent-sandbox.nix requires every declared rwDir / rwFile to already exist.
   sharedRwDirs = [
-    # Agent configs
     "$HOME/.omp"
     "$HOME/.copilot"
-
-    # Misc configs
     "$HOME/.config/gh"
 
     # Nix user config and profile state, so nix commands (registry, config,
@@ -138,14 +135,11 @@ let
     "$HOME/.config/nix"
     "$HOME/.local/state/nix"
 
-    # npm / bun caches
     "$HOME/.npm"
     "$HOME/.bun/install/cache"
     "$HOME/.cache/nix"
     "$HOME/.cache/nix-index"
     "$HOME/.cache/direnv"
-
-    # Rust / Cargo registry and build cache
     "$HOME/.cargo"
     "$HOME/.rustup"
 
@@ -157,7 +151,6 @@ let
     "$HOME/.microsoft/usersecrets"
   ];
 
-  # Individual rw files, alongside sharedRwDirs above.
   sharedRwFiles = [
     "$HOME/.npmrc"
     "$HOME/.bunfig.toml"
@@ -262,16 +255,12 @@ let
   nosandboxVariant =
     name: pkg:
     pkgs.writeShellScriptBin "${name}-nosandbox" ''
-      # Prepend the sandbox's tool PATH so this unsandboxed variant has
-      # access to the same tools as the sandboxed variant (git, ripgrep,
-      # pandoc, …), in addition to whatever else the host provides.
       export PATH="${sandboxToolsPath}:$PATH"
       # Mirrors the sandboxed VIRTUAL_ENV wiring (see wrapWithSandbox above)
       # so OMP's eval tool can find the Nix-built Python environment
       # (ipykernel, kernel_gateway, …) even where the PATH prepend alone
       # isn't enough for OMP to discover it.
       export VIRTUAL_ENV="${pythonEvalEnv}"
-      # Also use nixpkgs chromium outside the sandbox
       export CHROME_BIN="${chromiumWrapper}/bin/chromium"
       export PUPPETEER_EXECUTABLE_PATH="${chromiumWrapper}/bin/chromium"
       export PUPPETEER_SKIP_DOWNLOAD="true"
@@ -496,7 +485,9 @@ in
     # See https://github.com/archie-judd/agent-sandbox.nix/pull/72.
     home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       mkdir -p ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwDirs ++ sharedRoDirs)}
-      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') (sharedRwFiles ++ sharedRoFiles)}
+      mkdir -p ${
+        lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') (sharedRwFiles ++ sharedRoFiles)
+      }
       for f in ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwFiles ++ sharedRoFiles)}; do
         [ -e "$f" ] || touch "$f" || true
       done

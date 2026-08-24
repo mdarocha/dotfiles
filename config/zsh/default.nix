@@ -73,7 +73,6 @@ in
           export CLICOLOR=1
           autoload -Uz colors && colors
 
-          # ls colors
           export LS_COLORS="$(${pkgs.vivid}/bin/vivid generate solarized-dark)"
           alias ls="ls --color=auto"
 
@@ -82,14 +81,12 @@ in
           zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
           zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
 
-          # bindkey fixups for Ptyxis terminal
           if [ -n  $PTYXIS_VERSION ]; then
             bindkey '^[[H'  beginning-of-line
             bindkey '^[[F'  end-of-line
             bindkey '^[[3~' delete-char
           fi
 
-          # load machine-specific config if it exists
           if [ -e "$HOME/.zshrc.local" ]; then
             . "$HOME/.zshrc.local"
           fi
