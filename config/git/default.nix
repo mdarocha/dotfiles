@@ -36,7 +36,8 @@
       ghq = {
         root = lib.mkDefault "~/Projekty";
       };
-    } // lib.optionalAttrs (config.programs.gh.enable && config.programs.gh.gitCredentialHelper.enable) {
+    }
+    // lib.optionalAttrs (config.programs.gh.enable && config.programs.gh.gitCredentialHelper.enable) {
       # gh's credential helper only ever handles HTTPS auth; rewrite SSH
       # remotes to HTTPS so `git push`/`fetch` work through it instead.
       url."https://github.com/".insteadOf = "git@github.com:";

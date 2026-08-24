@@ -1,4 +1,10 @@
-{ config, pkgs, lib, ... }: [
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+[
   {
     bindings = {
       "alt-c" = "workspace::ToggleCenteredLayout";

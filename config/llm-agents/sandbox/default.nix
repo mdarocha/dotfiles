@@ -485,7 +485,9 @@ in
     # See https://github.com/archie-judd/agent-sandbox.nix/pull/72.
     home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       mkdir -p ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwDirs ++ sharedRoDirs)}
-      mkdir -p ${lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') (sharedRwFiles ++ sharedRoFiles)}
+      mkdir -p ${
+        lib.concatMapStringsSep " " (p: ''"${builtins.dirOf p}"'') (sharedRwFiles ++ sharedRoFiles)
+      }
       for f in ${lib.concatMapStringsSep " " (p: ''"${p}"'') (sharedRwFiles ++ sharedRoFiles)}; do
         [ -e "$f" ] || touch "$f" || true
       done

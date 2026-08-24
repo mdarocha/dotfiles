@@ -72,7 +72,9 @@ in
         This applies in the `-nosandbox` variant too — it points `VIRTUAL_ENV` at
         the same Nix-built environment, so `pip install` fails there identically.
 
-        Pre-installed Python packages: ${lib.concatMapStringsSep ", " (n: "`${n}`") cfg.sandbox.pythonPackageNames}
+        Pre-installed Python packages: ${
+          lib.concatMapStringsSep ", " (n: "`${n}`") cfg.sandbox.pythonPackageNames
+        }
 
         If a task requires a package not listed above:
         1. Tell the user which package is missing and that it must be added to the

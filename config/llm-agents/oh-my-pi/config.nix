@@ -1,5 +1,6 @@
 { ... }:
 {
+  # appearance
   theme = {
     dark = "dark-solarized";
     light = "light-solarized";
@@ -10,6 +11,7 @@
   tui.renderMermaid = true;
   task.showResolvedModelBadge = true;
 
+  # model
   advisor.syncBacklog = "5";
   defaultThinkingLevel = "auto";
   hideThinkingBlock = true;
@@ -24,12 +26,14 @@
     usageReservePolicy = "auto";
   };
 
+  # interaction
   steeringMode = "all";
   followUpMode = "all";
   treeFilterMode = "no-tools";
   startup.checkUpdate = false;
   features.unexpectedStopDetection = true;
 
+  # context
   contextPromotion.enabled = true;
   compaction = {
     thresholdPercent = 80;
@@ -40,6 +44,7 @@
     ];
   };
 
+  # memory
   memory.backend = "mnemopi";
   mnemopi = {
     scoping = "per-project-tagged";
@@ -48,6 +53,7 @@
     proactiveLinking = true;
   };
 
+  # tools
   tools = {
     artifactSpillThreshold = 10;
     artifactTailBytes = 2.5;
@@ -61,6 +67,7 @@
     repeatGap = 5;
   };
 
+  # tasks
   task = {
     isolation = {
       mode = "rcopy";
@@ -70,6 +77,7 @@
     eager = "preferred";
   };
 
+  # providers
   providers = {
     webSearchOrder = [
       "exa"
@@ -79,9 +87,12 @@
     fetch = "native";
   };
 
+  # composer
   composer.shape = "box";
 
+  # shell
   bash.direnv = "auto";
 
+  # sharing
   share.store = "gist";
 }
