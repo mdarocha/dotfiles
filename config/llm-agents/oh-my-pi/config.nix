@@ -62,6 +62,10 @@
   security.enabled = true;
   github.enabled = true;
   dev.autoqa = false;
+  ttsr = {
+    repeatMode = "after-gap";
+    repeatGap = 5;
+  };
 
   # tasks
   task = {
