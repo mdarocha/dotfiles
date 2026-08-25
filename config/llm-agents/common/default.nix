@@ -312,16 +312,5 @@ in
         humanizer = inputs.humanizer;
       };
     };
-
-    rules = mkOption {
-      type = types.attrsOf types.path;
-      description = "Map of rule name to source path. Each rule is written to all configured agents.";
-      default = {
-        no-nix-store-source-search = ./rules/no-nix-store-source-search.md;
-        no-filesystem-root-scan = ./rules/no-filesystem-root-scan.md;
-        pr-fixes-one-per-line = ./rules/pr-fixes-one-per-line.md;
-        minimal-comments = ./rules/minimal-comments.md;
-      };
-    };
   };
 }

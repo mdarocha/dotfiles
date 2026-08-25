@@ -9,7 +9,7 @@
     ./common
     ./copilot-cli
     ./oh-my-pi
-    ./claude-code-web
+    ./claude-code
   ];
 
   options.mdarocha.llm-agents = {

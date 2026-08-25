@@ -19,9 +19,6 @@ in
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".copilot/skills/${name}" { source = dir; }
       ) cfg.common.skills)
-      (lib.mapAttrs' (
-        name: src: lib.nameValuePair ".copilot/rules/${name}.md" { source = src; }
-      ) cfg.common.rules)
     ];
   };
 }

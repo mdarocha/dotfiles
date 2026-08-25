@@ -12,6 +12,14 @@ let
 
   defaultConfig = import ./config.nix { inherit config pkgs lib; };
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.oh-my-pi.settings;
+
+  # TODO read this from the ./rules directory instead of hardcoding it here.
+  rules = {
+    no-nix-store-source-search = ./rules/no-nix-store-source-search.md;
+    no-filesystem-root-scan = ./rules/no-filesystem-root-scan.md;
+    pr-fixes-one-per-line = ./rules/pr-fixes-one-per-line.md;
+    minimal-comments = ./rules/minimal-comments.md;
+  };
 in
 {
   options.mdarocha.llm-agents.oh-my-pi = {
@@ -43,9 +51,7 @@ in
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
       ) cfg.common.skills)
-      (lib.mapAttrs' (
-        name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }
-      ) cfg.common.rules)
+      (lib.mapAttrs' (name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }) rules)
     ];
 
     mdarocha.managedConfigFiles.oh-my-pi-config = {
