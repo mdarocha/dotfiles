@@ -38,7 +38,8 @@
   agent_servers = {
     "oh-my-pi" = {
       type = "custom";
-      command = config.mdarocha.llm-agents.oh-my-pi.package;
+      # TODO: figure out something better than this hardcoded path
+      command = "${config.mdarocha.llm-agents.oh-my-pi.package}/bin/omp";
       args = [
         "--mode"
         "acp"
@@ -49,7 +50,7 @@
     };
     "oh-my-pi (no sandbox)" = {
       type = "custom";
-      command = config.mdarocha.llm-agents.oh-my-pi.package-nosandbox;
+      command ="${config.mdarocha.llm-agents.oh-my-pi.package-nosandbox}/bin/omp-nosandbox";
       args = [
         "--mode"
         "acp"
