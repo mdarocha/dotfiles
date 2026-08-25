@@ -81,5 +81,18 @@ in
       label = "omp config";
       value = mergedConfig;
     };
+
+    home.activation.download-omp-tiny-models =
+      lib.mkIf
+        (
+          mergedConfig.providers ? tinyModel
+          && mergedConfig.providers.tinyModel != null
+          && mergedConfig.providers.tinyModel != "online"
+        )
+        (
+          lib.hm.dag.entryAfter [ "managed-config-file-oh-my-pi-config" "reloadSystemd" ] ''
+            run ${cfg.oh-my-pi.package-nosandbox}/bin/omp-nosandbox tiny-models download ${mergedConfig.providers.tinyModel}
+          ''
+        );
   };
 }

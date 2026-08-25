@@ -85,6 +85,7 @@
       "perplexity"
     ];
     fetch = "native";
+    tinyModel = "lfm2-700m";
   };
 
   # composer
