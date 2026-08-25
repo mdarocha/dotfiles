@@ -164,11 +164,10 @@ let
   sharedRoDirs = [
     "$HOME/.config/direnv"
     "$HOME/.local/share/direnv"
+    "$HOME/.config/git"
   ];
 
-  sharedRoFiles = [
-    "$HOME/.config/git/config"
-  ];
+  sharedRoFiles = [ ];
 
   # Standard single-user-desktop location, exposed in sandbox to allow clipboard access
   waylandRuntimeDir = "/run/user/1000";
