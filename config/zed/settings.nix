@@ -71,8 +71,11 @@
   git_panel.dock = "left";
 
   autosave = "on_window_change";
+  calls.mute_on_join = true;
+
   restore_on_startup = "last_session";
   base_keymap = "VSCode";
+  format_on_save = "modifications";
 
   telemetry = {
     metrics = false;
@@ -83,6 +86,8 @@
   load_direnv = "shell_hook";
   cursor_blink = false;
   vim_mode = true;
+  which_key.enabled = true;
+
   ui_font_size = 16;
   buffer_font_size = 14;
   ui_font_family = ".SystemUIFont";
