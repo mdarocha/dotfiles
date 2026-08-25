@@ -185,6 +185,8 @@ let
 
       allowNix = true;
       allowGpu = true;
+      # TODO files should be an option
+      # In general, this whole sandbox should probably be rewritten as a home-manager module
       # Bind system nix config read-only so the agent inherits experimental
       # features (nix-command, flakes) and substituter/registry settings.
       # Git identity config is also bound read-only (not a rwDir) so the
