@@ -330,6 +330,11 @@ in
             ];
           };
           "Figma" = [ "figma.com" ];
+          "Google Antigravity (inference)" = [
+            "cloudcode-pa.googleapis.com"
+            "sandbox.googleapis.com"
+            "cloudaicompanion.googleapis.com"
+          ];
           "GitHub" = [
             "github.com"
             "githubusercontent.com"
