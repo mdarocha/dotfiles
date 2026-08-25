@@ -14,7 +14,7 @@
   # model
   advisor.syncBacklog = "5";
   defaultThinkingLevel = "auto";
-  hideThinkingBlock = false;
+  hideThinkingBlock = true;
   retry = {
     fallbackChains = {
       "anthropic/*" = [
@@ -85,7 +85,7 @@
       "perplexity"
     ];
     fetch = "native";
-    tinyModel = "lfm2-700m";
+    tinyModel = "lfm2-350m";
   };
 
   # composer
