@@ -56,7 +56,7 @@ For every entry whose `$configDir/$fileName` exists on disk, load three states:
 - **current** — `$configDir/$fileName` right now. Parse with `jq` (json /
   json-array format) or `yq -o=json` (yaml format).
 - **backup** — `$configDir/$fileName.<suffix>`, if present: content
-  immediately before the *last* activation ran.
+  immediately before the _last_ activation ran.
 
 Reconcile at the same top-level-key granularity
 `overlays/hm/managed-config/config-merge.nix`'s `_config_diff_warn` uses:
@@ -81,13 +81,22 @@ Skip an entry with no on-disk file or no backup yet — nothing to compare.
   variant rather than a general preference.
 - Keep candidates that look like a deliberate, durable preference set through
   the tool's own settings UI.
-- Exclude keys that are set to their default values in the tool's own defaults - use web search to find the default value for a given key in the tool's documentation or source code. If the current value matches the default, it may not be worth committing to the repo.
+- Exclude keys that are set to their default values in the tool's own defaults. Prefer an authoritative lookup over guessing:
+    - If the tool has an introspection CLI (e.g. `omp config list --json`), get the _built-in_ defaults by running it against an empty/isolated config dir rather than the user's own (e.g. `PI_CODING_AGENT_DIR=$(mktemp -d) omp config list --json`) — this sidesteps the user's already-applied repo config entirely.
+    - Otherwise, fetch the tool's shipped default settings file straight from its upstream repo (e.g. Zed's `assets/settings/default.json` on GitHub) and grep it directly before reaching for web search.
+    - Only fall back to web search/docs for keys not present in either source (e.g. settings delegated to an underlying LSP server rather than the editor itself) — and if the default still can't be confirmed, exclude the key rather than guess.
+    - Before checking any of this, skip a key outright if a prior audit already recorded a decision for it — see the "recording decisions" step below.
 
 ## Phase 4 — ask before touching anything
 
 For every surviving candidate, use the `ask` tool (batch related ones)
 showing: entry label, key path, current repo value, proposed new value, and
 which file you'd edit. Unanswered/declined candidates stay untouched.
+
+Non-interactive/headless sessions have no `ask` tool available: present the
+same information (entry label, key path, current repo value, proposed value,
+target file) in the chat reply instead, batched into one list, and treat the
+user's next reply as the answers.
 
 ## Phase 5 — apply approved changes
 
@@ -100,6 +109,19 @@ which file you'd edit. Unanswered/declined candidates stay untouched.
    module argument instead.
 3. Re-run the Phase 1 `nix eval` for the changed entry and confirm the new
    `value` matches what was approved.
+
+4. For every candidate the user declined or asked to leave unmanaged, append
+   a short comment block at the bottom of the file you would have edited:
+
+    ```nix
+    # managed-config audit decisions (see .omp/commands/managed-config-audit.md)
+    # - <key path>: intentionally left unmanaged; skip in future audits.
+    ```
+
+    Keep one such block per file, appending new lines to it rather than
+    duplicating the header. Future audits must check this block before
+    re-flagging a key — treat it the same as a declined candidate and skip it
+    without re-asking.
 
 ## Phase 6 — commit to main
 

@@ -14,7 +14,7 @@
   # model
   advisor.syncBacklog = "5";
   defaultThinkingLevel = "auto";
-  hideThinkingBlock = true;
+  hideThinkingBlock = false;
   retry = {
     fallbackChains = {
       "anthropic/*" = [

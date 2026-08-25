@@ -13,6 +13,7 @@
   edit_predictions = {
     mode = "eager";
     provider = "copilot";
+    allow_data_collection = "no";
     copilot = {
       proxy = null;
       proxy_no_verify = null;
@@ -50,7 +51,7 @@
     };
     "oh-my-pi (no sandbox)" = {
       type = "custom";
-      command ="${config.mdarocha.llm-agents.oh-my-pi.package-nosandbox}/bin/omp-nosandbox";
+      command = "${config.mdarocha.llm-agents.oh-my-pi.package-nosandbox}/bin/omp-nosandbox";
       args = [
         "--mode"
         "acp"
@@ -63,7 +64,10 @@
 
   project_panel.dock = "left";
   outline_panel.dock = "left";
-  collaboration_panel.dock = "left";
+  collaboration_panel = {
+    dock = "left";
+    button = false;
+  };
   git_panel.dock = "left";
 
   autosave = "on_window_change";
@@ -167,6 +171,12 @@
         };
       };
     };
+    vtsls = {
+      settings = {
+        javascript.updateImportsOnFileMove.enabled = "always";
+        typescript.updateImportsOnFileMove.enabled = "always";
+      };
+    };
   };
 
   languages = {
@@ -193,4 +203,8 @@
       tab_size = 2;
     };
   };
+
+  # managed-config audit decisions (see .omp/commands/managed-config-audit.md)
+  # - agent.tool_permissions: intentionally left unmanaged; skip in future audits.
+  # - agent.default_model.enable_thinking/effort: intentionally left unmanaged; skip in future audits.
 }
