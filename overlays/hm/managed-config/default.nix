@@ -2,6 +2,9 @@
 # (an editor, an agent) rather than fully by home-manager: Nix deep-merges
 # its managed defaults in, the tool's own edits outside of those keys are
 # preserved, and the previous file is backed up before being replaced.
+#
+# TODO the backup logic should be done in a way to preserve all versions
+# - so copy to a timestamped file instead of overwriting the same backup file each time.
 {
   config,
   lib,
