@@ -66,7 +66,29 @@ in
 
     home.file = lib.mkMerge [
       {
-        ".omp/agent/AGENTS.md".text = cfg.common.agentInstructions;
+        ".omp/agent/AGENTS.md".text = cfg.common.base;
+
+        ".omp/agent/extensions/sandbox-instructions.ts".text = ''
+          import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
+
+          const SANDBOX = ${builtins.toJSON cfg.common.sandbox};
+          const NO_SANDBOX = ${builtins.toJSON cfg.common."no-sandbox"};
+
+          export default function (pi: ExtensionAPI) {
+            pi.setLabel("Sandbox Instructions");
+
+            pi.on("before_agent_start", async (event) => {
+              const extra = process.env.MDAROCHA_AGENT_SANDBOX === "1" ? SANDBOX : NO_SANDBOX;
+              if (!extra.trim()) return undefined;
+
+              // The returned array replaces the prompt wholesale, so carry the
+              // current one over instead of returning the chunk alone.
+              return {
+                systemPrompt: [...event.systemPrompt, extra],
+              };
+            });
+          }
+        '';
       }
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
