@@ -339,6 +339,7 @@ in
               "GET"
               "POST"
             ];
+            "oauth2.googleapis.com" = [ "POST" ];
           };
           "OpenAI (inference)" = {
             "chatgpt.com" = ["GET" "POST"];
