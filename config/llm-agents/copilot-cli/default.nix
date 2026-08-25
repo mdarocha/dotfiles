@@ -7,10 +7,14 @@
 
 let
   cfg = config.mdarocha.llm-agents;
+  packages = cfg.sandbox.wrapPackages "copilot" pkgs.llm-agents.copilot-cli;
 in
 {
   config = lib.mkIf cfg.enable {
-    home.packages = cfg.sandbox.wrapPackages "copilot" pkgs.llm-agents.copilot-cli;
+    home.packages = [
+      packages.sandbox
+      packages.no-sandbox
+    ];
 
     home.file = lib.mkMerge [
       {

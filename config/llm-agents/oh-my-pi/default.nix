@@ -20,9 +20,27 @@ let
     pr-fixes-one-per-line = ./rules/pr-fixes-one-per-line.md;
     minimal-comments = ./rules/minimal-comments.md;
   };
+
+  packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
 in
 {
   options.mdarocha.llm-agents.oh-my-pi = {
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = packages.sandbox;
+      description = ''
+        oh-my-pi agent package.
+      '';
+    };
+
+    package-nosandbox = lib.mkOption {
+      type = lib.types.package;
+      default = packages.no-sandbox;
+      description = ''
+        oh-my-pi agent package without sandboxing.
+      '';
+    };
+
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "$HOME/.omp/agent";
@@ -41,11 +59,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
+    home.packages = [
+      cfg.oh-my-pi.package
+      cfg.oh-my-pi.package-nosandbox
+    ];
 
     home.file = lib.mkMerge [
       {
-        # oh-my-pi discovers AGENTS.md files via universal config discovery.
         ".omp/agent/AGENTS.md".text = cfg.common.agentInstructions;
       }
       (lib.mapAttrs' (

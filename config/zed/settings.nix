@@ -35,6 +35,31 @@
     };
   };
 
+  agent_servers = {
+    "oh-my-pi" = {
+      type = "custom";
+      command = config.mdarocha.llm-agents.oh-my-pi.package;
+      args = [
+        "--mode"
+        "acp"
+        "--approval-mode"
+        "yolo"
+      ];
+      env = { };
+    };
+    "oh-my-pi (no sandbox)" = {
+      type = "custom";
+      command = config.mdarocha.llm-agents.oh-my-pi.package-nosandbox;
+      args = [
+        "--mode"
+        "acp"
+        "--approval-mode"
+        "yolo"
+      ];
+      env = { };
+    };
+  };
+
   project_panel.dock = "left";
   outline_panel.dock = "left";
   collaboration_panel.dock = "left";

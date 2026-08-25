@@ -251,6 +251,7 @@ let
   # sandboxed variant (see nosandboxVariant below).
   sandboxToolsPath = lib.makeBinPath cfg.sandbox.allowedPackages;
 
+  # TODO this should not get created if the sandbox is disabled
   nosandboxVariant =
     name: pkg:
     pkgs.writeShellScriptBin "${name}-nosandbox" ''
@@ -461,14 +462,15 @@ in
         default = pythonEvalPackageNames;
       };
 
+      # TODO this should have better typing than just attrsOf
       wrapPackages = mkOption {
-        type = types.functionTo (types.functionTo (types.listOf types.package));
+        type = types.functionTo (types.functionTo (types.attrsOf types.package));
         internal = true;
         readOnly = true;
-        default = name: pkg: [
-          (maybeSandbox name pkg)
-          (nosandboxVariant name pkg)
-        ];
+        default = name: pkg: {
+          sandbox = (maybeSandbox name pkg);
+          no-sandbox = (nosandboxVariant name pkg);
+        };
         description = "Function to wrap a package binary with the sandbox and also produce an unsandboxed variant named <name>-nosandbox.";
       };
     };
