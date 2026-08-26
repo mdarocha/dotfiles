@@ -75,6 +75,7 @@
   security.enabled = true;
   github.enabled = true;
   dev.autoqa = false;
+  generate_image.enabled = true;
   ttsr = {
     repeatMode = "after-gap";
     repeatGap = 5;
