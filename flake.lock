@@ -111,6 +111,23 @@
         "type": "github"
       }
     },
+    "git-ai": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787763114,
+        "narHash": "sha256-C/QpqnH+yborO1ZkPY8Yi96famS8NJ5P8u1UkpKdC38=",
+        "owner": "git-ai-project",
+        "repo": "git-ai",
+        "rev": "84f78f68cfa78a988a370666e1759cc6a0f75837",
+        "type": "github"
+      },
+      "original": {
+        "owner": "git-ai-project",
+        "ref": "main",
+        "repo": "git-ai",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -224,6 +241,7 @@
         "agent-sandbox": "agent-sandbox",
         "anthropics-skills": "anthropics-skills",
         "flake-parts": "flake-parts",
+        "git-ai": "git-ai",
         "home-manager": "home-manager",
         "humanizer": "humanizer",
         "llm-agents": "llm-agents",

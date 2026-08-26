@@ -22,6 +22,11 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    git-ai = {
+      url = "github:git-ai-project/git-ai/main";
+      flake = false;
+    };
+
     # Pending https://github.com/archie-judd/agent-sandbox.nix/pull/74
     # (allowGpu / /dev/dri passthrough). Track this branch until merged
     # upstream, then point back at "main".

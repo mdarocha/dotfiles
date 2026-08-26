@@ -406,6 +406,7 @@ in
           git
           git-lfs
           gh
+          git-ai
           pythonEvalEnv
           nodejs
           bun
