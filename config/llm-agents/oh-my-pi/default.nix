@@ -13,13 +13,14 @@ let
   defaultConfig = import ./config.nix { inherit config pkgs lib; };
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.oh-my-pi.settings;
 
-  # TODO read this from the ./rules directory instead of hardcoding it here.
-  rules = {
-    no-nix-store-source-search = ./rules/no-nix-store-source-search.md;
-    no-filesystem-root-scan = ./rules/no-filesystem-root-scan.md;
-    pr-fixes-one-per-line = ./rules/pr-fixes-one-per-line.md;
-    minimal-comments = ./rules/minimal-comments.md;
-  };
+  filesIn =
+    dir: suffix:
+    lib.mapAttrs' (file: _: lib.nameValuePair (lib.removeSuffix suffix file) (dir + "/${file}")) (
+      lib.filterAttrs (file: kind: kind == "regular" && lib.hasSuffix suffix file) (builtins.readDir dir)
+    );
+
+  rules = filesIn ./rules ".md";
+  extensions = filesIn ./extensions ".ts";
 
   packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
 in
@@ -94,6 +95,9 @@ in
         name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
       ) cfg.common.skills)
       (lib.mapAttrs' (name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }) rules)
+      (lib.mapAttrs' (
+        name: src: lib.nameValuePair ".omp/agent/extensions/${name}.ts" { source = src; }
+      ) extensions)
     ];
 
     mdarocha.managedConfigFiles.oh-my-pi-config = {
