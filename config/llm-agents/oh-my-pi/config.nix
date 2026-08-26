@@ -48,6 +48,8 @@
   contextPromotion.enabled = true;
   compaction = {
     thresholdPercent = 80;
+    thresholdTokens = -1;
+    handoffSaveToDisk = false;
     methodOrder = [
       "snapcompact"
       "remote"
@@ -97,6 +99,10 @@
     ];
     fetch = "native";
     tinyModel = "lfm2-350m";
+    imageOrder = [
+      "antigravity"
+      "openai-codex"
+    ];
   };
 
   # composer
