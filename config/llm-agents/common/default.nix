@@ -223,7 +223,7 @@ in
         Also note that the network proxy will allow ONLY http requests - this means any non-HTTP
         network calls like SSH or custom protocols will always fail. If you need them, inform the user
         that they need to disable the sandbox by running the `-nosandbox` variant of your binary.
-        
+
         All blocked requests will show up in `/tmp/sandbox-proxy.log`. You don't have access to this file while inside the sandbox.
         If you suspect your issue is caused by sandbox blocking a network request, inform the user that they should check there.
 
@@ -307,13 +307,40 @@ in
       '';
     };
 
+    # TODO: this is required only for the full `agentInstructions` field, and can be removed
+    # once we remove `agentInstructions`.
+    sandbox-detection = mkOption {
+      type = types.str;
+      description = "Runtime mode-detection procedure. Only meaningful where both mode sections are present.";
+      default = ''
+        ## Sandbox detection
+
+        You may be running inside a sandboxed environment or directly on the host, and
+        this document carries the rules for both. **You MUST determine which mode you
+        are in before relying on any mode-specific rule below.** Check the
+        `MDAROCHA_AGENT_SANDBOX` environment variable once at session start:
+
+        ```bash
+        echo "$MDAROCHA_AGENT_SANDBOX"
+        ```
+
+        - `1` → you are **inside** the sandbox. Apply every **(sandbox only)** section
+          and skip the host-mode section.
+        - unset/empty → you are **outside** the sandbox (the `-nosandbox` variant). Skip
+          every **(sandbox only)** section and apply the host-mode section instead.
+
+      '';
+    };
+
+    # TODO: all agents should be moved to dynamic hooks for building sandbox/nosandbox instructions,
+    # and this field should be removed.
     agentInstructions = mkOption {
       type = types.str;
       readOnly = true;
       description = ''
         Every section, for agents that cannot select an execution variant at runtime.
       '';
-      default = cfg.common.base + cfg.common.sandbox + cfg.common.no-sandbox;
+      default = cfg.common.base + cfg.common.sandbox-detection + cfg.common.sandbox + cfg.common.no-sandbox;
     };
 
     skills = mkOption {
