@@ -435,7 +435,7 @@ in
           poppler-utils
           qpdf
           pandoc
-          libreoffice-still
+          libreoffice-stable
           tesseract
           imagemagick
         ];
