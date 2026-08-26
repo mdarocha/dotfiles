@@ -32,14 +32,13 @@ in
       default = ''
         ## Provisioned CLI tools
 
-        These packages are provisioned by Nix and available in both execution
-        variants, alongside `nix` itself:
+        These packages are provisioned by Nix and should be always available, alongside `nix` itself:
 
         ${lib.concatMapStringsSep ", " (n: "`${n}`") cfg.sandbox.packageDescriptions}
 
         Do not assume a tool outside this list exists — check first. If you need one
         that is not provisioned, use `nix run nixpkgs#<package>` or
-        `nix shell nixpkgs#<package>` to get it temporarily instead of installing it.
+        `nix shell nixpkgs#<package>` to get it temporarily instead of installing it (see the `run-with-nix` skill).
 
         ## Python execution environment
 
@@ -56,7 +55,7 @@ in
 
         If a task requires a package not listed above:
         1. Tell the user which package is missing and that it must be added to the
-           sandbox config (`pythonEvalEnv` in `config/llm-agents/sandbox/default.nix`).
+           sandbox config (`pythonEvalEnv` in [`config/llm-agents/sandbox/default.nix`](https://github.com/mdarocha/dotfiles/blob/main/config/llm-agents/sandbox/default.nix)).
         2. Do NOT work around the absence by downloading wheels, vendoring source, or
            running `pip` with `--target`.
 
@@ -71,31 +70,28 @@ in
         import pandas as pd  # already available, just import it
         df = pd.read_csv("data.csv")
         ```
+        
+        ## Git LFS
+
+        Do **not** run `git lfs install`: LFS filters are already configured
+        globally (`filter.lfs.*` in `~/.config/git/config`, provisioned by
+        home-manager's `programs.git.lfs.enable`), `add`/`commit`/`push`/`checkout` already
+        smudge/clean LFS-tracked files correctly without any per-repo
+        `.git/config` entries. `git-lfs` itself is on `$PATH`.
 
         ## Browser GPU acceleration
 
-        This applies identically inside the sandbox and in the `-nosandbox` variant.
-
-        Detect whether the browser tool's Chromium is currently running headless
-        (no GPU) or visible (real GPU, where available) by checking the live process
-        — not any stored setting, which may not reflect what's actually running:
-
-        ```bash
-        ps aux | grep -o -- '--ozone-platform=headless' | head -1
-        ```
-
-        Non-empty output → headless mode. Chromium's `headless` Ozone platform forces
-        SwiftShader (software) rendering unconditionally, so no GPU acceleration is
-        possible regardless of `/dev/dri` access or driver env wiring. Empty output
-        with a `libexec/chromium/chromium` process present → visible mode, with real
-        GPU acceleration available wherever the sandbox/host provides it. No chromium
-        process at all → the browser tool hasn't launched yet this session; mode is
-        undetermined until first use.
+        Some tasks (ie. WebGL rendering, in-browser ML) REQUIRE GPU acceleration in the browser, since they are too
+        slow without it.
 
         Confirm the actual GPU backend via `chrome://gpu`'s "Graphics Feature Status"
         and `GPU0` fields, not `WEBGL_debug_renderer_info` / `navigator.userAgent` —
         the browser tool spoofs those for fingerprinting resistance regardless of the
         real backend.
+
+        GPU availability depends on whether: (1) the required /dev/dri is currently available
+        (it can be unavailable if the current machine has no GPU, or because it's sandboxed out),
+        (2) the browser is not running in "headless" mode.
 
         If Chromium is running headless but the task genuinely needs GPU-backed
         rendering (e.g. WebGL correctness, GPU compute), headless mode cannot provide
@@ -197,12 +193,13 @@ in
       type = types.str;
       description = "Instructions that hold only inside the sandbox.";
       default = ''
+        You are running inside a sandbox.
+
         ## Toolset limits (sandbox only)
 
         Inside the sandbox the provisioned list is **all** there is: no other binaries
         are on PATH and none of the host's own tools leak in. Check that list before
-        reaching for a command, and pull anything missing through `nix run` /
-        `nix shell`.
+        reaching for a command, and pull anything missing using Nix.
 
         ## direnv and devenv (sandbox only)
 
@@ -222,6 +219,13 @@ in
 
         Outbound network access is restricted by a filtering proxy. HTTP requests will
         fail with connection errors for any disallowed domain or method.
+
+        Also note that the network proxy will allow ONLY http requests - this means any non-HTTP
+        network calls like SSH or custom protocols will always fail. If you need them, inform the user
+        that they need to disable the sandbox by running the `-nosandbox` variant of your binary.
+        
+        All blocked requests will show up in `/tmp/sandbox-proxy.log`. You don't have access to this file while inside the sandbox.
+        If you suspect your issue is caused by sandbox blocking a network request, inform the user that they should check there.
 
         Domains use suffix matching: `github.com` also covers `api.github.com`,
         `raw.github.com`, and any other subdomain.
@@ -257,21 +261,12 @@ in
         If a task needs Windows-side files, run the `-nosandbox` variant instead, or ask
         the user to copy them into the Linux filesystem first.
 
-        ## Git LFS and `.git/config` (sandbox only)
+        ## `.git/config` (sandbox only)
 
         `.git/config` in a project checkout is **read-only** inside the sandbox — any
         write to it, e.g. `git config --local ...`, fails with "Device or resource
         busy" / "Read-only file system". This is not repo-specific; it applies to
         every checkout.
-
-        Do **not** run `git lfs install`: LFS filters are already configured
-        globally (`filter.lfs.*` in `~/.config/git/config`, provisioned by
-        home-manager's `programs.git.lfs.enable`), and that file is also a
-        read-only bind mount inside the sandbox, so `git lfs install` cannot write
-        to it either and is unnecessary — `add`/`commit`/`push`/`checkout` already
-        smudge/clean LFS-tracked files correctly without any per-repo
-        `.git/config` entries. `git-lfs` itself is on `$PATH`.
-
       '';
     };
 
@@ -279,6 +274,8 @@ in
       type = types.str;
       description = "Instructions that hold only outside the sandbox (the `-nosandbox` variant).";
       default = ''
+        You are running without any sandboxing applied - full system access is available.
+
         ## Host mode (no sandbox)
 
         These rules apply when running outside the sandbox, through the `-nosandbox`
