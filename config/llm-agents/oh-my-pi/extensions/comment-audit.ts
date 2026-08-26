@@ -12,17 +12,20 @@ const NARRATION_MIN_FRACTION = 0.5;
 
 const LINE_COMMENT_PREFIXES: Array<[RegExp, string[]]> = [
 	[
-		/\.(?:c|h|cc|cpp|cxx|hpp|cs|java|kt|kts|scala|swift|go|rs|zig|ts|tsx|js|jsx|mjs|cjs|vue|svelte|php|dart|proto|gradle|css|scss|less|fs|fsx)$/i,
-		["//"],
+		/\.(?:c|h|cc|cpp|cxx|hpp|cs|java|kt|kts|scala|swift|go|rs|zig|ts|tsx|js|jsx|mjs|cjs|vue|svelte|php|dart|proto|gradle|css|scss|less|fs|fsx|pas|dpr|pp|d|mm|groovy)$/i,
+		["//", "/*"],
 	],
 	[
-		/\.(?:py|rb|sh|bash|zsh|fish|nix|pl|pm|r|jl|ps1|tf|yaml|yml|toml|ini|mk|cmake|ex|exs)$/i,
+		/\.(?:py|rb|sh|bash|zsh|fish|nix|pl|pm|r|jl|ps1|tf|yaml|yml|toml|ini|mk|cmake|ex|exs|csh|tcsh|hcl|graphql|gql)$/i,
 		["#"],
 	],
-	[/\.(?:sql|hs|elm|lua)$/i, ["--"]],
-	[/\.(?:el|lisp|scm|clj|cljs)$/i, [";"]],
+	[/\.(?:sql|hs|elm|lua|ada|adb|ads)$/i, ["--"]],
+	[/\.(?:el|lisp|scm|clj|cljs|asm)$/i, [";"]],
 	[/\.erl$/i, ["%"]],
 	[/\.mli?$/i, ["(*"]],
+	[/\.(?:f90|f95|f03|f08)$/i, ["!"]],
+	[/\.(?:vb|vbs|bas)$/i, ["'"]],
+	[/\.(?:html?|xml|xhtml|svg)$/i, ["<!--"]],
 	[/(?:^|\/)(?:Makefile|Dockerfile)$/, ["#"]],
 ];
 
@@ -87,7 +90,7 @@ function commentBody(text: string, prefixes: string[]): string | undefined {
 	const trimmed = text.trim();
 	for (const prefix of prefixes) {
 		if (trimmed.startsWith(prefix)) {
-			return trimmed.slice(prefix.length).replace(/^[/!*\s]+/, "").replace(/\s*(?:\*\/|-->)\s*$/, "").trim();
+			return trimmed.slice(prefix.length).replace(/^[/!*\s]+/, "").replace(/\s*(?:\*\/|\*\)|-->)\s*$/, "").trim();
 		}
 	}
 	if (trimmed.startsWith("*") && !trimmed.startsWith("*/")) {

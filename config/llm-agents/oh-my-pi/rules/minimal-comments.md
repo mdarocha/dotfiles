@@ -4,7 +4,8 @@ description: "Re-check every comment being written against the project comment p
 condition:
   - "(?m)^[ \\t]*(//|/\\*|\\*[ \\t]|<!--)"
   - "(?m)^[ \\t]*#(?!(!|\\[|include|define|ifn?def|endif|if|elif|else|error|warning|pragma|import|region|endregion|line|undef|version|extension))[ \\t]*\\S"
-  - "(?m)^[ \\t]*(--|;+|%|\\(\\*)[ \\t]+\\S"
+  - "(?m)^[ \\t]*(--|;+|%|\\(\\*|!)[ \\t]+\\S"
+  - "(?m)^[ \\t]*'[ \\t]+\\S"
 scope: ["tool:edit", "tool:write", "tool:ast_edit"]
 interruptMode: never
 globs:
@@ -13,6 +14,7 @@ globs:
   - "*.{sh,bash,zsh,fish,ps1,nix,tf,proto,gradle,sql,hs,elm,ex,exs,erl}"
   - "*.{clj,cljs,el,lisp,scm,ml,mli,fs,fsx,css,scss,less,mk,cmake}"
   - "*.{html,xml,yaml,yml,toml,ini}"
+  - "*.{vb,vbs,bas,pas,dpr,pp,f90,f95,f03,f08,ada,adb,ads,asm,d,mm,csh,tcsh,groovy,hcl,graphql,gql}"
   - "{Makefile,Dockerfile,*.Dockerfile}"
 ---
 
