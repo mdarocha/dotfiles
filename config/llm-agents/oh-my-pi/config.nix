@@ -42,7 +42,7 @@
   followUpMode = "all";
   treeFilterMode = "no-tools";
   startup.checkUpdate = false;
-  features.unexpectedStopDetection = true;
+  features.unexpectedStopDetection = "smart";
 
   # context
   contextPromotion.enabled = true;
