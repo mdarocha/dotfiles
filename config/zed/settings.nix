@@ -26,6 +26,7 @@
     enable_feedback = false;
     default_profile = "write";
     dock = "left";
+    thinking_display = "preview";
     inline_assistant_model = {
       provider = "copilot_chat";
       model = "claude-sonnet-4.6";
@@ -108,6 +109,7 @@
   git = {
     inline_blame = {
       enabled = false;
+      delay_ms = 300;
     };
   };
 
@@ -212,4 +214,5 @@
   # managed-config audit decisions (see .omp/commands/managed-config-audit.md)
   # - agent.tool_permissions: intentionally left unmanaged; skip in future audits.
   # - agent.default_model.enable_thinking/effort: intentionally left unmanaged; skip in future audits.
+  # - agent_servers.oh-my-pi.default_config_options: intentionally left unmanaged; skip in future audits.
 }
