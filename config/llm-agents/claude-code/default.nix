@@ -15,6 +15,9 @@ in
   config = mkIf (cfg.enable || cfg.claude-code-web.enable) {
     home.file = lib.mkMerge [
       {
+        # TODO: select the mode chunk at runtime via a SessionStart hook, like the
+        # oh-my-pi extension does. Claude Code has no native TypeScript hook that can
+        # replace the system prompt, so it gets the self-detecting full text for now.
         ".claude/CLAUDE.md".text = cfg.common.agentInstructions;
 
         ".claude/hooks/fix-nix-path.sh" = {
