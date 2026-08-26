@@ -80,23 +80,11 @@ in
     home.packages = [
       cfg.oh-my-pi.package
       cfg.oh-my-pi.package-nosandbox
-      pkgs.git-ai
     ];
 
     home.file = lib.mkMerge [
       {
         ".omp/agent/AGENTS.md".text = cfg.common.base + ompSpecificInstructions;
-        ".omp/agent/extensions/git-ai.ts".source = "${pkgs.git-ai}/share/git-ai/oh-my-pi.ts";
-
-        ".omp/agent/git-ai.override.json".text = builtins.toJSON {
-          version = 1;
-          tools.ast_edit = {
-            kind = "mutating";
-            canonical = "replace";
-            filepath_fields = [ "paths" ];
-          };
-        };
-
         ".omp/agent/extensions/sandbox-instructions.ts".text = ''
           import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
@@ -134,19 +122,6 @@ in
       format = "yaml";
       label = "omp config";
       value = mergedConfig;
-    };
-
-    mdarocha.managedConfigFiles.git-ai-config = {
-      configDir = "$HOME/.git-ai";
-      fileName = "config.json";
-      format = "json";
-      label = "git-ai config";
-      value = {
-        telemetry_oss_disabled = true;
-        disable_version_checks = true;
-        disable_auto_updates = true;
-        feature_flags.daemon_log_upload = false;
-      };
     };
 
     home.activation.download-omp-tiny-models =
