@@ -402,43 +402,45 @@ in
       allowedPackages = mkOption {
         type = types.listOf types.package;
         description = "Packages placed on PATH inside the agent sandbox. Add any tool the agent needs to invoke.";
-        default = with pkgs; [
-          git
-          git-lfs
-          gh
-          pythonEvalEnv
-          nodejs
-          bun
-          coreutils
-          findutils
-          gnused
-          gnugrep
-          gawk
-          curl
-          jq
-          ripgrep
-          fd
-          which
-          diffutils
-          chromiumWrapper
-          cargo
-          rustc
-          rustfmt
-          clippy
-          # binutils: strings, objdump — binary inspection
-          binutils
-          # file: file-type detection
-          file
-          # procps: ps, pgrep, pkill — process inspection
-          procps
-          # PDF/office skills: CLI tools for document processing
-          poppler-utils
-          qpdf
-          pandoc
-          libreoffice-stable
-          tesseract
-          imagemagick
-        ];
+        default =
+          (with pkgs; [
+            git
+            git-lfs
+            gh
+            pythonEvalEnv
+            nodejs
+            bun
+            coreutils
+            findutils
+            gnused
+            gnugrep
+            gawk
+            curl
+            jq
+            ripgrep
+            fd
+            which
+            diffutils
+            chromiumWrapper
+            cargo
+            rustc
+            rustfmt
+            clippy
+            # binutils: strings, objdump — binary inspection
+            binutils
+            # file: file-type detection
+            file
+            # procps: ps, pgrep, pkill — process inspection
+            procps
+            # PDF/office skills: CLI tools for document processing
+            poppler-utils
+            qpdf
+            pandoc
+            libreoffice-stable
+            tesseract
+            imagemagick
+          ])
+          ++ lib.optional cfg.git-ai.enable pkgs.git-ai;
       };
 
       packageDescriptions = mkOption {

@@ -85,7 +85,6 @@ in
     home.file = lib.mkMerge [
       {
         ".omp/agent/AGENTS.md".text = cfg.common.base + ompSpecificInstructions;
-
         ".omp/agent/extensions/sandbox-instructions.ts".text = ''
           import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 

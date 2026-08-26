@@ -8,7 +8,7 @@ let
     config.allowUnfree = true;
     overlays = [
       llm-agents.overlays.shared-nixpkgs
-      (import ../overlays/pkgs/default.nix)
+      (import ../overlays/pkgs/default.nix { inherit inputs; })
     ];
   };
 
@@ -40,7 +40,10 @@ in
   flake.homeConfigurations = {
     linux = mkHomeManagerConfiguration {
       mdarocha = {
-        llm-agents.enable = true;
+        llm-agents = {
+          enable = true;
+          git-ai.enable = true;
+        };
         zed.enable = true;
       };
     };
@@ -57,7 +60,10 @@ in
 
     deck = mkHomeManagerConfiguration {
       mdarocha = {
-        llm-agents.enable = true;
+        llm-agents = {
+          enable = true;
+          git-ai.enable = true;
+        };
         zed.enable = true;
       };
 

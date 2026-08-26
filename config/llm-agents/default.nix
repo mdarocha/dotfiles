@@ -10,6 +10,7 @@
     ./copilot-cli
     ./oh-my-pi
     ./claude-code
+    ./git-ai
   ];
 
   options.mdarocha.llm-agents = {
