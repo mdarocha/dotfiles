@@ -86,7 +86,7 @@ in
     home.file = lib.mkMerge [
       {
         ".omp/agent/AGENTS.md".text = cfg.common.base + ompSpecificInstructions;
-        ".omp/agent/extensions/git-ai.ts".source = pkgs.git-ai + "/share/git-ai/oh-my-pi.ts";
+        ".omp/agent/extensions/git-ai.ts".source = "${pkgs.git-ai}/share/git-ai/oh-my-pi.ts";
 
         ".omp/agent/git-ai.override.json".text = builtins.toJSON {
           version = 1;
