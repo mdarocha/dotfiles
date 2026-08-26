@@ -121,21 +121,33 @@ in
 
         ## Comments
 
-        No comment is the default. Well-named code is self-documenting, so a
-        comment must earn its place by saying something the code genuinely cannot:
-        a non-obvious *why*, a subtle edge case, a business rule invisible locally,
-        or a workaround (link the issue). Everything else goes: restatements of the
-        code, structural labels (`# imports`, `# helper`), phase headers
-        (`// Step 1: validate`), decorative separators, summaries of the function
-        they sit above, narration of the block below, edit history (`// changed
-        from`, `// now handles`, `// new`), commented-out code, and anything tied
-        to the current sandbox, host, or session rather than the code itself.
-        Match the file's existing comment density — never raise it, and
-        write edits as if the code had always been that way. Doc comments are the
-        contract for the public surface, not every private helper: follow the file's
-        convention, use the language's native format, document behavior, invariants,
-        units, and error/panic conditions, and never restate a name and type
-        (`@param id — the id`). When unsure, leave it out.
+        No comment is the default, because well-named code is self-documenting. Before
+        writing one, name which of these it is — if none fit, do not write it:
+
+        1. a *why* the code cannot show: a constraint, spec requirement, or business rule,
+        2. an edge case a reader would not predict,
+        3. a workaround, with the issue linked,
+        4. a doc comment on a public surface, stating behavior, invariants, units, and
+           error/panic conditions in the language's native format.
+
+        Never write these, in any language: restatements of the line below, structural
+        labels (`# imports`, `# helper`), phase headers (`// Step 1: validate`),
+        decorative separators, summaries of the function they sit above, edit history
+        (`// changed from`, `// now handles`, `// new`), commented-out code, chatter
+        aimed at the reviewer (`// as requested`), doc text that restates a name and
+        type (`@param id — the id`), or anything tied to the current session, host, or
+        sandbox rather than the code.
+
+        Two constraints outrank the list above:
+
+        - **Density.** Match the file's existing comment level and never raise it. Bulk
+          narration is rejected even when each line is individually defensible.
+        - **Durability.** Write edits as if the code had always been that way, and keep
+          every comment true after the next refactor.
+
+        This is enforced, not advisory: comment shapes from the banned list abort the
+        edit that writes them, and the diff is audited for narration and density before
+        a session settles. Deleting a comment is always the cheaper path.
 
         ## Code style preferences
 
