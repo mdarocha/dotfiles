@@ -22,6 +22,23 @@ let
   };
 
   packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
+
+  ompSpecificInstructions = ''
+    # Git worktrees
+
+    If you create git worktrees, always use the `~/.omp/wt` folder (the
+    same folder the built-in `github` tool's `pr_checkout` op uses).
+
+    Name each worktree directory `<slug>-<repo-hash>`, matching that same
+    built-in convention (`<pr-number>-<repo-hash>`):
+    - `<slug>`: a short, descriptive identifier for the work (issue/PR
+      number, ticket id, or a brief kebab-case task descriptor) — not the
+      branch name verbatim.
+    - `<repo-hash>`: a 7-hex-character digest of the repository root path
+      (e.g. `git rev-parse --show-toplevel | sha1sum | cut -c1-7`), so
+      worktrees from different repos never collide inside the shared
+      `~/.omp/wt` folder.
+  '';
 in
 {
   options.mdarocha.llm-agents.oh-my-pi = {
@@ -66,7 +83,7 @@ in
 
     home.file = lib.mkMerge [
       {
-        ".omp/agent/AGENTS.md".text = cfg.common.base;
+        ".omp/agent/AGENTS.md".text = cfg.common.base + ompSpecificInstructions;
 
         ".omp/agent/extensions/sandbox-instructions.ts".text = ''
           import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
