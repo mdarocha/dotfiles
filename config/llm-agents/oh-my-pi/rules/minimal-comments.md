@@ -8,83 +8,31 @@ condition:
 scope: ["tool:edit", "tool:write", "tool:ast_edit"]
 interruptMode: never
 globs:
-  - "*.c"
-  - "*.h"
-  - "*.cc"
-  - "*.cpp"
-  - "*.cxx"
-  - "*.hpp"
-  - "*.cs"
-  - "*.java"
-  - "*.kt"
-  - "*.kts"
-  - "*.scala"
-  - "*.swift"
-  - "*.go"
-  - "*.rs"
-  - "*.zig"
-  - "*.ts"
-  - "*.tsx"
-  - "*.js"
-  - "*.jsx"
-  - "*.mjs"
-  - "*.cjs"
-  - "*.vue"
-  - "*.svelte"
-  - "*.php"
-  - "*.dart"
-  - "*.py"
-  - "*.rb"
-  - "*.sh"
-  - "*.bash"
-  - "*.zsh"
-  - "*.fish"
-  - "*.nix"
-  - "*.pl"
-  - "*.pm"
-  - "*.lua"
-  - "*.sql"
-  - "*.hs"
-  - "*.elm"
-  - "*.ex"
-  - "*.exs"
-  - "*.erl"
-  - "*.clj"
-  - "*.cljs"
-  - "*.el"
-  - "*.lisp"
-  - "*.scm"
-  - "*.ps1"
-  - "*.r"
-  - "*.jl"
-  - "*.ml"
-  - "*.mli"
-  - "*.fs"
-  - "*.fsx"
-  - "*.tf"
-  - "*.proto"
-  - "*.gradle"
-  - "*.css"
-  - "*.scss"
-  - "*.less"
-  - "*.html"
-  - "*.xml"
-  - "*.yaml"
-  - "*.yml"
-  - "*.toml"
-  - "*.ini"
-  - "*.mk"
-  - "*.cmake"
-  - "Makefile"
-  - "Dockerfile"
+  - "*.{c,h,cc,cpp,cxx,hpp,cs,java,kt,kts,scala,swift,go,rs,zig}"
+  - "*.{ts,tsx,js,jsx,mjs,cjs,vue,svelte,php,dart,py,rb,lua,pl,pm,r,jl}"
+  - "*.{sh,bash,zsh,fish,ps1,nix,tf,proto,gradle,sql,hs,elm,ex,exs,erl}"
+  - "*.{clj,cljs,el,lisp,scm,ml,mli,fs,fsx,css,scss,less,mk,cmake}"
+  - "*.{html,xml,yaml,yml,toml,ini}"
+  - "{Makefile,Dockerfile,*.Dockerfile}"
 ---
 
-You just wrote a comment. Before moving on, delete it unless it survives this test: does it say something the code genuinely cannot — a non-obvious *why*, a subtle edge case, a business rule invisible locally, or a workaround?
+You just wrote a comment. The default is no comment, so deleting it is the expected
+outcome — keep it only by naming which exception it falls under:
 
-Delete it if it restates the code, labels obvious structure (`# imports`, `# helper`), announces a phase (`// Step 1: validate`), draws a decorative separator, summarises the function it sits above, narrates the block below it, describes the edit itself (`// changed from`, `// now handles`, `// new`), or is commented-out code. Also delete it if the surrounding file deliberately has none — match the file's existing comment density rather than raising it.
+1. a *why* that is invisible locally (a constraint, a spec requirement, a business rule),
+2. a subtle edge case a reader would not predict,
+3. a workaround, with the issue linked,
+4. doc-comment contract on a public surface: behavior, invariants, units, errors.
 
-Doc comments follow the file's convention and cover the public surface only. Document behavior, invariants, units, and error conditions; never restate a name and type (`@param id — the id`).
+If you cannot name one, delete it now, in this same edit — not "later". A comment that
+restates the code, labels structure, announces a phase, narrates the block below,
+records the edit you just made, or sits above a self-evident line is deleted on sight.
 
-Comments must stay true on any machine: never mention this sandbox, host, or session.
+Two further checks that override the list above:
+
+- **Density.** Match the file's existing comment level; never raise it. If the
+  surrounding code has no comments, yours needs a stronger reason than usual.
+- **Durability.** It must stay true on any machine and after the next refactor.
+  Never mention this session, host, sandbox, or what the code used to be.
 
 Full policy: `AGENTS.md` § Comments.
