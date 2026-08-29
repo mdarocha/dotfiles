@@ -421,6 +421,7 @@ in
           which
           diffutils
           chromiumWrapper
+          wl-clipboard
           cargo
           rustc
           rustfmt
