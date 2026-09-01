@@ -56,6 +56,7 @@
       "soft"
     ];
   };
+  extendedContext = true;
 
   # memory
   memory.backend = "mnemopi";
