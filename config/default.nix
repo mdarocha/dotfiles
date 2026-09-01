@@ -13,7 +13,7 @@
     ./vscode
     ./zsh
     ./zed
-    ../overlays/hm
+    ../overlays/modules
   ];
 
   targets.genericLinux = {
