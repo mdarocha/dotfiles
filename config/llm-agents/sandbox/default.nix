@@ -403,12 +403,10 @@ in
         type = types.listOf types.package;
         description = "Packages placed on PATH inside the agent sandbox. Add any tool the agent needs to invoke.";
         default = with pkgs; [
+          # Misc tools
           git
           git-lfs
           gh
-          pythonEvalEnv
-          nodejs
-          bun
           coreutils
           findutils
           gnused
@@ -422,10 +420,6 @@ in
           diffutils
           chromiumWrapper
           wl-clipboard
-          cargo
-          rustc
-          rustfmt
-          clippy
           # binutils: strings, objdump — binary inspection
           binutils
           # file: file-type detection
@@ -439,6 +433,22 @@ in
           libreoffice-stable
           tesseract
           imagemagick
+
+          # Python
+          pythonEvalEnv
+          pyright
+
+          # Node.js / JavaScript / TypeScript
+          nodejs
+          bun
+          typescript-language-server
+
+          # Rust
+          cargo
+          rustc
+          rustfmt
+          clippy
+          rust-analyzer
         ];
       };
 
