@@ -22,11 +22,12 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
-    # Pending https://github.com/archie-judd/agent-sandbox.nix/pull/74
-    # (allowGpu / /dev/dri passthrough). Track this branch until merged
-    # upstream, then point back at "main".
+    # Own fork, maintained independently — upstream (archie-judd/agent-sandbox.nix)
+    # rewrote the launcher in Python (v3.0.0+) with no allowGpu equivalent, so this
+    # tracks fork main rather than upstream. See mdarocha/agent-sandbox.nix#2 for
+    # the plan to adopt the upstream rewrite.
     agent-sandbox = {
-      url = "github:mdarocha/agent-sandbox.nix/feat/allow-gpu";
+      url = "github:mdarocha/agent-sandbox.nix/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

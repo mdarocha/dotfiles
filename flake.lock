@@ -7,16 +7,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1787306337,
-        "narHash": "sha256-TZ48P44c3L5nrWDW8bVNtiGWQMIfiw7rucbexjA0FWE=",
+        "lastModified": 1788262081,
+        "narHash": "sha256-+MrGAscBK896Ncy4LttUxbteyGf+nGgjDejGlJ0tT5E=",
         "owner": "mdarocha",
         "repo": "agent-sandbox.nix",
-        "rev": "a25d2abd88c1a6f8bd685b396658e9d54ca46a0b",
+        "rev": "4c963c3baf08886c486d3c897a5e075cbf9d2f32",
         "type": "github"
       },
       "original": {
         "owner": "mdarocha",
-        "ref": "feat/allow-gpu",
+        "ref": "main",
         "repo": "agent-sandbox.nix",
         "type": "github"
       }
