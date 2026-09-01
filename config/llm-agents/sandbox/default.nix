@@ -420,12 +420,10 @@ in
           diffutils
           chromiumWrapper
           wl-clipboard
-          # binutils: strings, objdump — binary inspection
           binutils
-          # file: file-type detection
           file
-          # procps: ps, pgrep, pkill — process inspection
           procps
+
           # PDF/office skills: CLI tools for document processing
           poppler-utils
           qpdf
@@ -449,6 +447,9 @@ in
           rustfmt
           clippy
           rust-analyzer
+
+          # Nix
+          nixd
         ];
       };
 
