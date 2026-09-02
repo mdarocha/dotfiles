@@ -42,6 +42,7 @@
   followUpMode = "all";
   treeFilterMode = "no-tools";
   startup.checkUpdate = false;
+  autocompleteMaxVisible = 5;
   features.unexpectedStopDetection = "smart";
 
   # context
@@ -90,6 +91,7 @@
       commits = "ai";
     };
     eager = "preferred";
+    agentPrewalk.designer = "on";
   };
 
   # providers
@@ -115,4 +117,8 @@
 
   # sharing
   share.store = "gist";
+
+  # managed-config audit decisions (see .omp/commands/managed-config-audit.md)
+  # - modelRoles.*: intentionally left unmanaged; skip in future audits.
+  # - stt.modelName: intentionally left unmanaged; skip in future audits.
 }
