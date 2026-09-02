@@ -407,6 +407,9 @@ in
           git
           git-lfs
           gh
+          # devenv-managed repos exec `prek` from git hooks; absent from
+          # PATH, `git commit` fails with "prek: not found".
+          prek
           coreutils
           findutils
           gnused
