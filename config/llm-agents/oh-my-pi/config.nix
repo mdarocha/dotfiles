@@ -86,13 +86,13 @@
   # tasks
   task = {
     isolation = {
-      mode = "rcopy";
       merge = "branch";
       commits = "ai";
     };
     eager = "preferred";
     agentPrewalk.designer = "on";
   };
+  isolation.backend = "rcopy";
 
   # providers
   providers = {
