@@ -390,6 +390,11 @@ in
             "pythonhosted.org"
           ];
           "Rust" = [ "crates.io" ];
+          "YouTube" = [
+            "youtube.com"
+            "googlevideo.com"
+            "ytimg.com"
+          ];
         };
       };
 
