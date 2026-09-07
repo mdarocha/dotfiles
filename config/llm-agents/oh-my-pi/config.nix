@@ -102,7 +102,7 @@
       "perplexity"
     ];
     fetch = "native";
-    tinyModel = "lfm2-350m";
+    tinyModel = "lfm2.5-350m";
     imageOrder = [
       "antigravity"
       "openai-codex"
