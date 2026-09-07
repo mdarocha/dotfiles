@@ -63,13 +63,19 @@
     };
   };
 
-  project_panel.dock = "left";
+  project_panel = {
+    dock = "left";
+    git_status_indicator = true;
+  };
   outline_panel.dock = "left";
   collaboration_panel = {
     dock = "left";
     button = false;
   };
-  git_panel.dock = "left";
+  git_panel = {
+    dock = "left";
+    show_count_badge = true;
+  };
 
   autosave = "on_window_change";
   calls.mute_on_join = true;
@@ -113,6 +119,8 @@
     };
   };
 
+  diff_view_style = "unified";
+
   wrap_guides = [
     80
     120
@@ -155,6 +163,8 @@
     ];
   };
 
+  document_symbols = "on";
+
   lsp = {
     nil = {
       settings = {
@@ -179,6 +189,7 @@
       };
     };
     vtsls = {
+      enable_lsp_tasks = true;
       settings = {
         javascript.updateImportsOnFileMove.enabled = "always";
         typescript.updateImportsOnFileMove.enabled = "always";
@@ -212,7 +223,14 @@
   };
 
   # managed-config audit decisions (see .omp/commands/managed-config-audit.md)
+  # ignore comment-slop rules for this block: these decisions must be recorded
+  # in comments to survive across machines and agent sessions.
   # - agent.tool_permissions: intentionally left unmanaged; skip in future audits.
   # - agent.default_model.enable_thinking/effort: intentionally left unmanaged; skip in future audits.
   # - agent_servers.oh-my-pi.default_config_options: intentionally left unmanaged; skip in future audits.
+  # - agent.favorite_models: intentionally left unmanaged; skip in future audits.
+  # - agent.sandbox_permissions: intentionally left unmanaged; skip in future audits.
+  # - agent.thread_summary_model: intentionally left unmanaged; skip in future audits.
+  # - languages.JavaScript/TypeScript.language_servers "!eslint": intentionally left unmanaged; skip in future audits.
+  # - edit_predictions.enabled_in_text_threads: intentionally left unmanaged; skip in future audits.
 }
