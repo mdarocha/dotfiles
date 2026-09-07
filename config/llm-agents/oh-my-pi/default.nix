@@ -86,6 +86,10 @@ in
       {
         ".omp/agent/AGENTS.md".text = cfg.common.base + ompSpecificInstructions;
 
+        # NixOS lacks the FHS dynamic loader the generic release binary
+        # needs, so oh-my-pi's runtime yt-dlp download is unusable here.
+        ".omp/agent/tools/yt-dlp".source = "${pkgs.yt-dlp}/bin/yt-dlp";
+
         ".omp/agent/extensions/sandbox-instructions.ts".text = ''
           import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
