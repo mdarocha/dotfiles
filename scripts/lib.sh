@@ -18,4 +18,22 @@ if [[ -f /etc/os-release ]] && grep -q '^ID=steamos' /etc/os-release; then
     CONFIGURATION="deck"
 fi
 
+if [[ -f /etc/NIXOS ]] || { [[ -f /etc/os-release ]] && grep -q '^ID=nixos' /etc/os-release; }; then
+    CONFIGURATION="nixos"
+fi
+
 export CONFIGURATION
+
+# mirrors `ghq.root` from config/git, which isn't readable yet on a first install
+if [[ -z "${GHQ_ROOT:-}" ]]; then
+    case "$CONFIGURATION" in
+        "deck")
+            GHQ_ROOT="$HOME/sdcard/projects"
+            ;;
+        *)
+            GHQ_ROOT="$HOME/Projekty"
+            ;;
+    esac
+fi
+
+export GHQ_ROOT

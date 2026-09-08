@@ -45,6 +45,17 @@ in
       };
     };
 
+    nixos = mkHomeManagerConfiguration {
+      mdarocha = {
+        llm-agents.enable = true;
+        zed.enable = true;
+      };
+
+      # NixOS already provides GPU drivers, FHS integration and man pages
+      targets.genericLinux.enable = false;
+      programs.man.generateCaches = false;
+    };
+
     wsl = mkHomeManagerConfiguration {
       mdarocha = {
         llm-agents.enable = true;
