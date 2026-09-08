@@ -60,15 +60,11 @@ blockline_nix() {
         return
     fi
 
-    if echo "$PATH" | grep -qc '/nix/store'; then
-        echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
-        return
-    fi
-
     if [[ -n $IN_NIX_SHELL ]]; then
         echo "$SOL_BG[violet] ${symbol_nix} nix $RESET_BG"
         return
     fi
+
 }
 
 blockline_python_venv() {
