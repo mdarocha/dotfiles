@@ -31,7 +31,7 @@ jobs:
           # only push from the main branch
           skipPush: ${{ github.event_name == 'pull_request' }}
 
-      - run: nix flake check -L
+      - run: nix flake check -L --option system-features nixos-test
 
       - name: Report configuration sizes
         run: nix run .#report-sizes >> $GITHUB_STEP_SUMMARY

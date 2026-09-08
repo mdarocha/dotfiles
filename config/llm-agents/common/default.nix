@@ -55,7 +55,7 @@ in
 
         If a task requires a package not listed above:
         1. Tell the user which package is missing and that it must be added to the
-           sandbox config (`pythonEvalEnv` in [`config/llm-agents/sandbox/default.nix`](https://github.com/mdarocha/dotfiles/blob/main/config/llm-agents/sandbox/default.nix)).
+           sandbox config (`pythonEvalEnv` in [`config/llm-agents/sandbox/tools.nix`](https://github.com/mdarocha/dotfiles/blob/main/config/llm-agents/sandbox/tools.nix)).
         2. Do NOT work around the absence by downloading wheels, vendoring source, or
            running `pip` with `--target`.
 

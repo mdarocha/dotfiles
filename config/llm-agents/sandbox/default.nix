@@ -13,6 +13,8 @@ let
     ;
 
   cfg = config.mdarocha.llm-agents;
+  tools = import ./tools.nix { inherit pkgs; };
+  inherit (tools) pythonEvalPackageNames pythonEvalEnv chromiumWrapper;
 
   # Normalizes a domain group value to an attrset of domain → methods.
   # A plain list of domain strings becomes { domain = "*"; … }; an explicit
@@ -31,95 +33,6 @@ let
 
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
-  # Python package names for the eval environment. This single list drives
-  # both the Nix environment (pythonEvalEnv) and the agent instructions
-  # (sandbox.pythonPackageNames) so they never drift apart.
-  pythonEvalPackageNames = [
-    "ipykernel"
-    "jupyter_kernel_gateway"
-
-    # PDF skill
-    "pypdf"
-    "pdfplumber"
-    "reportlab"
-    "pillow"
-    "pandas"
-    "pytesseract"
-    "pdf2image"
-    "pypdfium2"
-
-    # DOCX/PPTX/XLSX skills
-    "openpyxl"
-    "defusedxml"
-    "lxml"
-    "python-pptx"
-
-    # Data processing and analysis
-    "numpy"
-    "matplotlib"
-    "pyyaml"
-    "toml"
-
-    # HTTP and web
-    "requests"
-    "beautifulsoup4"
-
-    # General utilities
-    "python-dateutil"
-    "chardet"
-    "jsonschema"
-    "jinja2"
-  ];
-
-  # Python environment for OMP's eval tool. jupyter_kernel_gateway is added
-  # to pkgs.python3Packages via the repo's nixpkgs overlay.
-  pythonEvalEnv = pkgs.python3.withPackages (ps: map (name: ps.${name}) pythonEvalPackageNames);
-
-  # Chromium wrapper that imports the sandbox proxy CA into Chromium's NSS
-  # cert store before launch. The proxy is a TLS-intercepting MITM whose CA
-  # is trusted by Node/curl via NODE_EXTRA_CA_CERTS / SSL_CERT_FILE, but
-  # Chromium uses its own NSS database (~/.pki/nssdb) and ignores those vars.
-  # Importing the cert here keeps full certificate verification intact — only
-  # the proxy CA is trusted, not arbitrary certs. The sandbox $HOME is an
-  # ephemeral tmpfs, so the DB is recreated fresh each session with the
-  # correct per-session CA. No-ops gracefully when the cert file is absent
-  # (i.e. when no allowedDomains is set and no proxy is running).
-  #
-  # --no-sandbox: Chromium tries to create its own inner sandbox via a second
-  #   layer of user namespaces. That nested-namespace creation is blocked
-  #   inside bwrap's user namespace. The flag disables Chromium's sandbox;
-  #   security is still provided by the surrounding bwrap sandbox.
-  # --disable-dev-shm-usage: bwrap gives the sandbox a fresh /tmp tmpfs and a
-  #   minimal /dev, so /dev/shm may be absent or very small. This flag makes
-  #   Chromium write shared memory blobs to /tmp instead, avoiding crashes.
-  # Even with /dev/dri bound in (see allowGpu below), ANGLE falls back to
-  # SwiftShader unless it can also load a userspace GPU driver. The host
-  # isn't NixOS, so there's no /run/opengl-driver to bind in — point the
-  # loaders at nixpkgs' own Mesa build instead, which only needs /dev/dri
-  # ioctls to work and doesn't have to match the host's Mesa version.
-  mesaDriverEnv = ''
-    export LIBGL_DRIVERS_PATH="${pkgs.mesa}/lib/dri"
-    export __EGL_VENDOR_LIBRARY_FILENAMES="${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json"
-    export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/intel_icd.x86_64.json"
-    # Mesa's GBM loader (buffer allocation for EGL/Wayland surfaces) has its
-    # own separate search path from LIBGL_DRIVERS_PATH; without it ANGLE's
-    # EGL init fails with "MESA-LOADER: failed to open dri: .../gbm/dri_gbm.so".
-    export GBM_BACKENDS_PATH="${pkgs.mesa}/lib/gbm"
-  '';
-  chromiumWrapper = pkgs.writeShellScriptBin "chromium" ''
-    if [ -f /tmp/sandbox-ca-cert.pem ]; then
-      NSS_DB="$HOME/.pki/nssdb"
-      if [ ! -d "$NSS_DB" ]; then
-        mkdir -p "$NSS_DB"
-        ${pkgs.nss.tools}/bin/certutil -d "sql:$NSS_DB" -N --empty-password 2>/dev/null
-      fi
-      ${pkgs.nss.tools}/bin/certutil -d "sql:$NSS_DB" -A \
-        -n "sandbox-proxy-ca" -t "C,," \
-        -i /tmp/sandbox-ca-cert.pem 2>/dev/null || true
-    fi
-    ${mesaDriverEnv}
-    exec ${pkgs.chromium}/bin/chromium --no-sandbox --disable-dev-shm-usage "$@"
-  '';
 
   # Directories the sandboxed agent may read and write, shared across all
   # agents. ensureAgentSandboxDirs (below) creates any that are missing so a
@@ -273,6 +186,7 @@ let
   maybeSandbox = name: pkg: if cfg.sandbox.enable then wrapWithSandbox name pkg else pkg;
 in
 {
+  imports = [ ./network.nix ];
   options.mdarocha.llm-agents = {
     sandbox = {
       enable = mkOption {
@@ -280,185 +194,11 @@ in
         default = true;
         description = "Whether to wrap llm-agent tools with bubblewrap (Linux) or Seatbelt (macOS) via agent-sandbox.nix.";
       };
-      allowedDomainGroups = mkOption {
-        type = types.attrsOf (
-          types.either (types.listOf types.str) (
-            types.attrsOf (types.either types.str (types.listOf types.str))
-          )
-        );
-        description = ''
-          Allowed outbound domains, grouped for display in agent instructions.
-          Each group value is either:
-          - A list of domain suffixes (all HTTP methods allowed), or
-          - An attrset mapping each domain suffix to "*" (all methods) or a list
-            of allowed HTTP methods (e.g. ["GET" "HEAD"]).
-          The proxy matches by suffix so 'foo.com' also covers any *.foo.com subdomain.
-        '';
-        default = {
-          "Anthropic" = [
-            "anthropic.com"
-            "claude.ai"
-            "claudeusercontent.com"
-          ];
-          "Azure DevOps" = [
-            "dev.azure.com"
-            "visualstudio.com"
-            "vsassets.io"
-            "login.microsoftonline.com"
-            "blob.core.windows.net"
-          ];
-          "Contentful" = [
-            "contentful.com"
-            "ctfassets.net"
-          ];
-          "Documentation" = {
-            "docs.github.com" = [
-              "GET"
-              "HEAD"
-            ];
-            "developers.google.com" = [
-              "GET"
-              "HEAD"
-            ];
-            "learn.microsoft.com" = [
-              "GET"
-              "HEAD"
-            ];
-            "mdn.mozilla.net" = [
-              "GET"
-              "HEAD"
-            ];
-          };
-          "Figma" = [ "figma.com" ];
-          "Google Antigravity (inference)" = {
-            "cloudcode-pa.googleapis.com" = [
-              "GET"
-              "POST"
-            ];
-            "daily-cloudcode-pa.googleapis.com" = [
-              "GET"
-              "POST"
-            ];
-            "oauth2.googleapis.com" = [ "POST" ];
-          };
-          "OpenAI (inference)" = {
-            "chatgpt.com" = [
-              "GET"
-              "POST"
-            ];
-          };
-          "GitHub" = [
-            "github.com"
-            "githubusercontent.com"
-          ];
-          "GitHub Copilot" = [ "githubcopilot.com" ];
-          "MCP tools" = [
-            "mcp.grep.app"
-            "mcp.context7.com"
-            "mcp.exa.ai"
-            "websetsmcp.exa.ai"
-            "api.exa.ai"
-          ];
-          "Personal (mdarocha.pl)" = [
-            "mdarocha.pl"
-          ];
-          "Model metadata" = {
-            "models.dev" = [
-              "GET"
-              "HEAD"
-            ];
-          };
-          "Nix" = [
-            "nixos.org"
-            "numtide.com"
-            "cachix.org"
-            "determinate.systems"
-            "devenv.sh"
-          ];
-          "NuGet" = [ "api.nuget.org" ];
-          "OMP" = [ "omp.sh" ];
-          "OpenRouter" = [ "openrouter.ai" ];
-          "npm" = [
-            "npmjs.org"
-            "npmjs.com"
-            "yarnpkg.com"
-            "fontawesome.com"
-          ];
-          "Python" = [
-            "pypi.org"
-            "python.org"
-            "pythonhosted.org"
-          ];
-          "Rust" = [ "crates.io" ];
-          "YouTube" = [
-            "youtube.com"
-            "googlevideo.com"
-            "ytimg.com"
-          ];
-        };
-      };
-
-      allowGetAnywhere = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Allow GET and HEAD requests to any domain. Enables unrestricted web browsing and searching without listing every destination. When enabled, a wildcard entry for GET and HEAD is prepended to the proxy allowlist.";
-      };
 
       allowedPackages = mkOption {
         type = types.listOf types.package;
         description = "Packages placed on PATH inside the agent sandbox. Add any tool the agent needs to invoke.";
-        default = with pkgs; [
-          # Misc tools
-          git
-          git-lfs
-          gh
-          # devenv-managed repos exec `prek` from git hooks; absent from
-          # PATH, `git commit` fails with "prek: not found".
-          prek
-          coreutils
-          findutils
-          gnused
-          gnugrep
-          gawk
-          curl
-          jq
-          ripgrep
-          fd
-          which
-          diffutils
-          chromiumWrapper
-          wl-clipboard
-          binutils
-          file
-          procps
-
-          # PDF/office skills: CLI tools for document processing
-          poppler-utils
-          qpdf
-          pandoc
-          libreoffice-stable
-          tesseract
-          imagemagick
-
-          # Python
-          pythonEvalEnv
-          pyright
-
-          # Node.js / JavaScript / TypeScript
-          nodejs
-          bun
-          typescript-language-server
-
-          # Rust
-          cargo
-          rustc
-          rustfmt
-          clippy
-          rust-analyzer
-
-          # Nix
-          nixd
-        ];
+        default = tools.allowedPackages;
       };
 
       packageDescriptions = mkOption {

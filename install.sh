@@ -19,17 +19,27 @@ fi
 pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null || exit
 
 install_nix() {
-    if which nix >/dev/null 2>&1 || [ -d /nix ] || [ -f /nix/var/nix/profiles/default/bin/nix ]; then
+    if load_nix; then
         echo "✅ Nix is already installed."
         return
     fi
-    
+
+    if [[ -e /nix ]]; then
+        echo "Found /nix but no usable nix command; repair the existing Nix installation." >&2
+        exit 1
+    fi
+
     echo "🔨 Installing Nix..."
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
         sh -s -- install "$@" --no-confirm \
             --extra-conf "trusted-users = $USER" \
             --extra-conf "substituters = https://cache.nixos.org https://mdarocha-dotfiles.cachix.org" \
             --extra-conf "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= mdarocha-dotfiles.cachix.org-1:kBGT+0RREXqBc0Z7hI9NdvjrA7ypIpIhMLNrD1qLF9k="
+
+    if ! load_nix; then
+        echo "Nix installation completed without a usable nix command." >&2
+        exit 1
+    fi
 }
 
 install_nix_codespace_workarounds() {
@@ -66,13 +76,20 @@ install_nix_daemon_initd_service() {
 echo "👋 Hello!"
 echo "======"
 
-# shellcheck disable=SC1091
 source ./scripts/lib.sh
+CONFIGURATION="$(detect_configuration)"
+export CONFIGURATION
 
 echo "🔨 Setting up for $CONFIGURATION..."
 
 echo "⚙️  Setting up Nix..."
 case "$CONFIGURATION" in
+    "nixos")
+        if ! load_nix; then
+            echo "NixOS must provide a working nix command." >&2
+            exit 1
+        fi
+        ;;
     "codespace" | "claude")
         install_nix linux \
             --init none \
@@ -92,9 +109,10 @@ esac
 
 echo "⚙️  Applying home-manager configuration..."
 
-unset __ETC_PROFILE_NIX_SOURCED
-# shellcheck disable=SC1091
-. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+if ! load_nix; then
+    echo "No usable nix command after bootstrap." >&2
+    exit 1
+fi
 
 retries=3
 delay=3
@@ -103,10 +121,11 @@ attempt=1
 while [ "$attempt" -le "$retries" ]; do
     echo "Attempt $attempt/$retries..."
 
-    if /nix/var/nix/profiles/default/bin/nix run --accept-flake-config .#apply; then
+    if nix run --accept-flake-config .#apply; then
         break
+    else
+        status=$?
     fi
-    status=$?
 
     if [ "$attempt" -lt "$retries" ]; then
         echo "Configuration apply failed (exit $status). Retrying in $delay seconds..."
@@ -132,6 +151,9 @@ case "$CONFIGURATION" in
         fi
         chsh --shell "/home/$USER/.nix-profile/bin/zsh"
         echo "✅ Shell changed. Re-login to see results"
+        ;;
+    "nixos")
+        echo "NixOS user configuration owns the login shell."
         ;;
     *)
         echo "⚠️  $CONFIGURATION doesn't support changing the shell. Make sure it's setup manually."

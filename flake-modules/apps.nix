@@ -17,6 +17,11 @@
             '') (attrsToList self.homeConfigurations);
             script = pkgs.writeShellApplication {
               name = "report";
+              runtimeInputs = [
+                pkgs.nix
+                pkgs.jq
+                pkgs.coreutils
+              ];
               text = ''
                 echo "# homeConfigurations sizes"
 
@@ -35,13 +40,15 @@
           let
             script = pkgs.writeShellApplication {
               name = "apply";
+              runtimeInputs = [ pkgs.nix ];
               text = ''
-                # shellcheck disable=SC1091
                 source "${../scripts/lib.sh}";
+                CONFIGURATION="$(detect_configuration)"
+                export CONFIGURATION
 
                 echo "⚙️  Applying new configuration for $CONFIGURATION..."
                 export HOME_MANAGER_BACKUP_EXT="backup"
-                nix run .#homeConfigurations."$CONFIGURATION".activationPackage
+                nix run --accept-flake-config .#homeConfigurations."$CONFIGURATION".activationPackage
 
                 echo "🧹 Cleaning up..."
                 nix-collect-garbage -d

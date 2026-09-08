@@ -8,12 +8,21 @@ let
     config.allowUnfree = true;
     overlays = [
       llm-agents.overlays.shared-nixpkgs
-      (import ../overlays/nixpkgs/default.nix)
+      (import ../overlays)
     ];
   };
 
+  profiles = {
+    linux = ../profiles/linux.nix;
+    wsl = ../profiles/wsl.nix;
+    deck = ../profiles/deck.nix;
+    codespace = ../profiles/codespace.nix;
+    claude = ../profiles/claude.nix;
+    nixos = ../profiles/nixos.nix;
+  };
+
   mkHomeManagerConfiguration =
-    additionalConfig:
+    profile:
     homeManagerConfiguration {
       extraSpecialArgs = { inherit inputs; };
       inherit pkgs;
@@ -32,89 +41,10 @@ let
             };
           }
         )
-        additionalConfig
+        profile
       ];
     };
 in
 {
-  flake.homeConfigurations = {
-    linux = mkHomeManagerConfiguration {
-      mdarocha = {
-        llm-agents.enable = true;
-        zed.enable = true;
-      };
-    };
-
-    wsl = mkHomeManagerConfiguration {
-      mdarocha = {
-        llm-agents.enable = true;
-        zed = {
-          enable = true;
-          configDir = "/mnt/c/Users/marek.darocha/AppData/Roaming/Zed";
-        };
-      };
-    };
-
-    deck = mkHomeManagerConfiguration {
-      mdarocha = {
-        llm-agents.enable = true;
-        zed.enable = true;
-      };
-
-      programs.git.settings.ghq.root = "~/sdcard/projects";
-
-      # ensure flatpak-installed app icons and .desktop files are visible
-      # to plasmashell (systemd user session doesn't source /etc/profile.d/flatpak.sh)
-      xdg.systemDirs.data = [
-        "/var/lib/flatpak/exports/share"
-        "\${HOME}/.local/share/flatpak/exports/share"
-      ];
-
-      home = {
-        username = "deck";
-        homeDirectory = "/home/deck";
-      };
-    };
-
-    codespace = mkHomeManagerConfiguration {
-      mdarocha.vscode.enable = true;
-      mdarocha.zsh.autoDirectenvAllow = true;
-
-      home = {
-        username = "codespace";
-        homeDirectory = "/home/codespace";
-
-        # required, otherwise the "nix" binary cannot be found in $PATH
-        sessionVariablesExtra = ''
-          unset __ETC_PROFILE_NIX_SOURCED
-          . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-        '';
-      };
-
-      programs = {
-        man.enable = false; # saves some space
-        git.enable = false; # we leave the default codespace git config intact
-      };
-    };
-
-    claude = mkHomeManagerConfiguration {
-      mdarocha = {
-        llm-agents.claude-code-web.enable = true;
-        zsh.autoDirectenvAllow = true;
-      };
-
-      home = {
-        username = "root";
-        homeDirectory = "/root";
-
-        # required, otherwise the "nix" binary cannot be found in $PATH
-        sessionVariablesExtra = ''
-          unset __ETC_PROFILE_NIX_SOURCED
-          . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-        '';
-      };
-
-      programs.man.enable = false; # saves some space
-    };
-  };
+  flake.homeConfigurations = builtins.mapAttrs (_: mkHomeManagerConfiguration) profiles;
 }

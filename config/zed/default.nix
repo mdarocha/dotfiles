@@ -30,10 +30,10 @@ in
 
     configDir = mkOption {
       type = types.str;
-      default = "$HOME/.var/app/dev.zed.Zed/config/zed";
+      default = "${config.xdg.configHome}/zed";
       description = ''
-        Path to the Zed configuration directory. Defaults to the Flatpak data
-        path. Override for native installs or WSL (Windows Zed via /mnt/c).
+        Path to the Zed configuration directory. Profiles override this for
+        Flatpak and Windows installs.
       '';
     };
 

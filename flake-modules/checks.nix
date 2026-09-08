@@ -36,43 +36,23 @@
             paths = concatMapStringsSep "\n" (app: app.program) (attrValues self.apps.${system});
           in
           pkgs.writeText "apps-check" paths;
+        profile-selection = import ../tests/profile-selection.nix { inherit pkgs; };
+        "nixos-activation" = import ../tests/nixos-activation.nix { inherit pkgs self; };
 
         "run-packages" =
           let
             homePath =
-              (inputs.home-manager.lib.homeManagerConfiguration {
-                extraSpecialArgs = { inherit inputs; };
-                pkgs = self.homeConfigurations.linux.pkgs;
-                modules = [
-                  ../config
-                  (
-                    { lib, ... }:
-                    let
-                      inherit (lib) mkDefault;
-                    in
-                    {
-                      home = {
-                        username = mkDefault "marek";
-                        homeDirectory = mkDefault "/home/marek";
-                      };
-                    }
-                  )
-                  {
-                    mdarocha = {
-                      llm-agents = {
-                        enable = true;
-                        sandbox.enable = false;
-                      };
-                    };
-                  }
-                ];
-              }).config.home.path;
+              (
+                self.homeConfigurations.linux.extendModules {
+                  modules = [ { mdarocha.llm-agents.sandbox.enable = false; } ];
+                }
+              ).config.home.path;
           in
           pkgs.runCommand "run-packages" { } ''
             export HOME="$TMPDIR/home"
             mkdir -p "$HOME"
 
-            for cmd in git zsh gh omp copilot; do
+            for cmd in git zsh gh omp copilot omp-nosandbox copilot-nosandbox; do
               if [ ! -x "${homePath}/bin/$cmd" ]; then
                 echo "missing executable in Home Manager profile: $cmd" >&2
                 exit 1

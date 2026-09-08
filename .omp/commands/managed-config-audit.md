@@ -5,8 +5,8 @@ description: Audit Nix-managed config files against their live, tool-edited stat
 # Managed configuration audit
 
 Some config files are owned by the tool's own UI and only deep-merged with Nix
-defaults — see `overlays/modules/managed-config/default.nix` (the
-`mdarocha.managedConfigFiles` option) and `overlays/modules/managed-config/config-merge.nix`
+defaults — see `modules/managed-config/default.nix` (the
+`mdarocha.managedConfigFiles` option) and `modules/managed-config/config-merge.nix`
 (merge/backup logic). Those files drift at runtime: the tool writes settings
 Nix never declared. This audit finds that drift and, with approval, folds
 anything durable back into the repo. It also checks the repo's own declared
@@ -29,7 +29,8 @@ to scope the audit to. Blank means audit every entry.
 
 ```bash
 source scripts/lib.sh
-echo "$CONFIGURATION"
+CONFIGURATION="$(detect_configuration)"
+export CONFIGURATION
 ```
 
 Same detection `nix run .#apply` uses. Trust it over guessing from hostname/env.
@@ -47,7 +48,7 @@ against the real `$HOME`. If `$1` was given, keep only that entry.
 Discover the real backup suffix instead of assuming `"backup"`:
 
 ```bash
-grep -n 'HOME_MANAGER_BACKUP_EXT' flake-modules/apps.nix overlays/modules/managed-config/default.nix
+grep -n 'HOME_MANAGER_BACKUP_EXT' flake-modules/apps.nix modules/managed-config/default.nix
 ```
 
 ## Phase 2 — three-way comparison per entry
@@ -62,7 +63,7 @@ For every entry whose `$configDir/$fileName` exists on disk, load three states:
   immediately before the _last_ activation ran.
 
 Reconcile at the same top-level-key granularity
-`overlays/modules/managed-config/config-merge.nix`'s `_config_diff_warn` uses:
+`modules/managed-config/config-merge.nix`'s `_config_diff_warn` uses:
 
 - keys present in `current`/`backup` but absent from `repo` → the tool wrote
   these itself; never declared in Nix.

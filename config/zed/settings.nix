@@ -1,4 +1,4 @@
-{ config, ... }: {
+{ config, pkgs, ... }: {
   auto_install_extensions = {
     catppuccin-icons = true;
     nix = true;
@@ -148,7 +148,7 @@
     font_size = 14;
     line_height = "comfortable";
     shell = {
-      program = "${config.home.homeDirectory}/.nix-profile/bin/zsh";
+      program = "${pkgs.zsh}/bin/zsh";
     };
     toolbar = {
       breadcrumbs = false;

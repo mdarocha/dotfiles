@@ -13,13 +13,9 @@
     ./vscode
     ./zsh
     ./zed
-    ../overlays/modules
+    ../modules/managed-config
   ];
 
-  targets.genericLinux = {
-    enable = true;
-    gpu.enable = true;
-  };
 
   home.stateVersion = "24.05";
 
@@ -29,7 +25,6 @@
     # synchronize NIX_PATH with the dotfiles' nixpkgs (for <nixpkgs> angle-bracket lookups)
     NIX_PATH = lib.mkForce "nixpkgs=${inputs.nixpkgs}";
 
-    LD_LIBRARY_PATH = "$HOME/.nix-profile/lib:\${LD_LIBRARY_PATH:-}";
   };
 
   news.display = "silent";
