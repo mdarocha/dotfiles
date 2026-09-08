@@ -128,7 +128,6 @@ let
   sharedRwDirs = [
     "$HOME/.omp"
     "$HOME/.copilot"
-    "$HOME/.config/gh"
 
     # Nix user config and profile state, so nix commands (registry, config,
     # nix-env) persist their state across sandbox runs.
@@ -167,10 +166,11 @@ let
     "$HOME/.config/git"
   ];
 
-  sharedRoFiles = [ ];
+  sharedRoFiles = [ "$HOME/.config/gh/config.yml" ];
 
-  # Standard single-user-desktop location, exposed in sandbox to allow clipboard access
-  waylandRuntimeDir = "/run/user/1000";
+  # Resolved at runtime by the wrapper's bash script (paths here are shell
+  # strings, not Nix values) since the desktop user's uid varies per machine.
+  waylandRuntimeDir = "/run/user/$(id -u)";
   waylandDisplay = "wayland-0";
   waylandSocketPath = "${waylandRuntimeDir}/${waylandDisplay}";
 
@@ -245,6 +245,8 @@ let
         # Expose to allow clipboard access
         WAYLAND_DISPLAY = waylandDisplay;
         XDG_RUNTIME_DIR = waylandRuntimeDir;
+        # Evaluated on the host, where `gh` already has keyring access.
+        GH_TOKEN = "$(${pkgs.gh}/bin/gh auth token)";
       };
     };
 
