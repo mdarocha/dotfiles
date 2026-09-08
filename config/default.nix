@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   inputs,
   ...
 }:
@@ -16,10 +17,7 @@
     ../overlays/modules
   ];
 
-  targets.genericLinux = {
-    enable = true;
-    gpu.enable = true;
-  };
+  targets.genericLinux.enable = lib.mkDefault true;
 
   home.stateVersion = "24.05";
 
@@ -28,7 +26,8 @@
   systemd.user.sessionVariables = {
     # synchronize NIX_PATH with the dotfiles' nixpkgs (for <nixpkgs> angle-bracket lookups)
     NIX_PATH = lib.mkForce "nixpkgs=${inputs.nixpkgs}";
-
+  }
+  // lib.optionalAttrs config.targets.genericLinux.enable {
     LD_LIBRARY_PATH = "$HOME/.nix-profile/lib:\${LD_LIBRARY_PATH:-}";
   };
 
