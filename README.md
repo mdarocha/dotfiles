@@ -13,6 +13,14 @@ To install the dotfiles, clone the repository and run the `install.sh` script.
 $ ./install.sh
 ```
 
+It can also be run without a checkout, in which case it downloads the repository into
+`$GHQ_ROOT/github.com/mdarocha/dotfiles` (using `git` if available, a release tarball otherwise)
+and continues from there.
+
+```bash
+$ curl -sSfL https://raw.githubusercontent.com/mdarocha/dotfiles/main/install.sh | bash
+```
+
 The script will:
   1. Install `binfmt` support for ARM systems
      
@@ -40,6 +48,7 @@ install the dotfiles.
 | Configuration | Description |
 | :-- | :-- |
 | `homeConfigurations.linux` | For native Linux systems. |
+| `homeConfigurations.nixos` | For native NixOS systems - stays a standalone Home Manager root, and skips what NixOS already provides. |
 | `homeConfigurations.codespace` | For GitHub Codespaces. |
 | `homeConfigurations.wsl` | For Windows Subsystem for Linux. (🚧 TODO) |
 

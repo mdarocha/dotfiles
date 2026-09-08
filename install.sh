@@ -6,13 +6,33 @@ set -o pipefail
 
 export USER="${USER:-$(id -un)}"
 
-# Support running via curl | bash: if not executing from a file, clone the repo first
+# Support running via curl | bash: if not executing from a file, fetch the repo first
 if [[ ! -f "${BASH_SOURCE[0]:-}" ]]; then
-    DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
-    if [ ! -d "$DOTFILES_DIR/.git" ]; then
-        echo "📥 Cloning dotfiles repository to $DOTFILES_DIR..."
-        git clone https://github.com/mdarocha/dotfiles "$DOTFILES_DIR"
+    REPO_URL="https://github.com/mdarocha/dotfiles"
+
+    staging="$(mktemp -d)"
+    trap 'rm -rf "$staging"' EXIT
+
+    echo "📥 Fetching dotfiles..."
+    if command -v git > /dev/null 2>&1; then
+        git clone "$REPO_URL" "$staging/dotfiles"
+    else
+        mkdir -p "$staging/dotfiles"
+        curl --proto '=https' --tlsv1.2 -sSf -L "$REPO_URL/archive/refs/heads/main.tar.gz" \
+            | tar -xz -C "$staging/dotfiles" --strip-components=1
     fi
+
+    # shellcheck disable=SC1091
+    source "$staging/dotfiles/scripts/lib.sh"
+    DOTFILES_DIR="${DOTFILES_DIR:-$GHQ_ROOT/github.com/mdarocha/dotfiles}"
+
+    if [[ ! -f "$DOTFILES_DIR/install.sh" ]]; then
+        echo "📂 Placing dotfiles in $DOTFILES_DIR..."
+        mkdir -p "$(dirname "$DOTFILES_DIR")"
+        mv "$staging/dotfiles" "$DOTFILES_DIR"
+    fi
+
+    rm -rf "$staging"
     exec bash "$DOTFILES_DIR/install.sh"
 fi
 
@@ -85,6 +105,9 @@ case "$CONFIGURATION" in
         install_nix linux \
             --extra-conf "extra-platforms = aarch64-linux arm-linux"
         ;;
+    "nixos")
+        echo "✅ Nix is managed by the NixOS system."
+        ;;
     *)
         install_nix
         ;;
@@ -92,9 +115,19 @@ esac
 
 echo "⚙️  Applying home-manager configuration..."
 
-unset __ETC_PROFILE_NIX_SOURCED
-# shellcheck disable=SC1091
-. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    unset __ETC_PROFILE_NIX_SOURCED
+    # shellcheck disable=SC1091
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+
+nix_bin="/nix/var/nix/profiles/default/bin/nix"
+if [ ! -x "$nix_bin" ]; then
+    nix_bin="nix"
+fi
+
+# NixOS ships without flakes enabled, and the nested `nix run` in .#apply needs them too
+export NIX_CONFIG="extra-experimental-features = nix-command flakes"
 
 retries=3
 delay=3
@@ -103,7 +136,7 @@ attempt=1
 while [ "$attempt" -le "$retries" ]; do
     echo "Attempt $attempt/$retries..."
 
-    if /nix/var/nix/profiles/default/bin/nix run --accept-flake-config .#apply; then
+    if "$nix_bin" run --accept-flake-config .#apply; then
         break
     fi
     status=$?
@@ -132,6 +165,9 @@ case "$CONFIGURATION" in
         fi
         chsh --shell "/home/$USER/.nix-profile/bin/zsh"
         echo "✅ Shell changed. Re-login to see results"
+        ;;
+    "nixos")
+        echo "⚠️  On NixOS the shell is declarative - set programs.zsh.enable and users.users.$USER.shell in your system config."
         ;;
     *)
         echo "⚠️  $CONFIGURATION doesn't support changing the shell. Make sure it's setup manually."
