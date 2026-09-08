@@ -46,9 +46,17 @@ in
     };
 
     nixos = mkHomeManagerConfiguration {
+      home = {
+        username = "mdarocha";
+        homeDirectory = "/home/mdarocha";
+      };
+
       mdarocha = {
         llm-agents.enable = true;
-        zed.enable = true;
+        zed = {
+          enable = true;
+          configDir = "/home/mdarocha/.config/zed";
+        };
       };
 
       # NixOS already provides GPU drivers, FHS integration and man pages
