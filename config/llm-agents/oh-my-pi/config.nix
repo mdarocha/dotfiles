@@ -76,14 +76,14 @@
   # tasks
   task = {
     isolation = {
-      enabled = true;
+      enabled = false;
       merge = "branch";
       commits = "ai";
     };
     eager = "preferred";
     agentPrewalk.designer = "on";
   };
-  isolation.backend = "rcopy";
+  isolation.backend = "auto";
 
   # providers
   providers = {
@@ -93,7 +93,7 @@
       "perplexity"
     ];
     fetch = "native";
-    tinyModel = "lfm2.5-350m";
+    tinyModel = "lfm2.5-230m";
     imageOrder = [
       "antigravity"
       "openai-codex"
