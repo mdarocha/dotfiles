@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIGURATION="linux"
+CONFIGURATION=""
 
 if [[ "${CODESPACES:-}" == "true" ]]; then
     CONFIGURATION="codespace"
@@ -15,25 +15,21 @@ if [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]; then
 fi
 
 if [[ -f /etc/os-release ]] && grep -q '^ID=steamos' /etc/os-release; then
-    CONFIGURATION="deck"
+    echo "❌ SteamOS is unsupported." >&2
+    exit 1
 fi
 
 if [[ -f /etc/NIXOS ]] || { [[ -f /etc/os-release ]] && grep -q '^ID=nixos' /etc/os-release; }; then
     CONFIGURATION="nixos"
 fi
 
+if [[ -z "$CONFIGURATION" ]]; then
+    echo "❌ Unsupported environment: no matching home-manager configuration (expected codespace, wsl, claude or nixos)." >&2
+    exit 1
+fi
+
 export CONFIGURATION
 
 # mirrors `ghq.root` from config/git, which isn't readable yet on a first install
-if [[ -z "${GHQ_ROOT:-}" ]]; then
-    case "$CONFIGURATION" in
-        "deck")
-            GHQ_ROOT="$HOME/sdcard/projects"
-            ;;
-        *)
-            GHQ_ROOT="$HOME/Projekty"
-            ;;
-    esac
-fi
-
+: "${GHQ_ROOT:=$HOME/Projekty}"
 export GHQ_ROOT
