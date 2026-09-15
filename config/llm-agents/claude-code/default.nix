@@ -1,25 +1,45 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }:
 
 let
   cfg = config.mdarocha.llm-agents;
-  inherit (lib) mkEnableOption mkIf;
+  claudeCode = cfg.claude-code;
+  inherit (lib) mkOption mkIf types;
 in
 {
-  options.mdarocha.llm-agents.claude-code-web.enable =
-    mkEnableOption "Claude Code (web) agent config";
+  options.mdarocha.llm-agents.claude-code = {
+    enable = mkOption {
+      type = types.bool;
+      default = cfg.enable;
+      description = "Whether to configure Claude Code.";
+    };
 
-  config = mkIf (cfg.enable || cfg.claude-code-web.enable) {
+    package = mkOption {
+      type = types.nullOr types.package;
+      default = pkgs.llm-agents.claude-code;
+      description = "Claude Code package to install, or null where the environment already ships its own binary.";
+    };
+
+    fixNix = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Install a SessionStart hook that puts Nix on PATH. Needed in environments
+        where the Bash tool's shell never sources the Nix profile scripts.
+      '';
+    };
+  };
+
+  config = mkIf claudeCode.enable {
+    home.packages = lib.optional (claudeCode.package != null) claudeCode.package;
+
     home.file = lib.mkMerge [
-      {
-        # TODO: select the mode chunk at runtime via a SessionStart hook, like the
-        # oh-my-pi extension does. Claude Code has no native TypeScript hook that can
-        # replace the system prompt, so it gets the self-detecting full text for now.
-        ".claude/CLAUDE.md".text = cfg.common.agentInstructions;
-
+      { ".claude/CLAUDE.md".text = cfg.instructions; }
+      (mkIf claudeCode.fixNix {
         ".claude/hooks/fix-nix-path.sh" = {
           source = ./fix-nix-path.sh;
           executable = true;
@@ -37,10 +57,8 @@ in
             }
           ];
         };
-      }
-      (lib.mapAttrs' (
-        name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }
-      ) cfg.common.skills)
+      })
+      (lib.mapAttrs' (name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }) cfg.skills)
     ];
   };
 }

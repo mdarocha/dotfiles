@@ -43,10 +43,10 @@ Then pick the narrowest reproduction:
 
 Prefer the real entry point over a mock. The point is to catch what tests miss.
 
-> **Sandbox note:** if the task needs a running service (dev server, DB, test server),
-> **start it yourself** in the current shell session. You cannot rely on the user starting
-> it, and `localhost` inside the sandbox does not reach the host. Use `run-with-nix` if a
-> required tool isn't installed.
+> **Service note:** if the task needs a running service (dev server, DB, test server),
+> **start it yourself** in the current shell session — you cannot rely on the user
+> starting it, and a sandboxed session's `localhost` does not reach the host. Use
+> `run-with-nix` if a required tool isn't installed.
 
 ## Step 3: Run it and observe
 

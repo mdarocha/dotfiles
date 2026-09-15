@@ -118,7 +118,11 @@ in
 
     claude = mkHomeManagerConfiguration {
       mdarocha = {
-        llm-agents.claude-code-web.enable = true;
+        llm-agents.claude-code = {
+          enable = true;
+          package = null;
+          fixNix = true;
+        };
         zsh.autoDirectenvAllow = true;
       };
 

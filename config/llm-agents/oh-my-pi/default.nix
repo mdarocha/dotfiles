@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 
@@ -22,10 +23,10 @@ let
   rules = filesIn ./rules ".md";
   extensions = filesIn ./extensions ".ts";
 
-  packages = cfg.sandbox.wrapPackages "omp" pkgs.llm-agents.omp;
+  sandbox = import ./sandbox { inherit pkgs lib inputs; };
 
   ompSpecificInstructions = ''
-    # Git worktrees
+    ## Git worktrees
 
     If you create git worktrees, always use the `~/.omp/wt` folder (the
     same folder the built-in `github` tool's `pr_checkout` op uses).
@@ -45,7 +46,7 @@ in
   options.mdarocha.llm-agents.oh-my-pi = {
     package = lib.mkOption {
       type = lib.types.package;
-      default = packages.sandbox;
+      default = sandbox.package;
       description = ''
         oh-my-pi agent package.
       '';
@@ -53,7 +54,7 @@ in
 
     package-nosandbox = lib.mkOption {
       type = lib.types.package;
-      default = packages.no-sandbox;
+      default = sandbox.package-nosandbox;
       description = ''
         oh-my-pi agent package without sandboxing.
       '';
@@ -84,7 +85,11 @@ in
 
     home.file = lib.mkMerge [
       {
-        ".omp/agent/AGENTS.md".text = cfg.common.base + ompSpecificInstructions;
+        ".omp/agent/AGENTS.md".text = lib.concatStringsSep "\n" [
+          cfg.instructions
+          sandbox.instructions.toolset
+          ompSpecificInstructions
+        ];
 
         # NixOS lacks the FHS dynamic loader the generic release binary
         # needs, so oh-my-pi's runtime yt-dlp download is unusable here.
@@ -93,15 +98,14 @@ in
         ".omp/agent/extensions/sandbox-instructions.ts".text = ''
           import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
-          const SANDBOX = ${builtins.toJSON cfg.common.sandbox};
-          const NO_SANDBOX = ${builtins.toJSON cfg.common."no-sandbox"};
+          const SANDBOX = ${builtins.toJSON sandbox.instructions.sandboxed};
+          const NO_SANDBOX = ${builtins.toJSON sandbox.instructions.host};
 
           export default function (pi: ExtensionAPI) {
             pi.setLabel("Sandbox Instructions");
 
             pi.on("before_agent_start", async (event) => {
               const extra = process.env.MDAROCHA_AGENT_SANDBOX === "1" ? SANDBOX : NO_SANDBOX;
-              if (!extra.trim()) return undefined;
 
               // The returned array replaces the prompt wholesale, so carry the
               // current one over instead of returning the chunk alone.
@@ -114,7 +118,7 @@ in
       }
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
-      ) cfg.common.skills)
+      ) cfg.skills)
       (lib.mapAttrs' (name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }) rules)
       (lib.mapAttrs' (
         name: src: lib.nameValuePair ".omp/agent/extensions/${name}.ts" { source = src; }
@@ -128,6 +132,10 @@ in
       label = "omp config";
       value = mergedConfig;
     };
+
+    home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [
+      "writeBoundary"
+    ] sandbox.ensureDirs;
 
     home.activation.download-omp-tiny-models =
       lib.mkIf

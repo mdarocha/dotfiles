@@ -5,7 +5,6 @@
 
 {
   imports = [
-    ./sandbox
     ./common
     ./copilot-cli
     ./oh-my-pi
