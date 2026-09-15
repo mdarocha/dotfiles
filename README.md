@@ -47,7 +47,6 @@ install the dotfiles.
 
 | Configuration | Description |
 | :-- | :-- |
-| `homeConfigurations.linux` | For native Linux systems. |
 | `homeConfigurations.nixos` | For native NixOS systems - stays a standalone Home Manager root, and skips what NixOS already provides. |
 | `homeConfigurations.codespace` | For GitHub Codespaces. |
 | `homeConfigurations.wsl` | For Windows Subsystem for Linux. (🚧 TODO) |

@@ -72,7 +72,7 @@
       systems = [ "x86_64-linux" ];
 
       imports = [
-        ./flake-modules/home-configurations.nix
+        ./flake-modules/home-configurations
         ./flake-modules/checks.nix
         ./flake-modules/apps.nix
       ];

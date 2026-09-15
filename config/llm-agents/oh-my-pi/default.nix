@@ -44,6 +44,8 @@ let
 in
 {
   options.mdarocha.llm-agents.oh-my-pi = {
+    enable = lib.mkEnableOption "oh-my-pi";
+
     package = lib.mkOption {
       type = lib.types.package;
       default = sandbox.package;
@@ -77,7 +79,7 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf cfg.oh-my-pi.enable {
     home.packages = [
       cfg.oh-my-pi.package
       cfg.oh-my-pi.package-nosandbox

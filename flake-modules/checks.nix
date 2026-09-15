@@ -42,7 +42,7 @@
             homePath =
               (inputs.home-manager.lib.homeManagerConfiguration {
                 extraSpecialArgs = { inherit inputs; };
-                pkgs = self.homeConfigurations.linux.pkgs;
+                pkgs = self.homeConfigurations.wsl.pkgs;
                 modules = [
                   ../config
                   (
@@ -58,7 +58,12 @@
                     }
                   )
                   {
-                    mdarocha.llm-agents.enable = true;
+                    mdarocha.llm-agents = {
+                      copilot-cli.enable = true;
+                      claude-code.enable = true;
+                      cursor-agent.enable = true;
+                      oh-my-pi.enable = true;
+                    };
                   }
                 ];
               }).config.home.path;
@@ -67,7 +72,7 @@
             export HOME="$TMPDIR/home"
             mkdir -p "$HOME"
 
-            for cmd in git zsh gh copilot claude omp-nosandbox; do
+            for cmd in git zsh gh copilot claude cursor-agent omp-nosandbox; do
               if [ ! -x "${homePath}/bin/$cmd" ]; then
                 echo "missing executable in Home Manager profile: $cmd" >&2
                 exit 1

@@ -8,15 +8,11 @@
 let
   cfg = config.mdarocha.llm-agents;
   claudeCode = cfg.claude-code;
-  inherit (lib) mkOption mkIf types;
+  inherit (lib) mkOption mkEnableOption mkIf types;
 in
 {
   options.mdarocha.llm-agents.claude-code = {
-    enable = mkOption {
-      type = types.bool;
-      default = cfg.enable;
-      description = "Whether to configure Claude Code.";
-    };
+    enable = mkEnableOption "Claude Code";
 
     package = mkOption {
       type = types.nullOr types.package;

@@ -3,8 +3,9 @@
 Home Manager module that configures AI coding agents for local, privacy-conscious use.
 
 Upstream packages come from the [`numtide/llm-agents.nix`][llm-agents] flake
-(omp, copilot-cli, claude-code). This module adds configuration, sandboxing,
-and skills on top.
+(omp, copilot-cli, claude-code, cursor-agent). This module adds configuration,
+sandboxing, and skills on top. Every agent is disabled by default; enable it
+with `mdarocha.llm-agents.<name>.enable`.
 
 [llm-agents]: https://github.com/numtide/llm-agents.nix
 
@@ -38,7 +39,11 @@ and skills on top.
   for environments that ship their own binary; `claude-code.fixNix` adds a
   SessionStart hook that puts Nix on PATH there.
 
+- **Cursor Agent** (`cursor-agent/`) — installs [`cursor-agent`][cursor-agent];
+  no instructions or skills wiring.
+
 [srt]: https://github.com/archie-judd/agent-sandbox.nix
 [omp]: https://github.com/can1357/oh-my-pi
 [copilot-cli]: https://github.com/github/copilot-cli
 [claude-code]: https://github.com/anthropics/claude-code
+[cursor-agent]: https://cursor.com/

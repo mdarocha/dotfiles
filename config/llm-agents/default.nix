@@ -1,17 +1,9 @@
 {
-  lib,
-  ...
-}:
-
-{
   imports = [
     ./common
     ./copilot-cli
     ./oh-my-pi
     ./claude-code
+    ./cursor-agent
   ];
-
-  options.mdarocha.llm-agents = {
-    enable = lib.mkEnableOption "llm-agents";
-  };
 }

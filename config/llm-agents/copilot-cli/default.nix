@@ -7,9 +7,12 @@
 
 let
   cfg = config.mdarocha.llm-agents;
+  copilotCli = cfg.copilot-cli;
 in
 {
-  config = lib.mkIf cfg.enable {
+  options.mdarocha.llm-agents.copilot-cli.enable = lib.mkEnableOption "GitHub Copilot CLI";
+
+  config = lib.mkIf copilotCli.enable {
     home.packages = [ pkgs.llm-agents.copilot-cli ];
 
     home.file = lib.mkMerge [
