@@ -20,10 +20,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    llm-agents = {
-      url = "github:numtide/llm-agents.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # Do not follow the shared `nixpkgs`: omp compiles a Bun standalone binary
+    # with the `bun` version pinned in llm-agents.nix's own nixpkgs, which its
+    # upstream CI builds and caches against; following our own nixpkgs swaps
+    # in a different `bun` that produces a broken binary at build time.
+    llm-agents.url = "github:numtide/llm-agents.nix";
 
     # Own fork, maintained independently — upstream (archie-judd/agent-sandbox.nix)
     # rewrote the launcher in Python (v3.0.0+) with no allowGpu equivalent, so this

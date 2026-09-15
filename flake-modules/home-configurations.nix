@@ -8,6 +8,7 @@ let
     config.allowUnfree = true;
     overlays = [
       llm-agents.overlays.shared-nixpkgs
+      (import ../overlays/omp-bun-fix.nix)
       (import ../overlays/nixpkgs/default.nix)
     ];
   };
