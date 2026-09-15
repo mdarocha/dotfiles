@@ -20,10 +20,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    llm-agents = {
-      url = "github:numtide/llm-agents.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    llm-agents.url = "github:numtide/llm-agents.nix";
 
     # Own fork, maintained independently — upstream (archie-judd/agent-sandbox.nix)
     # rewrote the launcher in Python (v3.0.0+) with no allowGpu equivalent, so this
