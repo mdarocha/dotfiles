@@ -9,6 +9,7 @@
   terminal.showProgress = true;
   tui.textSizing = true;
   tui.renderMermaid = true;
+  tui.vimMode = true;
   task.showResolvedModelBadge = true;
 
   # model
