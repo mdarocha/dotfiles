@@ -8,6 +8,10 @@ let
   agentSandbox = inputs.agent-sandbox.lib.${pkgs.stdenv.hostPlatform.system};
 
   binName = "omp";
+  omp = pkgs.writeShellScriptBin binName ''
+    export PI_PROXY="$HTTPS_PROXY"
+    exec ${pkgs.llm-agents.omp}/bin/${binName} "$@"
+  '';
 
   python = import ./python.nix { inherit pkgs; };
   chromium = import ./chromium.nix { inherit pkgs; };
@@ -25,7 +29,7 @@ let
   waylandSocketPath = "${waylandRuntimeDir}/${waylandDisplay}";
 
   sandboxedPackage = agentSandbox.mkSandbox {
-    pkg = pkgs.llm-agents.omp;
+    pkg = omp;
     inherit binName;
     outName = binName;
 
