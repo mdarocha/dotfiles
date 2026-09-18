@@ -38,6 +38,7 @@ let
     libreoffice-stable
     tesseract
     imagemagick
+    ffmpeg
 
     # Python
     pythonEnv
