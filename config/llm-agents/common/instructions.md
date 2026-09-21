@@ -54,33 +54,26 @@ debugging, setup instructions, and CLI tool usage.
 
 ## Comments
 
-No comment is the default, because well-named code is self-documenting. Before
-writing one, name which of these it is — if none fit, do not write it:
+Prefer clear code to explanatory prose. Keep a comment when it provides information
+the code cannot express:
 
-1. a *why* the code cannot show: a constraint, spec requirement, or business rule,
-2. an edge case a reader would not predict,
+1. a constraint, specification requirement, or business rule that explains *why*,
+2. a non-obvious mechanism or edge case a reader cannot infer locally,
 3. a workaround, with the issue linked,
-4. a doc comment on a public surface, stating behavior, invariants, units, and
-   error/panic conditions in the language's native format.
+4. a public API contract covering behavior, invariants, units, or errors.
 
-Never write these, in any language: restatements of the line below, structural
-labels (`# imports`, `# helper`), phase headers (`// Step 1: validate`),
-decorative separators, summaries of the function they sit above, edit history
-(`// changed from`, `// now handles`, `// new`), commented-out code, chatter
-aimed at the reviewer (`// as requested`), doc text that restates a name and
-type (`@param id — the id`), or anything tied to the current session, host, or
-sandbox rather than the code.
+Never write restatements of the next line, structural labels (`# imports`,
+`# helper`), phase headers (`// Step 1: validate`), decorative separators,
+function summaries that repeat the signature, edit history (`// changed from`,
+`// now handles`, `// new`), commented-out code, reviewer chatter
+(`// as requested`), or doc text that restates a name and type
+(`@param id — the id`). Do not mention the current session or development
+environment in source comments.
 
-Two constraints outrank the list above:
-
-- **Density.** Match the file's existing comment level and never raise it. Bulk
-  narration is rejected even when each line is individually defensible.
-- **Durability.** Write edits as if the code had always been that way, and keep
-  every comment true after the next refactor.
-
-This is enforced, not advisory: comment shapes from the banned list abort the
-edit that writes them, and the diff is audited for narration and density before
-a session settles. Deleting a comment is always the cheaper path.
+Preserve existing comments unless the change makes them false or redundant.
+Place each comment beside the behavior it explains. A previously sparse file may
+need more comments when new complexity or hidden constraints justify them; local
+density is a signal, not a ceiling. Keep every comment concise and durable.
 
 ## Code style preferences
 

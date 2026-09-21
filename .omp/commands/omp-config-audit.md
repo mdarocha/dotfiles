@@ -149,18 +149,16 @@ the user's next reply as the answers.
 
    ```nix
    # omp config audit decisions (see .omp/commands/omp-config-audit.md)
-   # ignore comment-slop rules for this block: these decisions must be recorded
-   # in comments to survive across machines and agent sessions.
+   # These comments are durable audit state; future runs must preserve them.
    # - <key path>: intentionally left unmanaged; skip in future audits.
    ```
 
    Keep one such block per file, appending new lines to it rather than
    duplicating the header. Future audits must check this block before
    re-flagging a key — treat it the same as a declined candidate and skip it
-   without re-asking. This block is a deliberate, user-approved exception to
-   the repo's comment-slop/minimal-comments rules — it is the only place
-   these decisions survive across machines and agent sessions, so keep the
-   "ignore comment-slop rules" line intact when appending.
+   without re-asking. These comments record state that is otherwise unavailable
+   to future audits, so they satisfy the repo's comment policy. Keep the header
+   intact when appending.
 
 ## Phase 7 — commit to main
 

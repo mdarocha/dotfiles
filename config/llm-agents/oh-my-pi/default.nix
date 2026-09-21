@@ -21,7 +21,6 @@ let
     );
 
   rules = filesIn ./rules ".md";
-  extensions = filesIn ./extensions ".ts";
 
   sandbox = import ./sandbox { inherit pkgs lib inputs; };
 
@@ -116,9 +115,6 @@ in
         name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
       ) cfg.skills)
       (lib.mapAttrs' (name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }) rules)
-      (lib.mapAttrs' (
-        name: src: lib.nameValuePair ".omp/agent/extensions/${name}.ts" { source = src; }
-      ) extensions)
     ];
 
     home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [

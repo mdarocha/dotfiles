@@ -113,8 +113,7 @@
   share.store = "gist";
 
   # omp config audit decisions (see .omp/commands/omp-config-audit.md)
-  # ignore comment-slop rules for this block: these decisions must be recorded
-  # in comments to survive across machines and agent sessions.
+  # These comments are durable audit state; future runs must preserve them.
   # - modelRoles.*: intentionally left unmanaged; skip in future audits.
   # - stt.modelName: intentionally left unmanaged; skip in future audits.
 
