@@ -6,12 +6,12 @@ use them — see `default.nix` for the rest (aliases, packages, plugin list).
 
 ## Prompt: blockline
 
-`blockline.plugin.zsh` is a small custom prompt — no Starship/powerlevel10k or
-similar framework. Left to right, in Solarized-colored blocks: SSH/Codespaces
-host, active `nix shell`/`direnv` context, active Python venv, the last three
-path components, background job count, and git branch + status (staged `+`,
-modified `!`, untracked `.`, ahead/behind counts). There's no configuration
-option for it; edit the file directly to change segments.
+`blockline.plugin.zsh` is a small custom prompt. Left to right, in
+Solarized-colored blocks: SSH/Codespaces host, active `nix shell`/`direnv`
+context, active Python venv, the last three path components, background job
+count, and git branch + status (staged `+`, modified `!`, untracked `.`,
+ahead/behind counts). There's no option for it; edit the file directly to
+change segments.
 
 ## Window title
 
@@ -22,12 +22,12 @@ and the last command run — nothing to enable, it's always on.
 
 Turned on beyond Home Manager's own zsh defaults:
 
-- **Autosuggestion** — ghost-text completion from history as you type;
-  accept with → or `End`.
-- **Syntax highlighting** — the command line is colored green/red for
+- Autosuggestion — ghost-text completion from history as you type; accept
+  with → or `End`.
+- Syntax highlighting — the command line is colored green/red for
   valid/invalid commands as you type.
-- **History substring search** — type a prefix, then ↑/↓ cycles only
-  history entries matching that prefix (bound to the standard arrow keys).
+- History substring search — type a prefix, then ↑/↓ cycles only history
+  entries matching that prefix (bound to the standard arrow keys).
 - `vanilli.sh` additionally sets `auto_cd` (typing a bare directory name
   `cd`s into it), `auto_pushd` (every `cd` pushes onto the directory stack —
   use `popd`/`dirs -v` to navigate back), and smarter case-insensitive/
@@ -44,10 +44,10 @@ Turned on beyond Home Manager's own zsh defaults:
 
 `nix-direnv` is enabled with a custom `direnv_layout_dir` that hashes the
 project path into `$XDG_CACHE_HOME/direnv/layouts/` instead of nix-direnv's
-default per-project `.direnv/`. Set `mdarocha.zsh.autoDirectenvAllow = true`
-to auto-`direnv allow` any `.envrc` found on shell start — this trusts
-arbitrary `.envrc` files without prompting, so only enable it on machines/
-directories you already trust.
+default per-project `.direnv/`. Set `mdarocha.zsh.autoDirenvAllow = true` to
+auto-`direnv allow` any `.envrc` found on shell start — this trusts arbitrary
+`.envrc` files without prompting, so only enable it on machines/directories
+you already trust.
 
 ## `command-not-found` via nix-index
 

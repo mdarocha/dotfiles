@@ -4,7 +4,7 @@
       enabledAgents = [ "claude" ];
       claude-code.package = null;
     };
-    zsh.autoDirectenvAllow = true;
+    zsh.autoDirenvAllow = true;
   };
 
   home = {

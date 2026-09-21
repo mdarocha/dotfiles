@@ -13,7 +13,7 @@ in
   imports = [ ./nix-index ];
 
   options.mdarocha.zsh = {
-    autoDirectenvAllow = lib.mkEnableOption "auto direnv allow on shell start";
+    autoDirenvAllow = lib.mkEnableOption "auto direnv allow on shell start";
   };
 
   config = {
@@ -70,7 +70,7 @@ in
           # use zsh in nix shell
           export SHELL=${pkgs.zsh}/bin/zsh
         '')
-        (lib.mkIf cfg.autoDirectenvAllow (
+        (lib.mkIf cfg.autoDirenvAllow (
           lib.mkOrder 550 ''
             if [ -f .envrc ]; then
               direnv allow .

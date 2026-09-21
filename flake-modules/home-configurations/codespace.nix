@@ -1,6 +1,6 @@
 {
   mdarocha = {
-    zsh.autoDirectenvAllow = true;
+    zsh.autoDirenvAllow = true;
     llm-agents.enabledAgents = [
       "copilot"
       "omp"
