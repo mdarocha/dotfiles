@@ -30,6 +30,10 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
           # only push from the main branch
           skipPush: ${{ github.event_name == 'pull_request' }}
+          # post-build-hook mode: only paths actually built in this job trigger
+          # a push, so anything substituted from cache.nixos.org, numtide, or
+          # mdarocha-dotfiles itself is never re-uploaded here.
+          useDaemon: true
 
       - run: nix flake check -L
 
