@@ -55,20 +55,36 @@ in
       };
 
       extraPackages = with pkgs; [
+        # File and content search for Snacks pickers and venv-selector.
         ripgrep
         fd
+
+        # Converts images for snacks.image display.
         imagemagick
+
+        # PATH-resolved language servers: roslyn.nvim starts roslyn-ls; vtsls
+        # and Copilot run on node.
+        roslyn-ls
         nodejs
-        netcoredbg
-        vscode-js-debug
-        lldb
-        dotnet-sdk
-        jupytextCli
+
+        # Toolchain rust-analyzer shells out to.
         cargo
         rustc
         rustfmt
+
+        # MSBuild for roslyn-ls; dotnet test for neotest-dotnet.
+        dotnet-sdk
+
+        # nvim-dap adapters; lldb provides lldb-dap for Rust.
+        netcoredbg
+        vscode-js-debug
+        lldb
+
+        # python3 provider, Molten's kernel, and the debugpy adapter.
         pythonEnv
-        roslyn-ls
+
+        # jupytext.nvim's .ipynb conversion CLI.
+        jupytextCli
       ];
 
       extraPlugins = with pkgs.vimPlugins; [
