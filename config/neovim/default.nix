@@ -24,6 +24,12 @@ let
     omp = "${config.mdarocha.llm-agents.oh-my-pi.package}/bin/omp";
   };
 
+  bottomTerminal = ''
+    function()
+      Snacks.terminal(nil, { win = { position = "bottom" } })
+    end
+  '';
+
   luaModules = [
     ./lua/options.lua
     ./lua/ui.lua
@@ -170,6 +176,15 @@ in
           settings.options.theme = "solarized_dark";
         };
 
+        bufferline = {
+          enable = true;
+          settings.options = {
+            diagnostics = "nvim_lsp";
+            show_buffer_close_icons = false;
+            show_close_icon = false;
+          };
+        };
+
         which-key = {
           enable = true;
           settings.spec.__raw = ''
@@ -180,6 +195,7 @@ in
               { "<leader>d", group = "debug" },
               { "<leader>t", group = "test" },
               { "<leader>o", group = "oh-my-pi" },
+              { "<leader>b", group = "buffer" },
             }
           '';
         };
@@ -359,9 +375,12 @@ in
           options.desc = "Document symbols";
         }
         {
-          mode = "n";
+          mode = [
+            "n"
+            "t"
+          ];
           key = "<A-b>";
-          action.__raw = ''function() Snacks.terminal(nil, { win = { position = "bottom" } }) end'';
+          action.__raw = bottomTerminal;
           options.desc = "Bottom terminal";
         }
         {
@@ -370,8 +389,8 @@ in
             "t"
           ];
           key = "<C-`>";
-          action.__raw = ''function() Snacks.terminal(vim.o.shell, { win = { position = "float" } }) end'';
-          options.desc = "Floating terminal";
+          action.__raw = bottomTerminal;
+          options.desc = "Bottom terminal";
         }
         {
           mode = [
@@ -405,6 +424,42 @@ in
           key = "gr";
           action.__raw = "vim.lsp.buf.references";
           options.desc = "References";
+        }
+        {
+          mode = "n";
+          key = "gd";
+          action.__raw = "vim.lsp.buf.definition";
+          options.desc = "Go to definition";
+        }
+        {
+          mode = "n";
+          key = "g/";
+          action.__raw = "function() Snacks.picker.grep() end";
+          options.desc = "Search all files";
+        }
+        {
+          mode = "n";
+          key = "<C-PageDown>";
+          action = "<cmd>BufferLineCycleNext<CR>";
+          options.desc = "Next tab";
+        }
+        {
+          mode = "n";
+          key = "<C-PageUp>";
+          action = "<cmd>BufferLineCyclePrev<CR>";
+          options.desc = "Previous tab";
+        }
+        {
+          mode = "n";
+          key = "<leader>bd";
+          action = "<cmd>bdelete<CR>";
+          options.desc = "Close buffer";
+        }
+        {
+          mode = "n";
+          key = "<leader>bp";
+          action = "<cmd>BufferLinePick<CR>";
+          options.desc = "Pick buffer";
         }
 
         {

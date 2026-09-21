@@ -8,6 +8,9 @@ vim.api.nvim_create_user_command("OmpCommit", function()
     vim.notify("OmpCommit: omp executable not found", vim.log.levels.WARN)
     return
   end
-  Snacks.terminal({ vim.g.mdarocha_tools.omp, "commit" }, { cwd = root })
+  Snacks.terminal({ vim.g.mdarocha_tools.omp, "commit" }, {
+    cwd = root,
+    win = { position = "bottom" },
+  })
   vim.cmd("startinsert")
 end, { desc = "Run omp commit in the repository root" })

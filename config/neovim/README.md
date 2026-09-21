@@ -29,13 +29,19 @@ store.
 [snacks.nvim](https://github.com/folke/snacks.nvim) handles the explorer,
 pickers, terminals, notifications, indent guides, status column, and inline
 images. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) displays
-the status line. [which-key.nvim](https://github.com/folke/which-key.nvim)
-lists leader mappings, and [auto-session](https://github.com/rmagatti/auto-session)
-restores the session for the current directory.
+the status line and [bufferline.nvim](https://github.com/akinsho/bufferline.nvim)
+the tab bar with file icons and diagnostics.
+[which-key.nvim](https://github.com/folke/which-key.nvim) lists leader
+mappings, and [auto-session](https://github.com/rmagatti/auto-session) restores
+the session for the current directory.
 
 | Key | Action |
 | --- | --- |
 | `<leader>e` or `<A-l>` | Open the file explorer |
+| `<A-r>` | Open the document symbol list |
+| `<A-b>` or ``<C-`>`` | Toggle the bottom terminal |
+| `<A-c>` | Toggle the centered editing layout |
+| `g/` | Search across the project |
 | `<leader>sf` | Find files |
 | `<leader>sg` | Search file contents |
 | `<leader>sb` | List buffers |
@@ -43,9 +49,36 @@ restores the session for the current directory.
 | `<leader>sS` | Find workspace symbols |
 | `<leader>sd` | List diagnostics |
 | `<leader>sh` | Search help |
-| `<A-b>` | Toggle a bottom terminal |
-| ``<C-`>`` | Toggle a floating terminal |
-| `<A-c>` | Toggle the centered editing layout |
+
+Terminals always open in a bottom split.
+
+### Tabs
+
+Every open buffer appears in the tab bar.
+
+| Key | Action |
+| --- | --- |
+| `<C-PageDown>` | Next tab |
+| `<C-PageUp>` | Previous tab |
+| `<leader>bp` | Jump to a tab by its letter |
+| `<leader>bd` | Close the current buffer |
+
+### Splits
+
+Splits use Vim's `<C-w>` window commands.
+
+| Key | Action |
+| --- | --- |
+| `<C-w>v` | Split vertically |
+| `<C-w>s` | Split horizontally |
+| `<C-w>h/j/k/l` | Move to the split left/below/above/right |
+| `<C-w>H/J/K/L` | Move the current split to that edge |
+| `<C-w>=` | Equalize split sizes |
+| `<C-w>_` or `<C-w>|` | Maximize height or width |
+| `<C-w>c` | Close the current split |
+| `<C-w>o` | Close every other split |
+
+New splits open to the right and below.
 
 [solarized.nvim](https://github.com/maxmx03/solarized.nvim) starts in dark
 mode. `:set background=light` switches to its light palette.
@@ -77,6 +110,20 @@ adds LSP, buffer, path, and snippet completion.
 
 Formatting and inlay hints use the capabilities advertised by the attached
 server.
+
+| Key | Action |
+| --- | --- |
+| `gd` | Go to definition |
+| `gr` | List references |
+| `<C-]>` | Go to implementation |
+| `K` | Show hover documentation |
+| `<C-k>` | Show signature help |
+| `<A-CR>` | Show code actions |
+| `\r` | Rename the symbol under the cursor |
+
+`gr` shares a prefix with Neovim's built-in `grn`, `gra`, `gri`, and `grr`
+mappings, so it waits for `timeoutlen` before listing references. Those
+built-ins still work.
 
 [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) grammars
 are installed through Nix for Bash, C#, CSS, HTML, JavaScript, JSON, Lua,
