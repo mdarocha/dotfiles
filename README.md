@@ -49,7 +49,8 @@ install the dotfiles.
 | :-- | :-- |
 | `homeConfigurations.nixos` | For native NixOS systems - stays a standalone Home Manager root, and skips what NixOS already provides. |
 | `homeConfigurations.codespace` | For GitHub Codespaces. |
-| `homeConfigurations.wsl` | For Windows Subsystem for Linux. (🚧 TODO) |
+| `homeConfigurations.wsl` | For Windows Subsystem for Linux. |
+| `homeConfigurations.claude` | For Claude Code's remote/cloud sandbox environment ("Claude Code web"). |
 
 ## Additional configurations
 
@@ -67,7 +68,3 @@ The Ghostty config uses the **Hack Nerd Font**. If you use Ghostty, you may want
 from the [Nerd Fonts website](https://www.nerdfonts.com/font-downloads).
 Place the font files under `~/.local/share/fonts/` and run `fc-cache -f`.
 
-### Zed
-
-[Zed](https://zed.dev/) can be installed via your system package manager or the official
-installer. Home Manager will write the config regardless.

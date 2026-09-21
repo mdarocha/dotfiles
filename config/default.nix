@@ -11,10 +11,7 @@
     ./git
     ./ghostty
     ./llm-agents
-    ./vscode
     ./zsh
-    ./zed
-    ../overlays/modules
   ];
 
   targets.genericLinux.enable = lib.mkDefault true;
@@ -33,8 +30,6 @@
 
   news.display = "silent";
 
-  # needed for program icons to show up in DE
-  programs.bash.enable = true;
   xdg.enable = true;
   xdg.mime.enable = true;
 
@@ -50,7 +45,5 @@
     pkgs.cachix
 
     pkgs.jq
-    # needed for zed
-    pkgs.nil
   ];
 }

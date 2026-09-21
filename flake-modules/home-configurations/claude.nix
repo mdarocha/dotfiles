@@ -1,11 +1,10 @@
 {
   mdarocha = {
-    llm-agents.claude-code = {
-      enable = true;
-      package = null;
-      fixNix = true;
+    llm-agents = {
+      enabledAgents = [ "claude" ];
+      claude-code.package = null;
     };
-    zsh.autoDirectenvAllow = true;
+    zsh.autoDirenvAllow = true;
   };
 
   home = {

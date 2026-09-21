@@ -112,6 +112,7 @@ case "$CONFIGURATION" in
         install_nix
         ;;
 esac
+./scripts/claude-code-web-nix.sh
 
 echo "⚙️  Applying home-manager configuration..."
 

@@ -13,7 +13,7 @@ in
   imports = [ ./nix-index ];
 
   options.mdarocha.zsh = {
-    autoDirectenvAllow = lib.mkEnableOption "auto direnv allow on shell start";
+    autoDirenvAllow = lib.mkEnableOption "auto direnv allow on shell start";
   };
 
   config = {
@@ -35,11 +35,19 @@ in
     programs.zsh = {
       enable = true;
 
-      autosuggestion.enable = false;
-      enableCompletion = true;
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+      historySubstringSearch.enable = true;
       enableVteIntegration = true;
 
-      dotDir = config.home.homeDirectory;
+      dotDir = "${config.xdg.configHome}/zsh";
+
+      history = {
+        append = true;
+        extended = true;
+        findNoDups = true;
+        saveNoDups = true;
+      };
 
       initContent = lib.mkMerge [
         (lib.mkOrder 500 ''
@@ -62,7 +70,7 @@ in
           # use zsh in nix shell
           export SHELL=${pkgs.zsh}/bin/zsh
         '')
-        (lib.mkIf cfg.autoDirectenvAllow (
+        (lib.mkIf cfg.autoDirenvAllow (
           lib.mkOrder 550 ''
             if [ -f .envrc ]; then
               direnv allow .
@@ -81,7 +89,7 @@ in
           zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
           zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
 
-          if [ -n  $PTYXIS_VERSION ]; then
+          if [ -n "''${PTYXIS_VERSION:-}" ]; then
             bindkey '^[[H'  beginning-of-line
             bindkey '^[[F'  end-of-line
             bindkey '^[[3~' delete-char
