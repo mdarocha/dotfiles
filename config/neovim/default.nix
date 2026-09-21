@@ -121,6 +121,8 @@ in
 
         blink-cmp.enable = true;
 
+        schemastore.enable = true;
+
         lsp = {
           enable = true;
           servers = {
@@ -446,6 +448,18 @@ in
         {
           mode = "n";
           key = "<C-PageUp>";
+          action = "<cmd>BufferLineCyclePrev<CR>";
+          options.desc = "Previous tab";
+        }
+        {
+          mode = "n";
+          key = "<C-Tab>";
+          action = "<cmd>BufferLineCycleNext<CR>";
+          options.desc = "Next tab";
+        }
+        {
+          mode = "n";
+          key = "<C-S-Tab>";
           action = "<cmd>BufferLineCyclePrev<CR>";
           options.desc = "Previous tab";
         }

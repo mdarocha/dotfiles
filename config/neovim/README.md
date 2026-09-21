@@ -58,10 +58,13 @@ Every open buffer appears in the tab bar.
 
 | Key | Action |
 | --- | --- |
-| `<C-PageDown>` | Next tab |
-| `<C-PageUp>` | Previous tab |
+| `<C-Tab>` or `<C-PageDown>` | Next tab |
+| `<C-S-Tab>` or `<C-PageUp>` | Previous tab |
 | `<leader>bp` | Jump to a tab by its letter |
 | `<leader>bd` | Close the current buffer |
+
+`<C-Tab>` needs a terminal that speaks the Kitty keyboard protocol, such as
+Ghostty. Use `<C-PageDown>` and `<C-PageUp>` elsewhere.
 
 ### Splits
 
@@ -103,8 +106,8 @@ adds LSP, buffer, path, and snippet completion.
 | Rust | [`rust-analyzer`](https://rust-analyzer.github.io) | Nix also provides `cargo`, `rustc`, and `rustfmt` |
 | C# and Razor | [`roslyn-ls`](https://github.com/dotnet/roslyn) with [roslyn.nvim](https://github.com/seblyng/roslyn.nvim) | Discovers solutions and projects; `:Roslyn target` switches targets |
 | JavaScript, TypeScript, JSX, TSX | [`vtsls`](https://github.com/yioneko/vtsls) | File renames update import paths; `:VtsOrganizeImports` and `:VtsSourceDefinition` are available |
-| HTML, CSS, JSON | [`vscode-langservers-extracted`](https://github.com/hrsh7th/vscode-langservers-extracted) | |
-| YAML | [`yaml-language-server`](https://github.com/redhat-developer/yaml-language-server) | |
+| HTML, CSS, JSON | [`vscode-langservers-extracted`](https://github.com/hrsh7th/vscode-langservers-extracted) | Schemas come from [SchemaStore.nvim](https://github.com/b0o/SchemaStore.nvim) |
+| YAML | [`yaml-language-server`](https://github.com/redhat-developer/yaml-language-server) | Schemas come from [SchemaStore.nvim](https://github.com/b0o/SchemaStore.nvim) |
 | XML, `.csproj`, `.fsproj`, `.props` | [`lemminx`](https://github.com/eclipse/lemminx) | |
 | Zig | [`zls`](https://github.com/zigtools/zls) | |
 
@@ -126,8 +129,14 @@ mappings, so it waits for `timeoutlen` before listing references. Those
 built-ins still work.
 
 [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) grammars
-are installed through Nix for Bash, C#, CSS, HTML, JavaScript, JSON, Lua,
-Markdown, Nix, Python, Rust, TSX, TypeScript, Vim, XML, YAML, and Zig.
+are compiled by Nix for Bash, C#, CSS, HTML, JavaScript, JSON, Lua, Markdown,
+Nix, Python, Rust, TSX, TypeScript, Vim, XML, YAML, and Zig. They ship as store
+paths on the runtimepath, so startup loads them without compiling or
+downloading anything.
+
+`.json`, `.yaml`, and `.yml` files get completion, validation, and hover
+documentation from the [SchemaStore](https://www.schemastore.org) catalog,
+which is also installed as a Nix package.
 
 ## Python notebooks
 
