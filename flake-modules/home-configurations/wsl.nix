@@ -4,4 +4,5 @@
     "cursor"
     "copilot"
   ];
+  mdarocha.neovim.enable = true;
 }

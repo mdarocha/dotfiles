@@ -12,6 +12,7 @@
     ./ghostty
     ./llm-agents
     ./zsh
+    ./neovim
   ];
 
   targets.genericLinux.enable = lib.mkDefault true;
@@ -43,7 +44,6 @@
   home.packages = [
     pkgs.devenv
     pkgs.cachix
-
     pkgs.jq
   ];
 }

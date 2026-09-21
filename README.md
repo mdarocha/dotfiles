@@ -68,3 +68,8 @@ The Ghostty config uses the **Hack Nerd Font**. If you use Ghostty, you may want
 from the [Nerd Fonts website](https://www.nerdfonts.com/font-downloads).
 Place the font files under `~/.local/share/fonts/` and run `fc-cache -f`.
 
+### Neovim
+
+Home Manager installs and configures the [Neovim](https://neovim.org/) workbench
+with [nixvim](https://github.com/nix-community/nixvim). See
+[`config/neovim/README.md`](config/neovim/README.md) for setup and keybindings.

@@ -59,6 +59,10 @@
       flake = false;
     };
 
+    nixvim = {
+      url = "github:nix-community/nixvim";
+    };
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";

@@ -8,6 +8,7 @@
     "claude"
     "omp"
   ];
+  mdarocha.neovim.enable = true;
 
   # NixOS already provides GPU drivers, FHS integration and man pages
   targets.genericLinux.enable = false;

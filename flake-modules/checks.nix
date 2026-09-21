@@ -45,6 +45,7 @@
                 extraSpecialArgs = { inherit inputs; };
                 pkgs = self.homeConfigurations.wsl.pkgs;
                 modules = [
+                  inputs.nixvim.homeModules.nixvim
                   ../config
                   (
                     { lib, ... }:

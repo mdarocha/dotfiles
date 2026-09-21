@@ -1,6 +1,11 @@
 { inputs, ... }:
 let
-  inherit (inputs) nixpkgs home-manager llm-agents;
+  inherit (inputs)
+    nixpkgs
+    home-manager
+    llm-agents
+    nixvim
+    ;
   inherit (home-manager.lib) homeManagerConfiguration;
 
   pkgs = import nixpkgs {
@@ -19,6 +24,7 @@ let
       inherit pkgs;
 
       modules = [
+        nixvim.homeModules.nixvim
         ../../config
         (
           { lib, ... }:
