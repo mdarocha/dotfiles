@@ -1,3 +1,5 @@
+-- Format through the LSP when the server offers it; never invoke an external
+-- formatter.
 local function format_on_save(args)
   local clients = vim.lsp.get_clients({ bufnr = args.buf })
   for _, client in ipairs(clients) do
@@ -12,6 +14,8 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   callback = format_on_save,
 })
 
+-- roslyn.nvim appends --daemon-mode by default, which nixpkgs' roslyn-ls
+-- (5.11.0) rejects.
 vim.lsp.config("roslyn", {
   cmd = {
     "Microsoft.CodeAnalysis.LanguageServer",
@@ -25,6 +29,7 @@ require("roslyn").setup({
   broad_search = true,
 })
 
+-- vtsls exposes these as protocol extensions rather than standard LSP methods.
 vim.api.nvim_create_user_command("VtsOrganizeImports", function()
   vim.lsp.buf.execute_command({
     command = "typescript.organizeImports",
@@ -39,6 +44,7 @@ vim.api.nvim_create_user_command("VtsSourceDefinition", function()
   })
 end, { desc = "vtsls: go to source definition" })
 
+-- Pyright reads the interpreter path once at startup.
 vim.api.nvim_create_autocmd("User", {
   pattern = "VenvSelectPostActivate",
   callback = function()
