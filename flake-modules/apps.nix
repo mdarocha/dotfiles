@@ -43,8 +43,10 @@
                 export HOME_MANAGER_BACKUP_EXT="backup"
                 nix run .#homeConfigurations."$CONFIGURATION".activationPackage
 
-                echo "🧹 Cleaning up..."
-                nix-collect-garbage -d
+                if [[ "$CONFIGURATION" == "nixos" ]]; then
+                  echo "🧹 Cleaning up..."
+                  nix-collect-garbage -d
+                fi
               '';
             };
           in
