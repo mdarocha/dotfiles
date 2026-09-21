@@ -49,7 +49,8 @@ install the dotfiles.
 | :-- | :-- |
 | `homeConfigurations.nixos` | For native NixOS systems - stays a standalone Home Manager root, and skips what NixOS already provides. |
 | `homeConfigurations.codespace` | For GitHub Codespaces. |
-| `homeConfigurations.wsl` | For Windows Subsystem for Linux. (🚧 TODO) |
+| `homeConfigurations.wsl` | For Windows Subsystem for Linux. |
+| `homeConfigurations.claude` | For Claude Code's remote/cloud sandbox environment ("Claude Code web"). |
 
 ## Additional configurations
 

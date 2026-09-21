@@ -1,4 +1,0 @@
-[
-  "modelRoles"
-  "stt.modelName"
-]

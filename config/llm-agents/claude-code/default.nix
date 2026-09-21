@@ -6,8 +6,8 @@
 }:
 
 let
-  cfg = config.mdarocha.llm-agents;
-  claudeCode = cfg.claude-code;
+  cfg = config.mdarocha.llm-agents.claude-code;
+  common = config.mdarocha.llm-agents;
   inherit (lib)
     mkOption
     mkEnableOption
@@ -26,14 +26,14 @@ in
     };
   };
 
-  config = mkIf claudeCode.enable {
-    home.packages = lib.optional (claudeCode.package != null) claudeCode.package;
+  config = mkIf cfg.enable {
+    home.packages = lib.optional (cfg.package != null) cfg.package;
 
     home.file = {
-      ".claude/CLAUDE.md".text = cfg.instructions;
+      ".claude/CLAUDE.md".text = common.instructions;
     }
     // lib.mapAttrs' (
       name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }
-    ) cfg.skills;
+    ) common.skills;
   };
 }
