@@ -73,7 +73,12 @@ environment in source comments.
 Preserve existing comments unless the change makes them false or redundant.
 Place each comment beside the behavior it explains. A previously sparse file may
 need more comments when new complexity or hidden constraints justify them; local
-density is a signal, not a ceiling. Keep every comment concise and durable.
+density is a signal, not a ceiling.
+
+Keep each comment short and durable. One line is the default; take a second only
+when the constraint needs it. Write for a reader who knows the language and this
+codebase: state the point and stop. Cut lead-ins, restated context, hedging, and
+sentence padding.
 
 ## Code style preferences
 
