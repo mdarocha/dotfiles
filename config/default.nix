@@ -11,10 +11,7 @@
     ./git
     ./ghostty
     ./llm-agents
-    ./vscode
     ./zsh
-    ./zed
-    ../overlays/modules
   ];
 
   targets.genericLinux.enable = lib.mkDefault true;
@@ -50,7 +47,5 @@
     pkgs.cachix
 
     pkgs.jq
-    # needed for zed
-    pkgs.nil
   ];
 }

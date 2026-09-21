@@ -1,11 +1,10 @@
 {
   mdarocha = {
-    vscode.enable = true;
     zsh.autoDirectenvAllow = true;
-    llm-agents = {
-      copilot-cli.enable = true;
-      oh-my-pi.enable = true;
-    };
+    llm-agents.enabledAgents = [
+      "copilot"
+      "omp"
+    ];
   };
 
   home = {

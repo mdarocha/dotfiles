@@ -15,6 +15,7 @@
               fileset = unions [
                 ../install.sh
                 ../scripts/lib.sh
+                ../scripts/claude-code-web-nix.sh
                 ../scripts/nix-daemon.initd
               ];
             };

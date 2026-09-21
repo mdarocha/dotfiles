@@ -67,7 +67,3 @@ The Ghostty config uses the **Hack Nerd Font**. If you use Ghostty, you may want
 from the [Nerd Fonts website](https://www.nerdfonts.com/font-downloads).
 Place the font files under `~/.local/share/fonts/` and run `fc-cache -f`.
 
-### Zed
-
-[Zed](https://zed.dev/) can be installed via your system package manager or the official
-installer. Home Manager will write the config regardless.

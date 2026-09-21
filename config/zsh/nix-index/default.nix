@@ -32,6 +32,7 @@ in
 {
   programs.nix-index = {
     enable = true;
+    enableZshIntegration = true;
     package = pkgs.symlinkJoin {
       name = "nix-index";
       # Don't provide 'bin/nix-index', since the index is updated automatically

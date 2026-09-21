@@ -40,7 +40,6 @@
                 source "${../scripts/lib.sh}";
 
                 echo "⚙️  Applying new configuration for $CONFIGURATION..."
-                export HOME_MANAGER_BACKUP_EXT="backup"
                 nix run .#homeConfigurations."$CONFIGURATION".activationPackage
 
                 echo "🧹 Cleaning up..."
