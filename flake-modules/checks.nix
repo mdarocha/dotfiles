@@ -31,6 +31,8 @@
             inherit paths;
           };
 
+        neovim = self.homeConfigurations.nixos.config.programs.nixvim.build.test;
+
         apps =
           let
             inherit (pkgs.lib) attrValues concatMapStringsSep;
