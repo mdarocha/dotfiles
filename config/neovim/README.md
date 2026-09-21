@@ -1,14 +1,13 @@
 # Neovim
 
-This directory defines the Neovim setup installed by Home Manager when
-`mdarocha.neovim.enable = true`. [nixvim](https://github.com/nix-community/nixvim)
-builds the editor, plugins, language servers, debug adapters, and supporting
-tools from Nix packages. The editor does not use Mason or a runtime plugin
-manager.
+Enable the Home Manager module with `mdarocha.neovim.enable = true`.
+[nixvim](https://github.com/nix-community/nixvim) packages Neovim, its plugins,
+language servers, debug adapters, and supporting tools.
 
-`<leader>` is `Space`. `<localleader>` is `,`.
+`<leader>` is `\` and `<localleader>` is `,`. For example, `<leader>gg`
+means `\gg`.
 
-## Run it without activating Home Manager
+## Run without activating Home Manager
 
 From the repository root:
 
@@ -16,24 +15,22 @@ From the repository root:
 nix run .#neovim
 ```
 
-Arguments after `--` go to Neovim. For example, this opens the current
-directory:
+Pass Neovim arguments after `--`:
 
 ```sh
 nix run .#neovim -- .
 ```
 
-The app uses the same generated configuration as the `nixos` Home Manager
-profile, but runs it directly from the Nix store. It does not activate or
-change the current Home Manager generation.
+This runs the generated `nixos` profile configuration directly from the Nix
+store.
 
 ## Everyday editing
 
-[snacks.nvim](https://github.com/folke/snacks.nvim) provides the explorer,
+[snacks.nvim](https://github.com/folke/snacks.nvim) handles the explorer,
 pickers, terminals, notifications, indent guides, status column, and inline
-images. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) supplies
-the status line, while [which-key.nvim](https://github.com/folke/which-key.nvim)
-lists available leader mappings. [auto-session](https://github.com/rmagatti/auto-session)
+images. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) displays
+the status line. [which-key.nvim](https://github.com/folke/which-key.nvim)
+lists leader mappings, and [auto-session](https://github.com/rmagatti/auto-session)
 restores the session for the current directory.
 
 | Key | Action |
@@ -54,10 +51,9 @@ restores the session for the current directory.
 mode. `:set background=light` switches to its light palette.
 
 [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)
-renders headings, tables, checkboxes, callouts, and code blocks in Markdown
-buffers. `snacks.image` displays linked images and math when the terminal
-supports the Kitty Graphics Protocol. In other terminals the Markdown source
-remains visible.
+renders headings, tables, checkboxes, callouts, and code blocks. `snacks.image`
+displays linked images and math in terminals that support the Kitty Graphics
+Protocol; the source stays visible elsewhere.
 
 ## Language support
 
@@ -79,14 +75,12 @@ adds LSP, buffer, path, and snippet completion.
 | XML, `.csproj`, `.fsproj`, `.props` | [`lemminx`](https://github.com/eclipse/lemminx) | |
 | Zig | [`zls`](https://github.com/zigtools/zls) | |
 
-When a server supports formatting, the buffer is formatted before it is
-written. Other buffers are saved without running an external formatter.
-Inlay hints are enabled for servers that provide them.
+Formatting and inlay hints use the capabilities advertised by the attached
+server.
 
 [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) grammars
 are installed through Nix for Bash, C#, CSS, HTML, JavaScript, JSON, Lua,
-Markdown, Nix, Python, Rust, TSX, TypeScript, Vim, XML, YAML, and Zig. No
-`:TSInstall` step is needed.
+Markdown, Nix, Python, Rust, TSX, TypeScript, Vim, XML, YAML, and Zig.
 
 ## Python notebooks
 
@@ -157,8 +151,7 @@ notification and stops.
 
 [copilot.lua](https://github.com/zbirenbaum/copilot.lua) provides inline
 suggestions. Run `:Copilot auth` once to authenticate. `<C-y>` accepts a
-suggestion; `Tab` keeps its normal completion and indentation behavior. There
-is no Copilot chat panel in this configuration.
+suggestion; `Tab` keeps its normal completion and indentation behavior.
 
 ## Files
 
@@ -180,7 +173,7 @@ After activation, run:
 nvim --headless '+checkhealth' '+qa'
 ```
 
-To check the standalone app instead:
+For the standalone app:
 
 ```sh
 nix run .#neovim -- --headless '+checkhealth' '+qa'

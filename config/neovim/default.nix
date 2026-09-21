@@ -44,7 +44,7 @@ in
       nixpkgs.useGlobalPackages = true;
 
       globals = {
-        mapleader = " ";
+        mapleader = "\\";
         maplocalleader = ",";
       };
 
