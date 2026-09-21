@@ -1,155 +1,187 @@
-# neovim
+# Neovim
 
-Home Manager module that configures a full Neovim workbench with
-[nixvim](https://github.com/nix-community/nixvim), replacing the previous Zed
-setup. Every plugin, language server, and debug adapter is installed
-declaratively through Nix — there is no runtime plugin manager, no Mason, and
-nothing is downloaded on first launch. Enable it with
-`mdarocha.neovim.enable = true;`.
+This directory defines the Neovim setup installed by Home Manager when
+`mdarocha.neovim.enable = true`. [nixvim](https://github.com/nix-community/nixvim)
+builds the editor, plugins, language servers, debug adapters, and supporting
+tools from Nix packages. The editor does not use Mason or a runtime plugin
+manager.
 
-`<leader>` is `Space`, `<localleader>` is `,` (Neovim defaults).
+`<leader>` is `Space`. `<localleader>` is `,`.
 
-## Layout
+## Run it without activating Home Manager
 
-- `default.nix` — the Home Manager module: options, packages, plugin enables,
-  language servers, DAP adapters/configurations, and keymaps.
-- `lua/options.lua` — core `vim.opt` settings, per-filetype indent width, and
-  the autosave-on-focus-lost autocommand.
-- `lua/ui.lua` — activates the Solarized colorscheme.
-- `lua/lsp.lua` — format-on-save, [roslyn.nvim](https://github.com/seblyng/roslyn.nvim)
-  setup, `vtsls` convenience commands, and the venv-selector → Pyright restart hook.
-- `lua/workbench.lua` — [jupytext.nvim](https://github.com/GCBallesteros/jupytext.nvim) setup.
-- `lua/keymaps.lua` — the `:OmpCommit` user command.
+From the repository root:
 
-## Editor & UI
+```sh
+nix run .#neovim
+```
 
-- **Colorscheme**: [solarized.nvim](https://github.com/maxmx03/solarized.nvim),
-  dark background (`:set background=light` switches to the light variant).
-- **[snacks.nvim](https://github.com/folke/snacks.nvim)** is the single UI
-  framework for file explorer, fuzzy pickers, floating/persistent terminals,
-  in-terminal image rendering (Kitty Graphics Protocol), notifications, indent
-  guides, and the statuscolumn.
-  - `<leader>e` / `<A-l>` — toggle the file explorer
-  - `<leader>sf` — find files, `<leader>sg` — live grep, `<leader>sb` — buffers
-  - `<leader>ss` — document symbols, `<leader>sS` — workspace symbols
-  - `<leader>sd` — diagnostics, `<leader>sh` — help tags
-  - `<A-b>` — bottom terminal, `` <C-`> `` — floating terminal
-  - `<A-c>` — zen mode (centered layout)
-- **[lualine.nvim](https://github.com/nvim-lualine/lualine.nvim)** — statusline
-  (mode, branch, diagnostics, filetype, position), Solarized theme.
-- **[which-key.nvim](https://github.com/folke/which-key.nvim)** — shows
-  available bindings under `<leader>s`/`g`/`h`/`d`/`t`/`o` after a short pause.
-- **[auto-session](https://github.com/rmagatti/auto-session)** — restores the
-  last session per working directory on startup.
-- **[render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)** —
-  in-buffer Markdown rendering (headings, tables, checkboxes, code blocks);
-  linked images render through `snacks.image` when the terminal supports the
-  Kitty Graphics Protocol.
+Arguments after `--` go to Neovim. For example, this opens the current
+directory:
 
-## Language intelligence
+```sh
+nix run .#neovim -- .
+```
 
-Configured through Neovim's built-in `vim.lsp.config`/`vim.lsp.enable` API via
-nixvim's `plugins.lsp.servers.*`, with [blink.cmp](https://github.com/Saghen/blink.cmp)
-supplying LSP/buffer/path/snippet completion and inlay hints enabled globally.
-Buffers format on save (`vim.lsp.buf.format`) only when the attached server
-supports it — no external formatter is ever invoked.
+The app uses the same generated configuration as the `nixos` Home Manager
+profile, but runs it directly from the Nix store. It does not activate or
+change the current Home Manager generation.
 
-| Language          | Server                                                        | Notes |
-| ------------------ | -------------------------------------------------------------- | ----- |
-| Nix                | [`nil`](https://github.com/oxalica/nil)                         | `nix.flake.autoArchive = false` |
-| Lua                | [`lua-language-server`](https://github.com/LuaLS/lua-language-server) | |
-| Python             | [`pyright`](https://github.com/microsoft/pyright)               | paired with `venv-selector.nvim` |
-| Rust               | [`rust-analyzer`](https://rust-analyzer.github.io)              | toolchain (`cargo`/`rustc`/`rustfmt`) provided by Nix |
-| C# / .NET          | [`roslyn-ls`](https://github.com/dotnet/roslyn) via [roslyn.nvim](https://github.com/seblyng/roslyn.nvim) | solution/project discovery, `:Roslyn target` |
-| TypeScript/JS/TSX  | [`vtsls`](https://github.com/yioneko/vtsls)                     | `updateImportsOnFileMove = "always"`; `:VtsOrganizeImports`, `:VtsSourceDefinition` |
-| HTML/CSS/JSON      | [`vscode-langservers-extracted`](https://github.com/hrsh7th/vscode-langservers-extracted) | |
-| YAML               | [`yaml-language-server`](https://github.com/redhat-developer/yaml-language-server) | |
-| XML (incl. `.csproj`/`.fsproj`/`.props`) | [`lemminx`](https://github.com/eclipse/lemminx) | |
-| Zig                | [`zls`](https://github.com/zigtools/zls)                        | |
+## Everyday editing
 
-**[venv-selector.nvim](https://github.com/linux-cultist/venv-selector.nvim)**
-finds and selects a project's Python virtual environment; selecting one
-restarts Pyright with the new interpreter.
+[snacks.nvim](https://github.com/folke/snacks.nvim) provides the explorer,
+pickers, terminals, notifications, indent guides, status column, and inline
+images. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) supplies
+the status line, while [which-key.nvim](https://github.com/folke/which-key.nvim)
+lists available leader mappings. [auto-session](https://github.com/rmagatti/auto-session)
+restores the session for the current directory.
+
+| Key | Action |
+| --- | --- |
+| `<leader>e` or `<A-l>` | Open the file explorer |
+| `<leader>sf` | Find files |
+| `<leader>sg` | Search file contents |
+| `<leader>sb` | List buffers |
+| `<leader>ss` | Find document symbols |
+| `<leader>sS` | Find workspace symbols |
+| `<leader>sd` | List diagnostics |
+| `<leader>sh` | Search help |
+| `<A-b>` | Toggle a bottom terminal |
+| ``<C-`>`` | Toggle a floating terminal |
+| `<A-c>` | Toggle the centered editing layout |
+
+[solarized.nvim](https://github.com/maxmx03/solarized.nvim) starts in dark
+mode. `:set background=light` switches to its light palette.
+
+[render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)
+renders headings, tables, checkboxes, callouts, and code blocks in Markdown
+buffers. `snacks.image` displays linked images and math when the terminal
+supports the Kitty Graphics Protocol. In other terminals the Markdown source
+remains visible.
+
+## Language support
+
+Neovim's built-in `vim.lsp.config` and `vim.lsp.enable` APIs manage the
+servers. nixvim uses [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)
+for maintained server definitions. [blink.cmp](https://github.com/Saghen/blink.cmp)
+adds LSP, buffer, path, and snippet completion.
+
+| Language | Server | Details |
+| --- | --- | --- |
+| Nix | [`nil`](https://github.com/oxalica/nil) | Automatic flake archiving is disabled |
+| Lua | [`lua-language-server`](https://github.com/LuaLS/lua-language-server) | Neovim runtime files are available to the server |
+| Python | [`pyright`](https://github.com/microsoft/pyright) | Virtual environments are selected with [venv-selector.nvim](https://github.com/linux-cultist/venv-selector.nvim) |
+| Rust | [`rust-analyzer`](https://rust-analyzer.github.io) | Nix also provides `cargo`, `rustc`, and `rustfmt` |
+| C# and Razor | [`roslyn-ls`](https://github.com/dotnet/roslyn) with [roslyn.nvim](https://github.com/seblyng/roslyn.nvim) | Discovers solutions and projects; `:Roslyn target` switches targets |
+| JavaScript, TypeScript, JSX, TSX | [`vtsls`](https://github.com/yioneko/vtsls) | File renames update import paths; `:VtsOrganizeImports` and `:VtsSourceDefinition` are available |
+| HTML, CSS, JSON | [`vscode-langservers-extracted`](https://github.com/hrsh7th/vscode-langservers-extracted) | |
+| YAML | [`yaml-language-server`](https://github.com/redhat-developer/yaml-language-server) | |
+| XML, `.csproj`, `.fsproj`, `.props` | [`lemminx`](https://github.com/eclipse/lemminx) | |
+| Zig | [`zls`](https://github.com/zigtools/zls) | |
+
+When a server supports formatting, the buffer is formatted before it is
+written. Other buffers are saved without running an external formatter.
+Inlay hints are enabled for servers that provide them.
+
+[nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) grammars
+are installed through Nix for Bash, C#, CSS, HTML, JavaScript, JSON, Lua,
+Markdown, Nix, Python, Rust, TSX, TypeScript, Vim, XML, YAML, and Zig. No
+`:TSInstall` step is needed.
 
 ## Python notebooks
 
-- **[molten-nvim](https://github.com/benlubas/molten-nvim)** runs code against
-  a live Jupyter kernel and renders rich output (including plots) through
-  `snacks.image`. Works on `# %%`-delimited Python cells and fenced code
-  blocks in Markdown.
-  - `<localleader>mi` — init/select a kernel
-  - `<localleader>rr` — re-run the current cell
-  - `<localleader>rl` — run the current line
-  - `<localleader>r` (visual) — run the selection
-- **[jupytext.nvim](https://github.com/GCBallesteros/jupytext.nvim)** transparently
-  opens `.ipynb` files as paired `# %%` Python scripts (via the `jupytext` CLI)
-  and writes them back as notebooks on save. Molten owns kernel state and output;
-  jupytext only owns the text representation.
+[molten-nvim](https://github.com/benlubas/molten-nvim) runs Python cells and
+Markdown code blocks in a Jupyter kernel. Text output appears in Neovim;
+plots use `snacks.image` when the terminal can display them.
 
-## Debugging (nvim-dap)
+| Key | Action |
+| --- | --- |
+| `<localleader>mi` | Select or initialize a kernel |
+| `<localleader>rr` | Run the current cell again |
+| `<localleader>rl` | Run the current line |
+| `<localleader>r` in visual mode | Run the selection |
 
-[nvim-dap](https://github.com/mfussenegger/nvim-dap) +
-[nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui), with adapters resolved
-from Nix store paths (no downloads, no Mason):
+[jupytext.nvim](https://github.com/GCBallesteros/jupytext.nvim) opens `.ipynb`
+files as Python buffers with `# %%` cell markers and writes changes back to the
+notebook. Molten keeps the kernel state and output; Jupytext handles the text
+representation.
 
-| Language   | Adapter | Package |
-| ---------- | ------- | ------- |
-| Python     | `debugpy` | `python3.withPackages` env with `debugpy` |
-| C#/.NET    | `netcoredbg` | [`netcoredbg`](https://github.com/Samsung/netcoredbg) |
-| JS/TS      | `vscode-js-debug` (`pwa-node`) | [`vscode-js-debug`](https://github.com/microsoft/vscode-js-debug) |
-| Rust       | `lldb-dap` | `lldb` |
+## Debugging and tests
 
-On launch you're prompted for the program path (or file/cwd defaults);
-`cwd` defaults to the project root.
+[nvim-dap](https://github.com/mfussenegger/nvim-dap) and
+[nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui) configure these Nix
+packaged adapters:
 
-- `F5` — continue/launch, `F10` — step over, `F11` — step into, `F12` — step out
-- `<leader>db` — toggle breakpoint, `<leader>du` — toggle the debug UI
+| Language | Adapter |
+| --- | --- |
+| Python | [`debugpy`](https://github.com/microsoft/debugpy) |
+| C# and .NET | [`netcoredbg`](https://github.com/Samsung/netcoredbg) |
+| JavaScript and TypeScript | [`vscode-js-debug`](https://github.com/microsoft/vscode-js-debug) (`pwa-node`) |
+| Rust | `lldb-dap` from [LLVM](https://lldb.llvm.org) |
 
-## Testing ([neotest](https://github.com/nvim-neotest/neotest))
+| Key | Action |
+| --- | --- |
+| `F5` | Launch or continue |
+| `F10` | Step over |
+| `F11` | Step into |
+| `F12` | Step out |
+| `<leader>db` | Toggle a breakpoint |
+| `<leader>du` | Toggle the debug UI |
 
-Native adapters for Python ([neotest-python](https://github.com/nvim-neotest/neotest-python)),
-JS/TS ([neotest-vitest](https://github.com/marilari88/neotest-vitest)), Rust
-([neotest-rust](https://github.com/rouge8/neotest-rust)), and C#/.NET
-([neotest-dotnet](https://github.com/Issafalcon/neotest-dotnet)) share the same
-keymaps:
+[neotest](https://github.com/nvim-neotest/neotest) runs tests through
+[neotest-python](https://github.com/nvim-neotest/neotest-python),
+[neotest-vitest](https://github.com/marilari88/neotest-vitest),
+[neotest-rust](https://github.com/rouge8/neotest-rust), and
+[neotest-dotnet](https://github.com/Issafalcon/neotest-dotnet).
 
-- `<leader>tt` — run the nearest test
-- `<leader>tf` — run all tests in the current file
-- `<leader>ts` — toggle the test summary panel
-- `<leader>to` — open the last test's output
+| Key | Action |
+| --- | --- |
+| `<leader>tt` | Run the nearest test |
+| `<leader>tf` | Run tests in the current file |
+| `<leader>ts` | Toggle the test summary |
+| `<leader>to` | Open the last test output |
 
-## Git
+## Git and Copilot
 
-- **[gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim)** — gutter
-  signs, hunk staging/reset/preview, line blame: `]c`/`[c` navigate hunks,
-  `<leader>hs`/`hr`/`hp` stage/reset/preview, `<leader>hb` blames the line.
-- **[neogit](https://github.com/NeoGitOrg/neogit)** (`<leader>gg`) — status,
-  staging, committing, branches, log.
-- **[diffview.nvim](https://github.com/sindrets/diffview.nvim)** (`<leader>gd`) —
-  diff review, file history, merge conflicts.
-- **`:OmpCommit`** (`<leader>oc`) — runs `omp commit` in a Snacks terminal at
-  the repository root; no-ops with a notification outside a Git worktree or
-  if `omp` isn't on `PATH`.
+[gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim) adds gutter signs
+and hunk operations. `]c` and `[c` move between hunks. `<leader>hs`,
+`<leader>hr`, `<leader>hp`, and `<leader>hb` stage, reset, preview, and blame.
 
-## Copilot
+[neogit](https://github.com/NeogitOrg/neogit) opens repository status with
+`<leader>gg`. [diffview.nvim](https://github.com/sindrets/diffview.nvim) opens
+reviews, file history, and merge conflicts with `<leader>gd`.
+
+`:OmpCommit` and `<leader>oc` run `omp commit` in a terminal rooted at the
+current Git repository. Outside a Git repository, the command displays a
+notification and stops.
 
 [copilot.lua](https://github.com/zbirenbaum/copilot.lua) provides inline
-suggestions only (no chat panel — that's out of scope for this workbench).
-Authenticate once with `:Copilot auth`. `<C-y>` accepts a suggestion; `Tab`
-keeps its normal completion/indent behavior.
+suggestions. Run `:Copilot auth` once to authenticate. `<C-y>` accepts a
+suggestion; `Tab` keeps its normal completion and indentation behavior. There
+is no Copilot chat panel in this configuration.
 
-## Treesitter
+## Files
 
-Grammars for `bash`, `c_sharp`, `css`, `html`, `javascript`, `json`, `jsonc`,
-`lua`, `markdown`, `markdown_inline`, `nix`, `python`, `rust`, `tsx`,
-`typescript`, `vim`, `vimdoc`, `xml`, `yaml`, and `zig` are installed via Nix
-(`plugins.treesitter.grammarPackages`) — no runtime `:TSInstall` required.
+- `default.nix` declares packages, plugins, language servers, debug adapters,
+  and keymaps.
+- `lua/options.lua` contains editor options, filetype indentation, and
+  autosave-on-focus-change.
+- `lua/ui.lua` loads Solarized.
+- `lua/lsp.lua` contains format-on-save, Roslyn startup, vtsls commands, and
+  the Pyright restart after a virtual-environment change.
+- `lua/workbench.lua` configures Jupytext.
+- `lua/keymaps.lua` defines `:OmpCommit`.
 
-## Verifying a checkout
+## Check the installation
 
-```
+After activation, run:
+
+```sh
 nvim --headless '+checkhealth' '+qa'
 ```
 
-reports the status of every plugin above, including whether each declared LSP
-server/DAP adapter binary is reachable.
+To check the standalone app instead:
+
+```sh
+nix run .#neovim -- --headless '+checkhealth' '+qa'
+```

@@ -7,6 +7,21 @@
     in
     {
       apps = {
+        neovim =
+          let
+            nixvim = self.homeConfigurations.nixos.config.programs.nixvim;
+            script = pkgs.writeShellApplication {
+              name = "neovim";
+              text = ''
+                exec "${nixvim.build.package}/bin/nvim" -u "${nixvim.build.initFile}" "$@"
+              '';
+            };
+          in
+          {
+            type = "app";
+            program = "${script}/bin/neovim";
+          };
+
         report-sizes =
           let
             configurations = concatMapStringsSep "\n" (config: ''

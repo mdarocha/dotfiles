@@ -43,6 +43,11 @@ in
 
       nixpkgs.useGlobalPackages = true;
 
+      globals = {
+        mapleader = " ";
+        maplocalleader = ",";
+      };
+
       extraPackages = with pkgs; [
         ripgrep
         fd
