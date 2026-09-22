@@ -2,6 +2,7 @@
   pkgs,
   lib,
   inputs,
+  environment,
 }:
 
 let
@@ -21,12 +22,6 @@ let
     fi
   '';
 
-  python = import ./python.nix { inherit pkgs; };
-  chromium = import ./chromium.nix { inherit pkgs; };
-  tools = import ./packages.nix {
-    inherit pkgs lib chromium;
-    pythonEnv = python.env;
-  };
   domains = import ./domains.nix { inherit lib; };
   paths = import ./paths.nix { inherit lib; };
 
@@ -41,7 +36,7 @@ let
     inherit binName;
     outName = binName;
 
-    allowedPackages = tools.list;
+    allowedPackages = environment.path;
     allowedDomains = domains.allowed;
 
     allowNix = true;
@@ -54,16 +49,10 @@ let
     roFiles = [ "/etc/nix/nix.conf" ] ++ paths.roFiles;
     roDirs = [ waylandSocketPath ] ++ paths.roDirs;
 
-    env = {
+    env = environment.env // {
       # Lets the instruction extension detect sandboxed vs. -nosandbox
       # execution without relying on fragile process-name introspection.
       MDAROCHA_AGENT_SANDBOX = "1";
-      # Used by karma-chrome-launcher when running Angular unit tests.
-      CHROME_BIN = "${chromium}/bin/chromium";
-      # Used by Puppeteer (OMP browser tools). Point directly at the
-      # Nix-provided binary so Puppeteer never tries to download Chrome.
-      PUPPETEER_EXECUTABLE_PATH = "${chromium}/bin/chromium";
-      PUPPETEER_SKIP_DOWNLOAD = "true";
       # Puppeteer connects to Chrome's DevTools endpoint on 127.0.0.1
       # (sandbox-local loopback, isolated from the host). Without these,
       # Bun routes the WebSocket upgrade through HTTP_PROXY, which returns
@@ -75,10 +64,6 @@ let
       # aborts. Point at the Nix-provided fonts.conf so fontconfig initialises
       # correctly inside the sandbox.
       FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
-      # Setting VIRTUAL_ENV to this Nix-built env causes the OMP runtime to
-      # prepend its bin/ to PATH, making `python3 -m kernel_gateway` and
-      # `ipykernel` available without any pip install step at runtime.
-      VIRTUAL_ENV = "${python.env}";
       # Expose to allow clipboard access
       WAYLAND_DISPLAY = waylandDisplay;
       XDG_RUNTIME_DIR = waylandRuntimeDir;
@@ -87,14 +72,13 @@ let
     };
   };
 
-  # Same toolset and Python environment as the sandboxed variant, just
-  # without the bwrap layer around it.
+  # Same toolset and environment as the sandboxed variant, just without the
+  # bwrap layer around it.
   hostPackage = pkgs.writeShellScriptBin "${binName}-nosandbox" ''
-    export PATH="${lib.makeBinPath tools.list}:$PATH"
-    export VIRTUAL_ENV="${python.env}"
-    export CHROME_BIN="${chromium}/bin/chromium"
-    export PUPPETEER_EXECUTABLE_PATH="${chromium}/bin/chromium"
-    export PUPPETEER_SKIP_DOWNLOAD="true"
+    export PATH="${lib.makeBinPath environment.path}:$PATH"
+    ${lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (name: value: "export ${name}=${lib.escapeShellArg value}") environment.env
+    )}
 
     ${configOverlays}
     exec ${pkgs.llm-agents.omp}/bin/${binName} "$@"
@@ -108,8 +92,6 @@ in
 
   instructions = import ./instructions.nix {
     inherit lib;
-    packageNames = tools.names;
-    pythonPackageNames = python.packageNames;
     domainList = domains.markdownList;
   };
 }

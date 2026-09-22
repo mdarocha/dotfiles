@@ -10,18 +10,17 @@ that is not provisioned, use `nix run nixpkgs#<package>` or
 
 ## Python execution environment
 
-Python dependencies are provisioned through a Nix-managed environment that the
-`eval` tool's Python kernel already has access to. `VIRTUAL_ENV` points at that
-same environment in both variants, so you MUST NOT install packages at runtime —
-`pip install`, `uv pip install`, `pip install --user`, `python -m pip`, or any
-other package manager invocation will fail or produce results silently discarded
-when the session ends.
+Python dependencies are provisioned through a Nix-managed environment already
+on PATH, with `VIRTUAL_ENV` pointing at it, so you MUST NOT install packages at
+runtime — `pip install`, `uv pip install`, `pip install --user`, `python -m pip`,
+or any other package manager invocation will fail or produce results silently
+discarded when the session ends.
 
 Pre-installed Python packages: @pythonPackages@
 
 If a task requires a package not listed above:
-1. Tell the user which package is missing and that it must be added to the
-   sandbox config (`packageNames` in [`config/llm-agents/oh-my-pi/sandbox/python.nix`](https://github.com/mdarocha/dotfiles/blob/main/config/llm-agents/oh-my-pi/sandbox/python.nix)).
+1. Tell the user which package is missing and that it must be added to
+   `packageNames` in [`config/llm-agents/common/environment/python.nix`](https://github.com/mdarocha/dotfiles/blob/main/config/llm-agents/common/environment/python.nix).
 2. Do NOT work around the absence by downloading wheels, vendoring source, or
    running `pip` with `--target`.
 
