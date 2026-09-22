@@ -1,3 +1,10 @@
+-- Default border for native floats without one; see :h 'winborder'.
+vim.o.winborder = "rounded"
+
+vim.diagnostic.config({
+  float = { border = "rounded" },
+})
+
 -- Format through the LSP when the server offers it; never invoke an external
 -- formatter.
 local function format_on_save(args)

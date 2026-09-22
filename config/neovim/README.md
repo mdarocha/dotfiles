@@ -26,26 +26,42 @@ store.
 
 ## Everyday editing
 
-[snacks.nvim](https://github.com/folke/snacks.nvim) handles the explorer,
-pickers, terminals, notifications, indent guides, status column, and inline
-images. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) displays
-the status line and [bufferline.nvim](https://github.com/akinsho/bufferline.nvim)
-the tab bar with file icons and diagnostics.
-[which-key.nvim](https://github.com/folke/which-key.nvim) lists leader
-mappings, and [auto-session](https://github.com/rmagatti/auto-session) restores
-the session for the current directory.
+[nvim-tree.nvim](https://github.com/nvim-tree/nvim-tree.lua) is a persistent
+36-column explorer on the left. [Aerial](https://github.com/stevearc/aerial.nvim)
+is the document-symbol outline on the right.
+[snacks.nvim](https://github.com/folke/snacks.nvim) provides pickers, the bottom
+terminal, notifications, indent guides, status column, images, and Zen mode.
+[mini.clue](https://github.com/echasnovski/mini.nvim) shows compact leader hints
+in the lower-right corner. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim)
+shows the selected Python environment when one is active.
+
+`vim`, `$EDITOR`, and `$VISUAL` resolve to this configured Neovim. Line numbers
+are absolute in Normal mode and relative in other editing modes.
+
+### Explorer
 
 | Key | Action |
 | --- | --- |
-| `<leader>e` or `<A-l>` | Open the file explorer |
-| `<A-r>` | Open the document symbol list |
+| `<leader>e` | Focus or open the left explorer |
+| `<A-l>` | Toggle the left explorer |
+| `o` or `l` | Open the selected file or directory |
+| `h` | Close the current directory or move to its parent |
+| `I` | Show or hide Git-ignored files |
+| `H` | Show or hide dotfiles |
+
+Git-ignored files are hidden by default; press `I` while the explorer is
+focused to show them. Dotfiles are visible by default.
+
+| Key | Action |
+| --- | --- |
+| `<A-r>` | Toggle the right document-symbol outline |
+| `<leader>ss` | Focus or open the right document-symbol outline |
 | `<A-b>` or ``<C-`>`` | Toggle the bottom terminal |
 | `<A-c>` | Toggle the centered editing layout |
 | `g/` | Search across the project |
 | `<leader>sf` | Find files |
 | `<leader>sg` | Search file contents |
 | `<leader>sb` | List buffers |
-| `<leader>ss` | Find document symbols |
 | `<leader>sS` | Find workspace symbols |
 | `<leader>sd` | List diagnostics |
 | `<leader>sh` | Search help |
@@ -54,7 +70,8 @@ Terminals always open in a bottom split.
 
 ### Tabs
 
-Every open buffer appears in the tab bar.
+Every open buffer appears in the tab bar. Click a tab to focus it, or click its
+close icon to close it.
 
 | Key | Action |
 | --- | --- |
@@ -197,9 +214,9 @@ packaged adapters:
 and hunk operations. `]c` and `[c` move between hunks. `<leader>hs`,
 `<leader>hr`, `<leader>hp`, and `<leader>hb` stage, reset, preview, and blame.
 
-[neogit](https://github.com/NeogitOrg/neogit) opens repository status with
-`<leader>gg`. [diffview.nvim](https://github.com/sindrets/diffview.nvim) opens
-reviews, file history, and merge conflicts with `<leader>gd`.
+[vim-fugitive](https://github.com/tpope/vim-fugitive) owns `:Git`; `<leader>gg`
+opens its Git status window. [diffview.nvim](https://github.com/sindrets/diffview.nvim)
+opens reviews, file history, and merge conflicts with `<leader>gd`.
 
 `:OmpCommit` and `<leader>oc` run `omp commit` in a terminal rooted at the
 current Git repository. Outside a Git repository, the command displays a
@@ -211,11 +228,18 @@ suggestion; `Tab` keeps its normal completion and indentation behavior.
 
 ## Files
 
-- `default.nix` declares packages, plugins, language servers, debug adapters,
+- `default.nix` assembles the Neovim module.
+- `modules/core.nix` configures the runtime, packages, editor aliases, and
+  shared Lua setup.
+- `modules/editor.nix` configures syntax, completion, schemas, and language
+  servers.
+- `modules/interface.nix` configures panes, statusline, tabs, hints, and visual
+  presentation.
+- `modules/workflow.nix` configures Git, notebooks, Copilot, debugging, tests,
   and keymaps.
 - `lua/options.lua` contains editor options, filetype indentation, and
   autosave-on-focus-change.
-- `lua/ui.lua` loads Solarized.
+- `lua/ui.lua` loads Solarized and local highlights.
 - `lua/lsp.lua` contains format-on-save, Roslyn startup, vtsls commands, and
   the Pyright restart after a virtual-environment change.
 - `lua/workbench.lua` configures Jupytext.
