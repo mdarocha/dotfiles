@@ -53,7 +53,9 @@ let
   package = pkgs.writeShellScriptBin binName ''
     export PATH="${lib.makeBinPath common.environment.path}:$PATH"
     ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (name: value: "export ${name}=${lib.escapeShellArg value}") common.environment.env
+      lib.mapAttrsToList (
+        name: value: "export ${name}=${lib.escapeShellArg value}"
+      ) common.environment.env
     )}
 
     case "''${1:-}" in

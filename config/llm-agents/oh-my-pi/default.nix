@@ -33,7 +33,10 @@ let
 
   rules = filesIn ./rules ".md";
 
-  sandbox = import ./sandbox { inherit pkgs lib inputs; environment = cfg.environment; };
+  sandbox = import ./sandbox {
+    inherit pkgs lib inputs;
+    environment = cfg.environment;
+  };
 
   ompSpecificInstructions = ''
     ## Git worktrees

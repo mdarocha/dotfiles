@@ -16,10 +16,14 @@ let
 
   inlineNames = names: lib.concatMapStringsSep ", " (n: "`${n}`") names;
 
-  instructions = builtins.replaceStrings [ "@packages@" "@pythonPackages@" ] [
-    (inlineNames tools.names)
-    (inlineNames python.packageNames)
-  ] (builtins.readFile ./environment/toolset.md);
+  instructions =
+    builtins.replaceStrings
+      [ "@packages@" "@pythonPackages@" ]
+      [
+        (inlineNames tools.names)
+        (inlineNames python.packageNames)
+      ]
+      (builtins.readFile ./environment/toolset.md);
 in
 {
   options.mdarocha.llm-agents.environment = {
