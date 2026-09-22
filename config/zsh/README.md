@@ -24,8 +24,6 @@ Turned on beyond Home Manager's own zsh defaults:
 
 - Autosuggestion — ghost-text completion from history as you type; accept
   with → or `End`.
-- Syntax highlighting — the command line is colored green/red for
-  valid/invalid commands as you type.
 - History substring search — type a prefix, then ↑/↓ cycles only history
   entries matching that prefix (bound to the standard arrow keys).
 - `vanilli.sh` additionally sets `auto_cd` (typing a bare directory name

@@ -14,6 +14,16 @@ let
     mkIf
     types
     ;
+
+  binName = "claude";
+
+  wrapped = pkgs.writeShellScriptBin binName ''
+    export PATH="${lib.makeBinPath common.environment.path}:$PATH"
+    ${lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (name: value: "export ${name}=${lib.escapeShellArg value}") common.environment.env
+    )}
+    exec ${cfg.package}/bin/${binName} "$@"
+  '';
 in
 {
   options.mdarocha.llm-agents.claude-code = {
@@ -27,10 +37,15 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = lib.optional (cfg.package != null) cfg.package;
+    # cfg.package == null means the environment already ships its own
+    # claude binary, so there is nothing here to wrap with our PATH/env.
+    home.packages = lib.optional (cfg.package != null) wrapped;
 
     home.file = {
-      ".claude/CLAUDE.md".text = common.instructions;
+      ".claude/CLAUDE.md".text = lib.concatStringsSep "\n" [
+        common.instructions
+        common.environment.instructions
+      ];
     }
     // lib.mapAttrs' (
       name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }

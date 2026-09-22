@@ -8,6 +8,8 @@ let
   inherit (lib) mkOption types;
 in
 {
+  imports = [ ./environment.nix ];
+
   options.mdarocha.llm-agents = {
     instructions = mkOption {
       type = types.str;
