@@ -43,7 +43,12 @@ let
   # `--add-dir` root alongside the primary workspace, so pointing it at a
   # fixed store path applies these instructions regardless of the invoking
   # project.
-  globalRulesDir = pkgs.writeTextDir "AGENTS.md" common.instructions;
+  globalRulesDir = pkgs.writeTextDir "AGENTS.md" (
+    lib.concatStringsSep "\n" [
+      common.instructions
+      common.environment.instructions
+    ]
+  );
 
   package = pkgs.writeShellScriptBin binName ''
     export PATH="${lib.makeBinPath common.environment.path}:$PATH"
