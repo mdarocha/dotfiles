@@ -181,15 +181,6 @@
       options.desc = "Bottom terminal";
     }
     {
-      mode = [
-        "n"
-        "i"
-      ];
-      key = "<C-k>";
-      action.__raw = "vim.lsp.buf.signature_help";
-      options.desc = "Signature help";
-    }
-    {
       mode = "n";
       key = "<A-CR>";
       action.__raw = "vim.lsp.buf.code_action";
@@ -224,6 +215,18 @@
       key = "g/";
       action.__raw = "function() Snacks.picker.grep() end";
       options.desc = "Search all files";
+    }
+    {
+      mode = "n";
+      key = "gt";
+      action = "<cmd>BufferLineCycleNext<CR>";
+      options.desc = "Next buffer tab";
+    }
+    {
+      mode = "n";
+      key = "gT";
+      action = "<cmd>BufferLineCyclePrev<CR>";
+      options.desc = "Previous buffer tab";
     }
     {
       mode = "n";

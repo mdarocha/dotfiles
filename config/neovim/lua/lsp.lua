@@ -5,6 +5,18 @@ vim.diagnostic.config({
   float = { border = "rounded" },
 })
 
+local function show_lsp_details()
+  local _, window = vim.diagnostic.open_float({ scope = "line", header = "", focusable = true })
+  if not window then
+    vim.lsp.buf.hover()
+  end
+end
+
+for _, key in ipairs({ "K", "<C-k>" }) do
+  vim.keymap.set("n", key, show_lsp_details, { desc = "Diagnostic or hover" })
+end
+vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, { desc = "Signature help" })
+
 local message_levels = {
   [vim.lsp.protocol.MessageType.Error] = vim.log.levels.ERROR,
   [vim.lsp.protocol.MessageType.Warning] = vim.log.levels.WARN,

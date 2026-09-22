@@ -34,8 +34,8 @@ terminal, notifications, indent guides, status column, images, and Zen mode.
 [mini.clue](https://github.com/echasnovski/mini.nvim) shows compact leader hints
 in the lower-right corner. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim)
 shows the active Python environment and attached LSP server count; click the count
-for a server list. [fidget.nvim](https://github.com/j-hui/fidget.nvim) displays
-server progress and messages in floating notifications.
+for a brief server-list notification. [fidget.nvim](https://github.com/j-hui/fidget.nvim)
+displays server progress and messages in floating notifications.
 
 `vim`, `$EDITOR`, and `$VISUAL` resolve to this configured Neovim. Line numbers
 are absolute in Normal mode and relative in other editing modes.
@@ -73,12 +73,13 @@ Terminals always open in a bottom split.
 
 ### Tabs
 
-Every open buffer appears in the tab bar. Click a buffer to focus it, or click its
-close icon to close it. Use native `:bnext` and `:bprevious` to cycle buffers;
-`gt` and `gT` navigate Neovim tab pages.
+Every open file buffer appears in the tab bar; utility panes stay out of it. Click
+a buffer to focus it or its close icon to close it. `gt` and `gT` cycle the
+displayed buffers. `:bnext` and `:bprevious` also work.
 
 | Key | Action |
 | --- | --- |
+| `gt` / `gT` | Next / previous buffer tab |
 | `<leader>bp` | Jump to a buffer by its letter |
 | `<leader>bd` | Close the current buffer |
 
@@ -128,16 +129,16 @@ adds LSP, buffer, path, and snippet completion.
 | XML, `.csproj`, `.fsproj`, `.props` | [`lemminx`](https://github.com/eclipse/lemminx) | |
 | Zig | [`zls`](https://github.com/zigtools/zls) | |
 
-Formatting and inlay hints use the capabilities advertised by the attached
-server.
+Formatting uses the capabilities advertised by the attached server. Inlay hints
+are disabled.
 
 | Key | Action |
 | --- | --- |
 | `gd` | Go to definition |
 | `gr` | List references |
 | `<C-]>` | Go to implementation |
-| `K` | Show hover documentation |
-| `<C-k>` | Show signature help |
+| `K` or `<C-k>` in Normal mode | Show diagnostics on the current line, otherwise hover documentation |
+| `<C-k>` in Insert mode | Show signature help |
 | `<A-CR>` | Show code actions |
 | `\r` | Rename the symbol under the cursor |
 

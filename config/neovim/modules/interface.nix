@@ -49,9 +49,10 @@
     fidget = {
       enable = true;
       settings = {
+        progress.ignore = [ "lua_ls" ];
         progress.display = {
-          done_ttl = 2;
-          render_limit = 4;
+          done_ttl = 1;
+          render_limit = 3;
         };
         notification.window = {
           normal_hl = "NormalFloat";
@@ -258,7 +259,7 @@
       enable = true;
       settings = {
         options = {
-          theme = "auto";
+          theme = "solarized_dark";
           component_separators = {
             left = "│";
             right = "│";
@@ -295,10 +296,21 @@
           lualine_b = [
             "branch"
             "diff"
-            "diagnostics"
           ];
           lualine_c = [ "filename" ];
           lualine_x = [
+            {
+              __unkeyed-1 = "diagnostics";
+              sources = [ "nvim_diagnostic" ];
+              sections = [
+                "error"
+                "warn"
+              ];
+              diagnostics_color = {
+                error.fg.__raw = "require('solarized-osaka.colors').setup().red300";
+                warn.fg.__raw = "require('solarized-osaka.colors').setup().yellow300";
+              };
+            }
             {
               __unkeyed-1.__raw = ''
                 function()
@@ -308,7 +320,18 @@
               icon = "󰒋";
               on_click.__raw = ''
                 function()
-                  Snacks.picker.lsp_config({ attached = 0, layout = { preset = "dropdown" } })
+                  local clients = vim.lsp.get_clients({ bufnr = 0 })
+                  local names = {}
+                  for _, client in ipairs(clients) do
+                    names[#names + 1] = client.name
+                  end
+                  table.sort(names)
+                  local message = #names == 0 and "No servers attached" or table.concat(names, "\n")
+                  require("fidget").notify(message, vim.log.levels.INFO, {
+                    group = "LSP",
+                    key = "attached",
+                    ttl = 6,
+                  })
                 end
               '';
             }
@@ -361,7 +384,14 @@
       settings.options = {
         mode = "buffers";
         diagnostics = "nvim_lsp";
-        separator_style = "padded_slant";
+        separator_style = "thin";
+        indicator.style = "underline";
+        custom_filter.__raw = ''
+          function(bufnr)
+            local buffer = vim.bo[bufnr]
+            return buffer.buftype == "" and buffer.filetype ~= "NvimTree" and buffer.filetype ~= "aerial"
+          end
+        '';
         show_buffer_icons = true;
         show_buffer_close_icons = true;
         show_close_icon = false;

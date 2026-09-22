@@ -110,5 +110,4 @@
     };
   };
 
-  lsp.inlayHints.enable = true;
 }
