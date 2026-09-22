@@ -38,11 +38,32 @@
           win = {
             position = "bottom";
             height = 0.32;
-            wo.statusline = "%#SnacksTerminalTitle#   Terminal %*";
+            wo.statusline = "   Terminal";
             wo.winbar = "";
           };
         };
         image.enabled = true;
+      };
+    };
+
+    fidget = {
+      enable = true;
+      settings = {
+        progress.display = {
+          done_ttl = 2;
+          render_limit = 4;
+        };
+        notification.window = {
+          normal_hl = "NormalFloat";
+          winblend = 0;
+          border = "rounded";
+          max_width = 52;
+          max_height = 8;
+          avoid = [
+            "NvimTree"
+            "aerial"
+          ];
+        };
       };
     };
 
@@ -53,7 +74,8 @@
         update_focused_file.enable = true;
         diagnostics = {
           enable = true;
-          show_on_dirs = true;
+          show_on_dirs = false;
+          show_on_open_dirs = false;
           icons = {
             hint = "󰌶";
             info = "󰋽";
@@ -68,17 +90,21 @@
         view = {
           side = "left";
           width = 36;
+          signcolumn = "no";
           preserve_window_proportions = true;
         };
         renderer = {
           group_empty = true;
           indent_markers.enable = true;
+          highlight_git = "name";
+          highlight_diagnostics = "icon";
           icons = {
+            diagnostics_placement = "after";
             show = {
               file = true;
               folder = true;
               folder_arrow = true;
-              git = true;
+              git = false;
             };
             glyphs = {
               default = "󰈔";
@@ -92,15 +118,6 @@
                 empty_open = "󰷏";
                 symlink = "󰉋";
                 symlink_open = "󰝰";
-              };
-              git = {
-                unstaged = "󰄱";
-                staged = "󰱒";
-                unmerged = "󰘬";
-                renamed = "󰑕";
-                untracked = "󰞋";
-                deleted = "󰆴";
-                ignored = "󰘓";
               };
             };
           };
@@ -282,6 +299,19 @@
           ];
           lualine_c = [ "filename" ];
           lualine_x = [
+            {
+              __unkeyed-1.__raw = ''
+                function()
+                  return #vim.lsp.get_clients({ bufnr = 0 })
+                end
+              '';
+              icon = "󰒋";
+              on_click.__raw = ''
+                function()
+                  Snacks.picker.lsp_config({ attached = 0, layout = { preset = "dropdown" } })
+                end
+              '';
+            }
             {
               __unkeyed-1.__raw = ''
                 function()

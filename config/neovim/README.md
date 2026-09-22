@@ -33,7 +33,9 @@ is the document-symbol outline on the right.
 terminal, notifications, indent guides, status column, images, and Zen mode.
 [mini.clue](https://github.com/echasnovski/mini.nvim) shows compact leader hints
 in the lower-right corner. [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim)
-shows the selected Python environment when one is active.
+shows the active Python environment and attached LSP server count; click the count
+for a server list. [fidget.nvim](https://github.com/j-hui/fidget.nvim) displays
+server progress and messages in floating notifications.
 
 `vim`, `$EDITOR`, and `$VISUAL` resolve to this configured Neovim. Line numbers
 are absolute in Normal mode and relative in other editing modes.
@@ -50,7 +52,8 @@ are absolute in Normal mode and relative in other editing modes.
 | `H` | Show or hide dotfiles |
 
 Git-ignored files are hidden by default; press `I` while the explorer is
-focused to show them. Dotfiles are visible by default.
+focused to show them. Dotfiles are visible by default. Diagnostics appear
+beside affected files, not in a separate gutter or on every parent directory.
 
 | Key | Action |
 | --- | --- |
@@ -70,18 +73,14 @@ Terminals always open in a bottom split.
 
 ### Tabs
 
-Every open buffer appears in the tab bar. Click a tab to focus it, or click its
-close icon to close it.
+Every open buffer appears in the tab bar. Click a buffer to focus it, or click its
+close icon to close it. Use native `:bnext` and `:bprevious` to cycle buffers;
+`gt` and `gT` navigate Neovim tab pages.
 
 | Key | Action |
 | --- | --- |
-| `<C-Tab>` or `<C-PageDown>` | Next tab |
-| `<C-S-Tab>` or `<C-PageUp>` | Previous tab |
-| `<leader>bp` | Jump to a tab by its letter |
+| `<leader>bp` | Jump to a buffer by its letter |
 | `<leader>bd` | Close the current buffer |
-
-`<C-Tab>` needs a terminal that speaks the Kitty keyboard protocol, such as
-Ghostty. Use `<C-PageDown>` and `<C-PageUp>` elsewhere.
 
 ### Splits
 
@@ -100,8 +99,9 @@ Splits use Vim's `<C-w>` window commands.
 
 New splits open to the right and below.
 
-[solarized.nvim](https://github.com/maxmx03/solarized.nvim) starts in dark
-mode. `:set background=light` switches to its light palette.
+[Solarized Osaka](https://github.com/craftzdog/solarized-osaka.nvim) starts in dark
+mode with Ghostty's `#002b36` canvas and `#073642` panels.
+`:colorscheme solarized-osaka-light` selects its light variant.
 
 [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)
 renders headings, tables, checkboxes, callouts, and code blocks. `snacks.image`
@@ -118,7 +118,7 @@ adds LSP, buffer, path, and snippet completion.
 | Language | Server | Details |
 | --- | --- | --- |
 | Nix | [`nil`](https://github.com/oxalica/nil) | Automatic flake archiving is disabled |
-| Lua | [`lua-language-server`](https://github.com/LuaLS/lua-language-server) | Neovim runtime files are available to the server |
+| Lua | [`lua-language-server`](https://github.com/LuaLS/lua-language-server) | [lazydev.nvim](https://github.com/folke/lazydev.nvim) supplies Neovim and plugin runtime types |
 | Python | [`pyright`](https://github.com/microsoft/pyright) | Virtual environments are selected with [venv-selector.nvim](https://github.com/linux-cultist/venv-selector.nvim) |
 | Rust | [`rust-analyzer`](https://rust-analyzer.github.io) | Nix also provides `cargo`, `rustc`, and `rustfmt` |
 | C# and Razor | [`roslyn-ls`](https://github.com/dotnet/roslyn) with [roslyn.nvim](https://github.com/seblyng/roslyn.nvim) | Discovers solutions and projects; `:Roslyn target` switches targets |
@@ -239,7 +239,7 @@ suggestion; `Tab` keeps its normal completion and indentation behavior.
   and keymaps.
 - `lua/options.lua` contains editor options, filetype indentation, and
   autosave-on-focus-change.
-- `lua/ui.lua` loads Solarized and local highlights.
+- `lua/ui.lua` loads Solarized Osaka without local highlight overrides.
 - `lua/lsp.lua` contains format-on-save, Roslyn startup, vtsls commands, and
   the Pyright restart after a virtual-environment change.
 - `lua/workbench.lua` configures Jupytext.

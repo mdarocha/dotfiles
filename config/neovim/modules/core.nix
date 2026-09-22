@@ -55,17 +55,7 @@
   ];
 
   extraPlugins = with pkgs.vimPlugins; [
-    (pkgs.vimUtils.buildVimPlugin {
-      pname = "solarized.nvim";
-      version = "unstable-2026-04-17";
-      src = pkgs.fetchFromGitHub {
-        owner = "maxmx03";
-        repo = "solarized.nvim";
-        rev = "a8085e29883ddcfb39bd46197eb32ef00df05368";
-        hash = "sha256-+GTY7p8BDwwy3r2/8yXG3WdwIk3/23mBuSC60qzjT18=";
-      };
-      meta.homepage = "https://github.com/maxmx03/solarized.nvim";
-    })
+    solarized-osaka-nvim
     roslyn-nvim
     jupytext-nvim
   ];

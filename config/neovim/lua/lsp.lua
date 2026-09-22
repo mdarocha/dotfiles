@@ -5,6 +5,28 @@ vim.diagnostic.config({
   float = { border = "rounded" },
 })
 
+local message_levels = {
+  [vim.lsp.protocol.MessageType.Error] = vim.log.levels.ERROR,
+  [vim.lsp.protocol.MessageType.Warning] = vim.log.levels.WARN,
+  [vim.lsp.protocol.MessageType.Info] = vim.log.levels.INFO,
+  [vim.lsp.protocol.MessageType.Log] = vim.log.levels.DEBUG,
+}
+
+vim.lsp.handlers["window/showMessage"] = function(_, params, ctx)
+  local client = vim.lsp.get_client_by_id(ctx.client_id)
+  require("fidget").notify(params.message, message_levels[params.type] or vim.log.levels.INFO, {
+    group = client and client.name or "LSP",
+  })
+end
+
+vim.api.nvim_create_autocmd({ "LspAttach", "LspDetach" }, {
+  callback = function()
+    vim.schedule(function()
+      require("lualine").refresh({ place = { "statusline" } })
+    end)
+  end,
+})
+
 -- Format through the LSP when the server offers it; never invoke an external
 -- formatter.
 local function format_on_save(args)

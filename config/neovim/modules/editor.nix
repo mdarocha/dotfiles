@@ -31,6 +31,8 @@
       languageRegister.json = "jsonc";
     };
 
+    lazydev.enable = true;
+
     blink-cmp = {
       enable = true;
       settings = {
@@ -73,7 +75,17 @@
           enable = true;
           settings.nix.flake.autoArchive = false;
         };
-        lua_ls.enable = true;
+        lua_ls = {
+          enable = true;
+          settings.Lua = {
+            runtime.version = "LuaJIT";
+            diagnostics.globals = [
+              "vim"
+              "Snacks"
+            ];
+            workspace.checkThirdParty = false;
+          };
+        };
         pyright.enable = true;
         rust_analyzer = {
           enable = true;

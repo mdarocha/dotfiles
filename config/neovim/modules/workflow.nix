@@ -227,30 +227,6 @@
     }
     {
       mode = "n";
-      key = "<C-PageDown>";
-      action = "<cmd>BufferLineCycleNext<CR>";
-      options.desc = "Next tab";
-    }
-    {
-      mode = "n";
-      key = "<C-PageUp>";
-      action = "<cmd>BufferLineCyclePrev<CR>";
-      options.desc = "Previous tab";
-    }
-    {
-      mode = "n";
-      key = "<C-Tab>";
-      action = "<cmd>BufferLineCycleNext<CR>";
-      options.desc = "Next tab";
-    }
-    {
-      mode = "n";
-      key = "<C-S-Tab>";
-      action = "<cmd>BufferLineCyclePrev<CR>";
-      options.desc = "Previous tab";
-    }
-    {
-      mode = "n";
       key = "<leader>bd";
       action = "<cmd>bdelete<CR>";
       options.desc = "Close buffer";
