@@ -18,7 +18,7 @@
   hideThinkingBlock = true;
   modelRoles = {
     tiny = "local/lfm2.5-350m:off";
-    memory = "local/qwen3-1.7b:low";
+    memory = "local/lfm2-1.2b:low";
     web = "web/exa";
   };
   retry = {
