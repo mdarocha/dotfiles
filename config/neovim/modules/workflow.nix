@@ -5,6 +5,7 @@
 }:
 {
   plugins = {
+    # Fugitive handles Git commands; Gitsigns and Diffview cover hunks and reviews.
     gitsigns.enable = true;
     fugitive.enable = true;
     diffview.enable = true;
@@ -25,6 +26,7 @@
       };
     };
 
+    # Molten runs notebook cells after Jupytext opens them as Python buffers.
     molten = {
       enable = true;
       settings = {
@@ -35,6 +37,7 @@
 
     venv-selector.enable = true;
 
+    # Neotest selects the adapter that matches the current language.
     neotest = {
       enable = true;
       adapters = {
@@ -45,6 +48,7 @@
       };
     };
 
+    # Nix supplies adapters; launch configurations prompt for project binaries.
     dap = {
       enable = true;
 
@@ -143,6 +147,7 @@
     };
   };
 
+  # Alt shortcuts reach persistent panes without replacing Vim's split keys.
   keymaps = [
     {
       mode = "n";
@@ -216,6 +221,7 @@
       action.__raw = "function() Snacks.picker.grep() end";
       options.desc = "Search all files";
     }
+    # BufferLine displays buffers, so gt/gT cycle files rather than Vim tab pages.
     {
       mode = "n";
       key = "gt";
@@ -290,6 +296,7 @@
       options.desc = "Help";
     }
 
+    # Git status and review history deliberately open different views.
     {
       mode = "n";
       key = "<leader>gg";
@@ -346,6 +353,7 @@
       options.desc = "omp commit";
     }
 
+    # Molten re-evaluates the percent cells emitted by Jupytext.
     {
       mode = "n";
       key = "<localleader>mi";
@@ -371,6 +379,7 @@
       options.desc = "Run selection";
     }
 
+    # DAP launch and step keys use the adapters configured above.
     {
       mode = "n";
       key = "<F5>";
@@ -408,6 +417,7 @@
       options.desc = "Toggle debug UI";
     }
 
+    # The same test keys use Python, Rust, Vitest, or .NET adapters by filetype.
     {
       mode = "n";
       key = "<leader>tt";

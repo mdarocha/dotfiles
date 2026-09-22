@@ -54,12 +54,14 @@
     jupytextCli
   ];
 
+  # Nix supplies these plugins directly; their setup lives in the Lua files below.
   extraPlugins = with pkgs.vimPlugins; [
     solarized-osaka-nvim
     roslyn-nvim
     jupytext-nvim
   ];
 
+  # This prelude runs before the inlined Lua files; nvim-tree takes over netrw.
   extraConfigLua = ''
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1

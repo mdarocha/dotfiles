@@ -5,6 +5,7 @@ vim.diagnostic.config({
   float = { border = "rounded" },
 })
 
+-- On a warned line, K shows the diagnostic; clean lines retain LSP hover.
 local function show_lsp_details()
   local _, window = vim.diagnostic.open_float({ scope = "line", header = "", focusable = true })
   if not window then
@@ -17,6 +18,7 @@ for _, key in ipairs({ "K", "<C-k>" }) do
 end
 vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, { desc = "Signature help" })
 
+-- LSP messages keep their server name; DEBUG logs stay below Fidget's INFO filter.
 local message_levels = {
   [vim.lsp.protocol.MessageType.Error] = vim.log.levels.ERROR,
   [vim.lsp.protocol.MessageType.Warning] = vim.log.levels.WARN,
@@ -31,6 +33,7 @@ vim.lsp.handlers["window/showMessage"] = function(_, params, ctx)
   })
 end
 
+-- Recompute the lualine server count after the client's attachment changes.
 vim.api.nvim_create_autocmd({ "LspAttach", "LspDetach" }, {
   callback = function()
     vim.schedule(function()

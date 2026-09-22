@@ -1,4 +1,5 @@
--- Percent cells so Molten sees the same markers in .ipynb and .py files.
+-- Edit .ipynb files as Python percent cells for Molten and the LSP.
+-- Jupytext still writes changes back to the notebook.
 require("jupytext").setup({
   style = "percent",
   output_extension = "py",

@@ -104,10 +104,8 @@ New splits open to the right and below.
 mode with Ghostty's `#002b36` canvas and `#073642` panels.
 `:colorscheme solarized-osaka-light` selects its light variant.
 
-[render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)
-renders headings, tables, checkboxes, callouts, and code blocks. `snacks.image`
-displays linked images and math in terminals that support the Kitty Graphics
-Protocol; the source stays visible elsewhere.
+`snacks.image` displays linked images and math in terminals that support the
+Kitty Graphics Protocol; the source stays visible elsewhere.
 
 ## Language support
 

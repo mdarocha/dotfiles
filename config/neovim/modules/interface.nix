@@ -2,6 +2,7 @@
   plugins = {
     web-devicons.enable = true;
 
+    # Snacks keeps temporary UI out of the dedicated file and symbol panes.
     snacks = {
       enable = true;
       settings = {
@@ -46,6 +47,7 @@
       };
     };
 
+    # LSP messages share a small popup; chatty LuaLS progress is omitted.
     fidget = {
       enable = true;
       settings = {
@@ -68,6 +70,7 @@
       };
     };
 
+    # Tree diagnostics sit beside files rather than repeating up each parent.
     nvim-tree = {
       enable = true;
       settings = {
@@ -143,6 +146,7 @@
       };
     };
 
+    # Follow the active editor buffer while keeping the outline at the edge.
     aerial = {
       enable = true;
       settings = {
@@ -170,6 +174,7 @@
       };
     };
 
+    # Prefix hints float in the corner instead of replacing the command line.
     mini = {
       enable = true;
       modules.clue = {
@@ -255,6 +260,7 @@
       };
     };
 
+    # Utility windows do not get a second statusline for the edited file.
     lualine = {
       enable = true;
       settings = {
@@ -295,10 +301,17 @@
           lualine_a = [ "mode" ];
           lualine_b = [
             "branch"
-            "diff"
           ];
           lualine_c = [ "filename" ];
           lualine_x = [
+            {
+              __unkeyed-1 = "diff";
+              diff_color = {
+                added.fg.__raw = "require('solarized-osaka.colors').setup().green300";
+                modified.fg.__raw = "require('solarized-osaka.colors').setup().yellow300";
+                removed.fg.__raw = "require('solarized-osaka.colors').setup().red300";
+              };
+            }
             {
               __unkeyed-1 = "diagnostics";
               sources = [ "nvim_diagnostic" ];
@@ -379,6 +392,7 @@
       };
     };
 
+    # The sidebar reserves tabline space but never becomes a file tab.
     bufferline = {
       enable = true;
       settings.options = {
@@ -386,10 +400,30 @@
         diagnostics = "nvim_lsp";
         separator_style = "thin";
         indicator.style = "underline";
+        tab_size = 16;
+        offsets = [
+          {
+            filetype = "NvimTree";
+            text = " 󰙅 Files";
+            text_align = "left";
+            separator = true;
+            highlight = "BufferLineOffsetSeparator";
+          }
+        ];
         custom_filter.__raw = ''
           function(bufnr)
             local buffer = vim.bo[bufnr]
-            return buffer.buftype == "" and buffer.filetype ~= "NvimTree" and buffer.filetype ~= "aerial"
+            if buffer.buftype ~= "" or buffer.filetype == "NvimTree" or buffer.filetype == "aerial" then
+              return false
+            end
+            if buffer.filetype == "" then
+              local name = vim.api.nvim_buf_get_name(bufnr)
+              -- Older sessions can restore NvimTree_1 as a nonexistent regular file.
+              if vim.fn.fnamemodify(name, ":t"):match("^NvimTree_%d+$") and vim.fn.filereadable(name) == 0 then
+                return false
+              end
+            end
+            return true
           end
         '';
         show_buffer_icons = true;
@@ -404,72 +438,30 @@
       };
     };
 
+    # Skip scratch panes on save so restored sessions contain real files.
     auto-session = {
       enable = true;
       settings = {
         auto_restore_last_session = true;
         bypass_save_filetypes = [
+          "NvimTree"
+          "aerial"
           "snacks_dashboard"
           "snacks_terminal"
           "prompt"
           "help"
         ];
+        close_filetypes_on_save = [
+          "checkhealth"
+          "NvimTree"
+          "aerial"
+          "snacks_terminal"
+          "snacks_picker_input"
+          "snacks_picker_list"
+          "snacks_picker_preview"
+        ];
       };
     };
 
-    render-markdown = {
-      enable = true;
-      settings = {
-        heading = {
-          sign = false;
-          width = "block";
-          left_pad = 1;
-          right_pad = 1;
-          min_width = 12;
-          border = false;
-          icons = [
-            "󰎤 "
-            "󰎧 "
-            "󰎪 "
-            "󰎭 "
-            "󰎱 "
-            "󰎳 "
-          ];
-        };
-        code = {
-          sign = false;
-          width = "block";
-          left_pad = 1;
-          right_pad = 1;
-          min_width = 12;
-          border = "thin";
-          language_icon = true;
-          language_name = true;
-        };
-        bullet.icons = [
-          "󰧞"
-          "󰧟"
-          "󰧠"
-          "󰧡"
-        ];
-        checkbox = {
-          unchecked.icon = "󰄱 ";
-          checked.icon = "󰱒 ";
-          custom = {
-            todo = {
-              raw = "[-]";
-              rendered = "󰥔 ";
-              highlight = "RenderMarkdownWarn";
-            };
-          };
-        };
-        pipe_table = {
-          preset = "round";
-          cell = "padded";
-          padding = 1;
-        };
-        sign.enabled = false;
-      };
-    };
   };
 }

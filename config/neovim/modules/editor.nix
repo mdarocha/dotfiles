@@ -7,6 +7,7 @@
         highlight.enable = true;
         indent.enable = true;
       };
+      # Grammars are built by Nix, so Treesitter never downloads them at startup.
       grammarPackages = with config.programs.nixvim.plugins.treesitter.package.builtGrammars; [
         bash
         c_sharp
@@ -31,11 +32,13 @@
       languageRegister.json = "jsonc";
     };
 
+    # Lazydev adds Neovim and installed plugin types only when editing Lua.
     lazydev.enable = true;
 
     blink-cmp = {
       enable = true;
       settings = {
+        # Arrow keys keep their usual behavior when completion is closed.
         keymap = {
           preset = "default";
           "<Up>" = [
@@ -68,6 +71,7 @@
 
     schemastore.enable = true;
 
+    # nixvim registers the servers with Neovim's built-in LSP client.
     lsp = {
       enable = true;
       servers = {
@@ -77,6 +81,7 @@
         };
         lua_ls = {
           enable = true;
+          # Config Lua uses these globals without require calls.
           settings.Lua = {
             runtime.version = "LuaJIT";
             diagnostics.globals = [

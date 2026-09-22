@@ -10,6 +10,7 @@ let
 
   cfg = config.mdarocha.neovim;
 
+  # One Python runtime serves Neovim's provider, Molten, and the debug adapter.
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
       pynvim
@@ -24,12 +25,14 @@ let
     omp = "${config.mdarocha.llm-agents.oh-my-pi.package}/bin/omp";
   };
 
+  # Terminal shortcuts share the same bottom split behavior.
   bottomTerminal = ''
     function()
       Snacks.terminal(nil, { win = { position = "bottom" } })
     end
   '';
 
+  # These Lua files become one init script in this order.
   luaModules = [
     ./lua/options.lua
     ./lua/ui.lua
@@ -44,6 +47,7 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Keep packaging, language support, UI, and workflow settings separate.
     programs.nixvim = lib.mkMerge [
       (import ./modules/core.nix {
         inherit

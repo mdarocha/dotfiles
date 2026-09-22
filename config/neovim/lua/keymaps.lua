@@ -1,3 +1,4 @@
+-- Resolve the file's Git root so commits work from nested directories.
 vim.api.nvim_create_user_command("OmpCommit", function()
   local root = vim.fs.root(0, ".git")
   if not root then

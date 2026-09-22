@@ -1,11 +1,12 @@
 vim.opt.number = false
 vim.opt.relativenumber = false
+-- Lualine shows mode, so Neovim's own INSERT message would repeat it.
 vim.opt.showmode = false
 vim.opt.signcolumn = "yes"
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.opt.cursorline = true
 vim.opt.termguicolors = true
+-- Mouse clicks reach tabs and panes; wheel steps stay at one row.
 vim.opt.mouse = "a"
 vim.opt.mousescroll = "ver:1,hor:1"
 vim.opt.textwidth = 120
@@ -13,6 +14,7 @@ vim.opt.colorcolumn = { "80", "120" }
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 
+-- File buffers switch between absolute and relative numbers; panes keep their own gutters.
 local function set_editor_numbers()
   if vim.bo.buftype ~= "" then
     return
