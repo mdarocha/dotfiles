@@ -141,7 +141,8 @@ in
     home.activation.download-omp-local-models = lib.mkIf (localModels != [ ]) (
       lib.hm.dag.entryAfter [ "writeBoundary" "reloadSystemd" ] (
         lib.concatMapStrings (model: ''
-          run ${cfg.oh-my-pi.package-nosandbox}/bin/omp-nosandbox tiny-models download ${lib.escapeShellArg model}
+          ${cfg.oh-my-pi.package-nosandbox}/bin/omp-nosandbox tiny-models download ${lib.escapeShellArg model} \
+            || echo "warning: failed to prefetch local model '${model}', continuing" >&2
         '') localModels
       )
     );
