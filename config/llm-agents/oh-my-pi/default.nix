@@ -14,6 +14,17 @@ let
   defaultConfig = import ./config.nix { inherit config pkgs lib; };
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.oh-my-pi.settings;
 
+  # `local/<model-id>[:suffix]` role selectors (tiny, memory, judge, ...) that need their weights
+  # predownloaded; retired `providers.tinyModel` etc. migrate into `modelRoles` on load, so this
+  # covers every local model role assignment, not just the tiny one.
+  localModels = lib.unique (
+    map (v: lib.removePrefix "local/" (lib.head (lib.splitString ":" v))) (
+      lib.filter (v: lib.isString v && lib.hasPrefix "local/" v) (
+        lib.attrValues (mergedConfig.modelRoles or { })
+      )
+    )
+  );
+
   filesIn =
     dir: suffix:
     lib.mapAttrs' (file: _: lib.nameValuePair (lib.removeSuffix suffix file) (dir + "/${file}")) (
@@ -127,17 +138,12 @@ in
       "writeBoundary"
     ] sandbox.ensureDirs;
 
-    home.activation.download-omp-tiny-models =
-      lib.mkIf
-        (
-          mergedConfig.providers ? tinyModel
-          && mergedConfig.providers.tinyModel != null
-          && mergedConfig.providers.tinyModel != "online"
-        )
-        (
-          lib.hm.dag.entryAfter [ "writeBoundary" "reloadSystemd" ] ''
-            run ${cfg.oh-my-pi.package-nosandbox}/bin/omp-nosandbox tiny-models download ${mergedConfig.providers.tinyModel}
-          ''
-        );
+    home.activation.download-omp-local-models = lib.mkIf (localModels != [ ]) (
+      lib.hm.dag.entryAfter [ "writeBoundary" "reloadSystemd" ] (
+        lib.concatMapStrings (model: ''
+          run ${cfg.oh-my-pi.package-nosandbox}/bin/omp-nosandbox tiny-models download ${lib.escapeShellArg model}
+        '') localModels
+      )
+    );
   };
 }

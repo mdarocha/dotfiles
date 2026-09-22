@@ -16,11 +16,28 @@
   advisor.syncBacklog = "5";
   defaultThinkingLevel = "auto";
   hideThinkingBlock = true;
+  modelRoles = {
+    tiny = "local/lfm2.5-350m:off";
+    memory = "local/qwen3-1.7b:low";
+    web = "web/exa";
+  };
   retry = {
     fallbackChains = {
       "anthropic/claude-sonnet-5" = [ "openai-codex/gpt-5.6-terra" ];
       "openai-codex/gpt-5.6-luna" = [ "anthropic/claude-haiku-4-5" ];
       "anthropic/claude-opus-5" = [ "openai-codex/gpt-5.6-sol" ];
+      web = [
+        "google/gemini-2.5-flash"
+        "google-antigravity/gemini-2.5-flash"
+        "openai-codex/gpt-5.6-luna"
+        "openai-codex/gpt-5.5"
+      ];
+      image = [
+        "openai-codex/gpt-image-1"
+        "openai/gpt-image-1"
+        "openrouter/google/gemini-3-pro-image-preview"
+        "google/gemini-3-pro-image-preview"
+      ];
     };
     usageAwareFallback = true;
     usageReservePct = 5;
@@ -88,18 +105,7 @@
 
   # providers
   providers = {
-    webSearchOrder = [
-      "exa"
-      "anthropic"
-      "perplexity"
-    ];
     fetch = "native";
-    tinyModel = "lfm2.5-230m";
-    imageOrder = [
-      "antigravity"
-      "openai-codex"
-      "openai"
-    ];
   };
   codexResets.autoRedeem = "yes";
 
@@ -114,7 +120,7 @@
 
   # omp config audit decisions (see .omp/commands/omp-config-audit.md)
   # These comments are durable audit state; future runs must preserve them.
-  # - modelRoles.*: intentionally left unmanaged; skip in future audits.
+  # - modelRoles.{default,smol,slow,plan,task,commit,advisor,vision}: intentionally left unmanaged; skip in future audits.
   # - stt.modelName: intentionally left unmanaged; skip in future audits.
 
 }
