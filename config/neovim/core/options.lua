@@ -10,6 +10,7 @@ vim.opt.termguicolors = true
 vim.opt.mouse = "a"
 vim.opt.mousescroll = "ver:1,hor:1"
 vim.opt.textwidth = 120
+vim.opt.expandtab = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.clipboard = "unnamedplus"
@@ -23,6 +24,16 @@ if vim.fn.has("wsl") == 1 then
     cache_enabled = 0,
   }
 end
+
+-- Reveal whitespace as Nerd Font octicons; Whitespace/NonText (theme) color them.
+vim.opt.list = true
+vim.opt.listchars = {
+  tab = "\u{f432} ", -- arrow-right
+  trail = "\u{f444}", -- dot-fill
+  nbsp = "\u{f4c3}", -- dot
+  extends = "\u{f460}", -- chevron-right
+  precedes = "\u{f47d}", -- chevron-left
+}
 
 -- File buffers switch between absolute and relative numbers; panes keep their own gutters.
 local function set_editor_numbers()

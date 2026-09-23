@@ -217,7 +217,8 @@ Formatting uses whatever the attached server supports. Inlay hints are off.
 | Line numbers | Absolute in Normal mode, relative in other modes |
 | Clipboard | System clipboard: `wl-copy`/`wl-paste` on Wayland, `clip.exe` and PowerShell on WSL |
 | Autosave | Modified named files are written on focus loss or buffer leave |
-| Indentation | 4 spaces; 2 for JSON, YAML, XML, Nix, and Lua |
+| Indentation | Spaces, 4 wide; 2 for JSON, YAML, XML, Nix, and Lua |
+| Whitespace | Tabs, trailing spaces, non-breaking spaces, and off-screen text show as dim Nerd Font glyphs |
 | Sessions | Saved per working directory and restored on start, falling back to the most recent; sidebars, terminals, and pickers are left out |
 | Terminals | Always a bottom split |
 | Status line | Active Python environment and attached LSP server count; click the count to list servers |
