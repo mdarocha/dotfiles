@@ -1,262 +1,96 @@
 ---
 name: github
-description: Interact with GitHub — PRs, issues, Actions, repos, code search, releases, and gists. Load on any GitHub-related task, including "create a PR", "open an issue", "check CI", "list PRs", "merge", "review", "check workflow status", "GitHub Actions", "search code", any `gh` CLI usage, any `github` tool call, or any mention of GitHub resources like issues, pull requests, or repositories.
+description: Work with GitHub repositories, issues, pull requests, reviews, Actions, and stacked PRs. Use for GitHub resources, CI checks, `gh` commands, or requests to create, link, update, sync, or merge a PR stack.
 user-invocable: false
 ---
 
-# GitHub CLI (gh)
+# GitHub
 
-> **Prefer native tools when available:** If the session provides a `github` tool or a GitHub MCP server,
-> use those instead of shelling out to `gh` — they are structured, faster, and don't require subprocess
-> overhead. Fall back to `gh` only for operations those tools don't cover (e.g. GraphQL mutations,
-> bulk operations, release management, variable management).
+Prefer a session's structured GitHub tool for supported operations; use `gh` for gaps such as review-thread mutations, releases, and `gh stack`. Use `gh` rather than raw HTTP or browser automation for CLI-supported operations. Read existing state before changing it. A request to create or link PRs authorizes those actions, not a merge; follow the session's permission policy for other remote changes. Do not assume a command will prompt for approval.
 
-Use the `gh` CLI to interact with GitHub from the command line. Always prefer `gh` over
-raw API calls or web browser interaction.
+For `gh pr`, `gh issue`, and other supported commands, use `--repo owner/repo` outside the checkout or when targeting another repository; `gh stack` operates in the current checkout. Use `--json`/`--jq` for structured output and `--paginate` when the first page is insufficient. Avoid interactive selectors and editors in agent runs. `gh <command> --help` is the source for flags not covered here.
 
-> **Important:** `gh` should already be installed and authenticated. If a command fails due to
-> missing installation or authentication, notify the user — do not attempt to install or
-> configure `gh` yourself.
-
-## Permissions
-
-Commands are split into two categories based on configured permissions:
-
-**Readonly (run freely):** `list`, `view`, `status`, `checks`, `diff`, `checkout`, `search`,
-`watch`, `download`, `browse` — these never modify remote state and can be run without asking.
-
-**Mutating (requires user confirmation):** `create`, `edit`, `close`, `merge`, `comment`,
-`review`, `reopen`, `ready`, `rerun`, `cancel`, `delete`, `upload`, `fork`, `sync`, `run`,
-`enable`, `disable`, `lock`, `unlock`, `revert`, `update-branch`, `gh api` — these modify
-remote state and will prompt the user for approval before executing.
-
-Always prefer running readonly commands first to gather context, then propose mutating
-commands and let the user confirm.
-
-## Key Patterns
-
-- Use `--json` and `--jq` for structured data extraction (avoids fragile text parsing)
-- Use `--repo owner/repo` to target a different repository
-- Use `--paginate` for large result sets
-- Avoid interactive commands (`-i` flags, editors) — always pass arguments directly
-- This skill covers the most common operations. For additional subcommands not listed here,
-  run `gh --help` or `gh <command> --help` to discover available commands and flags
-
-## Pull Requests
+## Pull requests and issues
 
 ```bash
-# Readonly — run freely
-gh pr list
-gh pr list --state all --author @me
-gh pr list --json number,title,state --jq '.[] | select(.title | contains("fix"))'
-gh pr view 123
-gh pr view 123 --comments
-gh pr view 123 --json title,body,state,author,commits,files
-gh pr checkout 123
+gh pr list --json number,title,baseRefName,headRefName,state
+gh pr view 123 --json title,body,state,files,commits
 gh pr diff 123
-gh pr diff 123 --name-only
 gh pr checks 123
-gh pr checks 123 --watch
-gh pr status
+gh pr create --base main --head feature --title "Title" --body "Description"
+gh pr edit 123 --add-reviewer user1
+gh pr review 123 --request-changes --body "Requested change"
 
-# Mutating — user will be asked to confirm
-gh pr create --title "Title" --body "Description"
-gh pr create --draft --base main --head feature
-gh pr create --reviewer user1,user2 --labels enhancement
-gh pr create --body-file body.md
-gh pr edit 123 --title "New title" --add-label bug --add-reviewer user1
-gh pr merge 123 --squash --delete-branch
-gh pr close 123 --comment "Reason"
-gh pr reopen 123
-gh pr review 123 --approve --body "LGTM!"
-gh pr review 123 --request-changes --body "Please fix..."
-gh pr comment 123 --body "Comment text"
-gh pr ready 123
-```
-
-## PR Review Threads
-
-GitHub has no dedicated `gh pr` subcommand for resolving review comment threads.
-Use the GraphQL API via `gh api graphql`.
-
-> **Confirmation rule:** Only run the resolve mutation when the user has explicitly
-> requested it (e.g. "mark the comment as resolved", "resolve that thread").
-> In all other cases — such as when reviewing a PR or summarising feedback —
-> list the threads for context but ask for confirmation before resolving anything.
-
-```bash
-# Readonly — list review threads with their IDs and resolution state
-gh api graphql -f query='
-query($owner: String!, $repo: String!, $pr: Int!) {
-  repository(owner: $owner, name: $repo) {
-    pullRequest(number: $pr) {
-      reviewThreads(first: 100) {
-        nodes {
-          id
-          isResolved
-          comments(first: 1) { nodes { body } }
-        }
-      }
-    }
-  }
-}
-' -f owner=OWNER -f repo=REPO -F pr=NUMBER
-
-# Mutating — resolve a single thread by its node ID (from the query above)
-gh api graphql -f query='
-mutation($id: ID!) {
-  resolveReviewThread(input: {threadId: $id}) {
-    thread { id isResolved }
-  }
-}
-' -f id="PRT_kwDO..."
-```
-
-The node ID looks like `PRT_kwDO...` and is returned by the `reviewThreads` query above.
-To resolve all unresolved threads in one pass, pipe the query result through `jq` to
-extract IDs, then loop and call the mutation for each.
-
-## Issues
-
-```bash
-# Readonly — run freely
-gh issue list
-gh issue list --state all --labels bug
-gh issue list --assignee @me
-gh issue list --search "is:open label:bug"
-gh issue list --json number,title,state
-gh issue view 123
+gh issue list --state open --json number,title,labels
 gh issue view 123 --comments
-gh issue view 123 --json title,body,state,labels
-gh issue status
-
-# Mutating — user will be asked to confirm
-gh issue create --title "Bug: description" --body "Details..."
-gh issue create --title "Bug" --labels bug,high-priority --assignee @me
-gh issue edit 123 --title "New title" --add-label enhancement
-gh issue close 123 --comment "Fixed in PR #456"
-gh issue reopen 123
-gh issue comment 123 --body "Comment text"
+gh issue create --title "Bug" --body "Reproduction and expected behavior"
 ```
 
-## GitHub Actions / CI
+Honor the repository's worktree/branch convention when checking out a PR; don't replace the user's working tree merely to read it. For code search, use the available code-search tool; `gh search code "term" --repo owner/repo` also finds code in repositories accessible to your GitHub account.
+
+`gh pr` has no review-thread resolution command. Query thread IDs first, then resolve only the requested thread:
 
 ```bash
-# Readonly — run freely
-gh run list
-gh run list --workflow "ci.yml" --branch main --limit 10
-gh run view 123456789
-gh run view 123456789 --log
-gh run view 123456789 --job 987654321
-gh run watch 123456789
-gh run download 123456789 --name build --dir ./artifacts
-gh workflow list
+gh api graphql -f query='query($owner:String!,$repo:String!,$pr:Int!){repository(owner:$owner,name:$repo){pullRequest(number:$pr){reviewThreads(first:100){nodes{id isResolved comments(first:1){nodes{body}}}}}}}' -f owner=OWNER -f repo=REPO -F pr=NUMBER
+gh api graphql -f query='mutation($id:ID!){resolveReviewThread(input:{threadId:$id}){thread{id isResolved}}}' -f id=PRT_ID
+```
+
+For more than 100 review threads, paginate the GraphQL connection rather than assuming the first page is complete.
+
+## Stacked pull requests
+
+`gh stack` is provided declaratively by the dotfiles (`config/git/gh.nix`). A stack is a linear dependency chain in one repository: `(main) <- base-change <- dependent-change`. The bottom PR targets `main`; each higher PR targets the branch immediately below it, so its diff contains only its layer. GitHub's stack grouping is **additional** to the base-branch chain. A pair of PRs with correct bases is not necessarily a GitHub stack.
+
+Choose layers by dependency, with a discrete reviewable concern per branch. Create the lower branch before work that depends on it. Keep unrelated changes in separate stacks. Stacks cannot span forks. The feature is in public preview: exit code 9 means the repository does not have stacked PRs enabled, so do not claim the PRs are linked. Check `gh stack <subcommand> --help` if a flag or behavior changes.
+
+### Existing PRs or separately managed worktrees
+
+When PRs already exist, check their head/base chain and link them **bottom to top**. `link` creates or updates GitHub stack membership without creating local stack tracking. It reuses existing PRs but can update their base branches; inspect the chain before running it. With branch arguments, `link` may push branches and create missing PRs (draft unless `--open`).
+
+```bash
+gh pr view 240 --json number,baseRefName,headRefName,state
+gh pr view 241 --json number,baseRefName,headRefName,state
+gh stack link --remote origin 240 241     # main <- PR 240 <- PR 241
+gh stack link --remote origin 242 243     # if 242 is a stack ID, append PR 243
+```
+
+The example mirrors an existing two-PR chain: linking #240 and #241 creates a GitHub stack; it neither rewrites their commits nor creates local tracking. A number in the first argument position can mean a **stack ID** if one exists, not necessarily a PR number. Verify the returned stack ID and both PRs' bases after linking. Use `gh stack checkout <PR-or-stack-ID>` only if local stack tracking is needed; it fetches and checks out branches, so respect worktree ownership.
+
+### New locally tracked stack
+
+```bash
+gh stack init --base main base-change   # adopt an existing branch or create it
+git add <base-files> && git commit -m "Add base change"
+gh stack add dependent-change           # from the current top branch
+git add <dependent-files> && git commit -m "Add dependent change"
+gh stack submit --auto --remote origin  # pushes branches; creates draft PRs and stack
+# Add --open only when these PRs should be ready for review.
+gh stack view --json
+```
+
+Use `gh stack init --base main branch-a branch-b` to adopt an existing local chain. Ensure ancestry and change ownership are correct first: stack metadata alone does not reorder commits. Don't use `gh stack init` for a pair of existing PRs when only remote linking is requested. `gh stack view --json` describes the **locally tracked** stack; it cannot inspect a link-only stack from an unrelated checkout.
+
+### Updating and merging
+
+Edit the branch that owns the change. `gh stack rebase --upstack --remote origin` cascades lower-branch edits upward; `gh stack push --remote origin` pushes rewritten branch tips with leases. `gh stack sync --remote origin` fetches, rebases, pushes, and updates PR/stack state. A noninteractive `sync` may exit 0 while reporting `Sync aborted` on divergence: inspect its output and verify before claiming success. On a rebase conflict, resolve and stage files, then `gh stack rebase --continue`; `gh stack rebase --abort` restores the stack. Do not prune branches unless requested.
+
+```bash
+gh stack merge 241 --yes --squash     # merges PR 241 and every unmerged PR below it
+gh stack merge 242 --yes --squash     # if 242 is a stack ID, merges the entire stack
+```
+
+Merge only on request, bottom to top. The selected merge is all-or-nothing unless it enters a merge queue; protections and checks still apply. Use `gh stack merge`, not `gh pr merge`, to merge multiple layers in one operation. Specify the intended merge method rather than relying on the last-used one. `gh stack modify` is an interactive TUI and is unsuitable for noninteractive runs.
+
+See [GitHub's stacked PR overview](https://docs.github.com/en/pull-requests/get-started/about-stacked-prs) and [CLI command reference](https://docs.github.com/en/pull-requests/reference/stacked-prs-cli-commands) for current behavior.
+
+## Actions and other operations
+
+```bash
+gh run list --workflow ci.yml --branch main --limit 10
+gh run view 123456789 --log-failed
 gh workflow view ci.yml --yaml
-
-# Mutating — user will be asked to confirm
-gh run rerun 123456789
-gh run cancel 123456789
-gh workflow run ci.yml --ref develop
-```
-
-## Repositories
-
-```bash
-# Readonly — run freely
-gh repo view
-gh repo view owner/repo --json name,description,defaultBranchRef
-gh repo clone owner/repo
-
-# Mutating — user will be asked to confirm
-gh repo create my-repo --public --description "Description"
-gh repo fork owner/repo --clone
-gh repo sync
-gh repo set-default owner/repo
-```
-
-## Search
-
-```bash
-# All search commands are readonly — run freely
-gh search code "pattern" --repo owner/repo
-gh search code "import" --extension py
-gh search issues "label:bug state:open"
-gh search prs "is:open review:required"
-gh search repos "stars:>1000 language:python" --sort stars
-```
-
-## API Requests
-
-For operations not covered by dedicated subcommands, use `gh api` directly.
-All `gh api` calls require user confirmation since they can modify remote state.
-
-```bash
-# REST
-gh api /repos/owner/repo --jq '.stargazers_count'
-gh api --method POST /repos/owner/repo/issues \
-  --field title="Title" --field body="Body"
-
-# GraphQL
-gh api graphql -f query='{
-  viewer { login repositories(first: 5) { nodes { name } } }
-}'
-
-# Pagination
-gh api /user/repos --paginate
-```
-
-## Releases
-
-```bash
-# Readonly — run freely
-gh release list
 gh release view v1.0.0
-gh release download v1.0.0 --pattern "*.tar.gz" --dir ./downloads
-
-# Mutating — user will be asked to confirm
-gh release create v1.0.0 --notes "Release notes" --target main
-gh release create v1.0.0 --draft --notes-file notes.md
-gh release upload v1.0.0 ./artifact.tar.gz
+gh api /repos/owner/repo --jq '.default_branch'
 ```
 
-## Variables
-
-```bash
-# Readonly — run freely
-gh variable list
-gh variable get MY_VAR
-
-# Mutating — user will be asked to confirm
-gh variable set MY_VAR "value"
-```
-
-## Common Workflows
-
-### Create PR from Issue
-
-```bash
-# Mutating — each step will ask for confirmation
-gh issue develop 123 --branch feature/issue-123
-# Make changes, commit, push...
-gh pr create --title "Fix #123" --body "Closes #123"
-```
-
-### Bulk Operations
-
-```bash
-# List is readonly, but each close is mutating and will ask
-gh issue list --search "label:stale" --json number --jq '.[].number' | \
-  xargs -I {} gh issue close {} --comment "Closing as stale"
-```
-
-## Output Formatting
-
-```bash
-# JSON with jq filtering
-gh pr list --json number,title --jq '.[] | select(.number > 100)'
-
-# Go templates
-gh repo view --template '{{.name}}: {{.description}}'
-```
-
-For full subcommand reference, run `gh <command> --help`.
+Use `gh api` for operations missing from native tools and `gh` subcommands; GET and GraphQL queries read state, while POST/PATCH/DELETE and GraphQL mutations change it. Don't classify every `gh api` call as mutating.

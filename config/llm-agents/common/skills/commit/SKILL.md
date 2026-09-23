@@ -1,101 +1,43 @@
 ---
 name: commit
-description: Commit session changes to git. Use when the user asks to commit, save, checkpoint, or snapshot their work. Also use proactively when working in a git worktree and you've completed a discrete unit of work. Triggers include "commit this", "save my changes", "create a commit", "git commit", "push my changes", "I'm done", "wrap up", or any request to persist the current session's work to version control - even if the user doesn't explicitly say "commit".
+description: Creates one local commit for the current session when the user explicitly requests it, or autonomously from a linked worktree after a discrete unit of work. It stages only session-related changes and never pushes.
 ---
 
-# Commit Current Session Changes
+# Commit Session Changes
 
-Create a single git commit containing only the changes made during this session.
-Do not create multiple commits. Do not push.
+Create exactly one local commit containing only work from the current session. Never push.
 
-## When to commit
+## Consent
 
-**User-initiated** (invoked via `/commit` or an explicit request like "commit this"):
-commit on any branch, no questions asked.
+- An explicit request to commit, save, checkpoint, or snapshot changes authorizes a commit in any checkout. Do not ask again.
+- Completion language alone, such as “I’m done” or “wrap up,” does not authorize a commit; ask whether the user wants one.
+- An agent may commit without a request only after completing a discrete unit of work in a linked (non-main) worktree. It must not self-initiate a commit from the main checkout.
 
-**Self-initiated** (you decide a commit would be appropriate after completing work):
-you MUST check whether you are in a git worktree:
+## Inspect and stage
 
-```bash
-git worktree list
-pwd
-```
+Check the recent commit style, working-tree state, unstaged diff, and staged diff before committing. Match the repository’s established message style.
 
-- If you are in a **git worktree** (cwd is not the main working tree): commit freely.
-- Otherwise: do NOT commit. Ask the user first.
-
-**Ambiguous** (the user says something like "I'm done", "wrap up", "save this",
-but hasn't explicitly asked for a commit): ask the user whether they want a commit.
-Do not assume.
-
-## Step 1: Gather Context
-
-Run these commands in parallel to understand the current state:
+Stage only files and hunks attributable to this session:
 
 ```bash
-git log --oneline -15       # Learn the repo's commit style
-git status                   # See what's changed
-git diff                     # Unstaged changes
-git diff --staged            # Already staged changes
+git add <session-file>...
 ```
 
-**Commit style:** Match the existing commits (casing, tense, format, prefixes, length).
-The repo's conventions always take priority over generic best practices.
-If existing commits use a consistent pattern (e.g. `module: description`, or imperative lowercase),
-follow it exactly. If they are low-quality messages like "fix" or "update", fall back to the
-guidelines in Step 3.
+For a file mixed with unrelated edits, use `git add -p <file>` and select only the session’s hunks. If unrelated content is already staged, prepare the session commit from an isolated index; if that cannot be done safely, stop and ask before committing. Never run a bare commit that would include unrelated staged work.
 
-## Step 2: Stage Session Changes
-
-Review the conversation history to identify which files were changed as part of this session.
-Only stage changes directly related to this session's work.
-
-**Most common case** — all changes in a file are session-related:
+Review the resulting staged diff before committing:
 
 ```bash
-git add <file1> <file2> ...
+git diff --cached --stat
+git diff --cached
 ```
 
-**Mixed files** — a file has both session and unrelated changes. Since `git add -p` is interactive
-and cannot be used here, use the patch-and-apply approach:
+## Commit
 
-```bash
-# 1. Generate the full diff for the file
-git diff <file> > /tmp/partial.patch
-
-# 2. Edit /tmp/partial.patch to keep ONLY the session-related hunks:
-#    - Remove entire hunk blocks (from @@ line through to next @@ or end) that aren't session-related
-#    - Within a hunk: remove `+` lines to exclude additions, change `-` to ` ` to keep deletions
-#    - Adjust hunk header line counts (@@ -a,b +c,d @@) if you modify hunks
-
-# 3. Apply the filtered patch to the staging area
-git apply --cached /tmp/partial.patch
-```
-
-After staging, verify the staged diff matches the session's work:
-
-```bash
-git diff --staged --stat
-git diff --staged
-```
-
-## Step 3: Commit
-
-Write a single-line commit message. Keep it short and descriptive.
-
-Fallback guidelines (use only when the repo has no clear style):
-
-- Imperative mood ("add feature" not "added feature")
-- Lowercase first word (unless the repo capitalizes)
-- No trailing period
-- Under ~72 characters
-- Focus on *what* changed and *where*, not *how*
-- Be specific — avoid "fix bug" or "update code"
-- If changes span multiple areas, summarize at the level that captures the intent
-- No "Co-authored-by", "Generated by", or similar trailers
+Use one short, specific, single-line message in the repository’s style. If no style is clear, use a lowercase imperative message without a trailing period or attribution trailers.
 
 ```bash
 git commit -m "<message>"
 ```
 
-Do not push. Do not create additional commits. The task is done after the single commit.
+Do not create follow-up commits or push the branch.

@@ -38,6 +38,7 @@ let
     "$HOME/.config/direnv"
     "$HOME/.local/share/direnv"
     "$HOME/.config/git"
+    "$HOME/.local/share/gh/extensions"
   ];
 
   roFiles = [ "$HOME/.config/gh/config.yml" ];

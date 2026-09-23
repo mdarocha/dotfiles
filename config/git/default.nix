@@ -6,11 +6,7 @@
 }:
 
 {
-  config.programs.gh = {
-    enable = lib.mkDefault true;
-    # gh credential helper is enabled by default, which
-    # sets up git to use `gh auth git-credential` for HTTPS auth
-  };
+  imports = [ ./gh.nix ];
 
   config.programs.git = {
     enable = lib.mkDefault true;
