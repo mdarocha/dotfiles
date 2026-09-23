@@ -140,11 +140,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790080548,
-        "narHash": "sha256-u4sa7RCbwvk8cZmAGs35F7o0h4IqDc3wsrrnjQvMumk=",
+        "lastModified": 1790128814,
+        "narHash": "sha256-6Gm9q+wW3E4Ey4F6wEbJAwaMsEK6hvCYfTW7yY64ZfA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "cbcbfa2778e0c5653ef349df3ebae8288efac3c0",
+        "rev": "0b2f1129177f70c5f0f5d88bb53c49ca47d0bfc0",
         "type": "github"
       },
       "original": {
@@ -181,11 +181,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1790097444,
-        "narHash": "sha256-Ib+t0TrdQY3vdhdCwby4o7XTVKrfQWu006oIrEq74zA=",
+        "lastModified": 1790136910,
+        "narHash": "sha256-Ho5xXKbluCp1lmvUkVwrN76fUW1NC3RARdNaFMGpEcY=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "dad23d43e328a9bc2e6f86c1c04630fd19a8be9e",
+        "rev": "3a78485c5ec8c10ec53915410c724a4492cea4bb",
         "type": "github"
       },
       "original": {
@@ -249,11 +249,11 @@
     "oh-my-zsh": {
       "flake": false,
       "locked": {
-        "lastModified": 1790091975,
-        "narHash": "sha256-vMHjXmMtVmlEU3kEI2YUCT4381ImHdl227ytqbp1Hfk=",
+        "lastModified": 1790125050,
+        "narHash": "sha256-ZC69pI5AV1QZcn1pAvfx4N9UuOjjYzz7wCNnCta6gNY=",
         "owner": "ohmyzsh",
         "repo": "ohmyzsh",
-        "rev": "40bddc3c1a100feafccb01403f74c1d4e7380380",
+        "rev": "74965c96098134b192f00084f966b4b02438a739",
         "type": "github"
       },
       "original": {
