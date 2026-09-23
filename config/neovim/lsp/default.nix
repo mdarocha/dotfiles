@@ -113,20 +113,20 @@
     {
       mode = "n";
       key = "gd";
-      action.__raw = "vim.lsp.buf.definition";
+      action.__raw = "function() Snacks.picker.lsp_definitions() end";
       options.desc = "Go to definition";
     }
     # Shares a prefix with Neovim's grn/gra/gri/grr, so it waits for 'timeoutlen'.
     {
       mode = "n";
       key = "gr";
-      action.__raw = "vim.lsp.buf.references";
+      action.__raw = "function() Snacks.picker.lsp_references() end";
       options.desc = "References";
     }
     {
       mode = "n";
       key = "<C-]>";
-      action.__raw = "vim.lsp.buf.implementation";
+      action.__raw = "function() Snacks.picker.lsp_implementations() end";
       options.desc = "Go to implementation";
     }
     {
@@ -140,6 +140,31 @@
       key = "\\r";
       action.__raw = "vim.lsp.buf.rename";
       options.desc = "Rename symbol";
+    }
+    # Override Neovim's quickfix-based LSP lookups.
+    {
+      mode = "n";
+      key = "grr";
+      action.__raw = "function() Snacks.picker.lsp_references() end";
+      options.desc = "References";
+    }
+    {
+      mode = "n";
+      key = "gri";
+      action.__raw = "function() Snacks.picker.lsp_implementations() end";
+      options.desc = "Go to implementation";
+    }
+    {
+      mode = "n";
+      key = "grt";
+      action.__raw = "function() Snacks.picker.lsp_type_definitions() end";
+      options.desc = "Go to type definition";
+    }
+    {
+      mode = "n";
+      key = "gO";
+      action.__raw = "function() Snacks.picker.lsp_symbols() end";
+      options.desc = "Document symbols";
     }
   ];
 

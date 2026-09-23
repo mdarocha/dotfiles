@@ -94,9 +94,6 @@ in
     ghostscript
     tectonic
     mermaid-cli
-
-    # System trash for Snacks.explorer deletions.
-    trash-cli
   ];
 
   keymaps = [

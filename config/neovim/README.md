@@ -109,10 +109,18 @@ New splits open right and below.
 | `gd` | Go to definition |
 | `gr` | List references (waits `timeoutlen`: shares a prefix with `grn`, `gra`, `gri`, `grr`) |
 | `<C-]>` | Go to implementation |
+| `grr` | List references |
+| `gri` | Go to implementation |
+| `grt` | Go to type definition |
+| `gO` | Document symbols |
 | `K`, `<C-k>` | Diagnostics on the current line, otherwise hover documentation |
 | `<C-k>` (Insert) | Signature help |
 | `<A-CR>` | Code actions |
 | `<leader>r` | Rename symbol |
+
+LSP lookups (`gd`, `gr`, `<C-]>`, `grr`, `gri`, `grt`, `gO`, and
+`:VtsSourceDefinition`) jump to a single result or open a snacks.nvim picker for
+several results.
 
 ### Completion and Copilot
 

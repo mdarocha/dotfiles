@@ -27,5 +27,20 @@ vim.api.nvim_create_user_command("VtsSourceDefinition", function()
     client:exec_cmd({
         command = "typescript.goToSourceDefinition",
         arguments = { vim.uri_from_bufnr(0), position },
-    }, { bufnr = 0 })
+    }, { bufnr = 0 }, function(err, result)
+        if err then
+            vim.notify("vtsls: " .. err.message, vim.log.levels.ERROR)
+            return
+        end
+        local items = vim.tbl_map(function(loc)
+            return { file = loc.filename, pos = { loc.lnum, loc.col - 1 }, line = loc.text }
+        end, vim.lsp.util.locations_to_items(result or {}, client.offset_encoding))
+        Snacks.picker.pick({
+            title = "Source Definitions",
+            items = items,
+            format = "file",
+            auto_confirm = true,
+            jump = { tagstack = true, reuse_win = true },
+        })
+    end)
 end, { desc = "vtsls: go to source definition" })
