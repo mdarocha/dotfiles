@@ -25,7 +25,7 @@
     fallbackChains = {
       "anthropic/claude-sonnet-5" = [ "openai-codex/gpt-5.6-terra" ];
       "openai-codex/gpt-5.6-luna" = [ "anthropic/claude-haiku-4-5" ];
-      "anthropic/claude-opus-5" = [ "openai-codex/gpt-5.6-sol" ];
+      "anthropic/claude-opus-5-5" = [ "openai-codex/gpt-6-sol" ];
       web = [
         "google/gemini-2.5-flash"
         "google-antigravity/gemini-2.5-flash"
