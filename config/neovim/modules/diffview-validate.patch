@@ -1,0 +1,98 @@
+--- a/lua/diffview/ui/panel.lua	2026-09-23 08:18:46.042009782 +0000
++++ b/lua/diffview/ui/panel.lua	2026-09-23 08:18:46.053902955 +0000
+@@ -154,60 +154,52 @@
+   local default_config = self:get_default_config(config.type)
+   config = vim.tbl_deep_extend("force", default_config, config or {}) --[[@as table ]]
+ 
+-  local function valid_enum(arg, values, optional)
+-    return {
+-      arg,
+-      function(v) return (optional and v == nil) or vim.tbl_contains(values, v) end,
+-      table.concat(vim.tbl_map(function(v) return ([['%s']]):format(v) end, values), "|"),
+-    }
++  -- vim.validate's table-spec form is deprecated (:h deprecated-0.11); no upstream issue tracks this.
++  local function valid_enum(name, arg, values, optional)
++    local msg = table.concat(vim.tbl_map(function(v) return ([['%s']]):format(v) end, values), "|")
++    vim.validate(name, arg, function(v)
++      return (optional and v == nil) or vim.tbl_contains(values, v)
++    end, false, msg)
+   end
+ 
+-  vim.validate({ type = valid_enum(config.type, { "split", "float" }) })
++  valid_enum("type", config.type, { "split", "float" })
+ 
+   if config.type == "split" then
+     ---@cast config PanelSplitSpec
+     self.state.form = vim.tbl_contains({ "top", "bottom" }, config.position) and "row" or "column"
+ 
+-    vim.validate({
+-      position = valid_enum(config.position, { "left", "top", "right", "bottom" }),
+-      relative = valid_enum(config.relative, { "editor", "win" }),
+-      width = { config.width, "number", true },
+-      height = { config.height, "number", true },
+-      win_opts = { config.win_opts, "table" }
+-    })
++    valid_enum("position", config.position, { "left", "top", "right", "bottom" })
++    valid_enum("relative", config.relative, { "editor", "win" })
++    vim.validate("width", config.width, "number", true)
++    vim.validate("height", config.height, "number", true)
++    vim.validate("win_opts", config.win_opts, "table")
+   else
+     ---@cast config PanelFloatSpec
+     local border = { "none", "single", "double", "rounded", "solid", "shadow" }
+ 
+-    vim.validate({
+-      relative = valid_enum(config.relative, { "editor", "win", "cursor" }),
+-      win = { config.win, "n", true },
+-      anchor = valid_enum(config.anchor, { "NW", "NE", "SW", "SE" }, true),
+-      width = { config.width, "n", false },
+-      height = { config.height, "n", false },
+-      row = { config.row, "n", false },
+-      col = { config.col, "n", false },
+-      zindex = { config.zindex, "n", true },
+-      style = valid_enum(config.style, { "minimal" }, true),
+-      win_opts = { config.win_opts, "table" },
+-      border = {
+-        config.border,
+-        function(v)
+-          if v == nil then return true end
+-
+-          if type(v) == "table" then
+-            return #v >= 2
+-          end
+-
+-          return vim.tbl_contains(border, v)
+-        end,
+-        ("%s or a list of length >=2"):format(
+-          table.concat(vim.tbl_map(function(v)
+-            return ([['%s']]):format(v)
+-          end, border), "|")
+-        )
+-      },
+-    })
++    valid_enum("relative", config.relative, { "editor", "win", "cursor" })
++    vim.validate("win", config.win, "number", true)
++    valid_enum("anchor", config.anchor, { "NW", "NE", "SW", "SE" }, true)
++    vim.validate("width", config.width, "number", false)
++    vim.validate("height", config.height, "number", false)
++    vim.validate("row", config.row, "number", false)
++    vim.validate("col", config.col, "number", false)
++    vim.validate("zindex", config.zindex, "number", true)
++    valid_enum("style", config.style, { "minimal" }, true)
++    vim.validate("win_opts", config.win_opts, "table")
++    vim.validate("border", config.border, function(v)
++      if v == nil then return true end
++
++      if type(v) == "table" then
++        return #v >= 2
++      end
++
++      return vim.tbl_contains(border, v)
++    end, false, ("%s or a list of length >=2"):format(
++      table.concat(vim.tbl_map(function(v)
++        return ([['%s']]):format(v)
++      end, border), "|")
++    ))
+   end
+ 
+   return config

@@ -35,7 +35,10 @@ in
     programs.zsh = {
       enable = true;
 
-      autosuggestion.enable = true;
+      autosuggestion = {
+        enable = true;
+        highlight = "fg=#586e75";
+      };
       historySubstringSearch.enable = true;
       enableVteIntegration = true;
 

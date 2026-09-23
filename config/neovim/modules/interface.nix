@@ -1,3 +1,4 @@
+{ pkgs }:
 {
   plugins = {
     web-devicons.enable = true;
@@ -9,7 +10,7 @@
         bigfile.enabled = true;
         notifier = {
           enabled = true;
-          style = "minimal";
+          style = "compact";
           timeout = 2500;
           padding = true;
           filter.__raw = ''
@@ -33,6 +34,8 @@
         picker = {
           enabled = true;
           ui_select = true;
+          # ffi.load("sqlite3") has no RPATH; point it at Nix's build.
+          db.sqlite3_path = "${pkgs.sqlite.out}/lib/libsqlite3.so";
         };
         terminal = {
           enabled = true;
@@ -60,12 +63,9 @@
           normal_hl = "NormalFloat";
           winblend = 0;
           border = "rounded";
+          border_hl = "FloatBorder";
           max_width = 52;
           max_height = 8;
-          avoid = [
-            "NvimTree"
-            "aerial"
-          ];
         };
       };
     };
@@ -400,7 +400,10 @@
         diagnostics = "nvim_lsp";
         separator_style = "thin";
         indicator.style = "underline";
-        tab_size = 16;
+        tab_size = 18;
+        truncate_names = false;
+        # bufferline only skips truncation once a name is at least max_name_length long, so keep it low
+        max_name_length = 1;
         offsets = [
           {
             filetype = "NvimTree";
@@ -436,6 +439,21 @@
         right_mouse_command = "bdelete %d";
         middle_mouse_command = "bdelete %d";
       };
+      # Devicon *Selected/Visible highlights (BufferLineDevIcon<Ft>Selected, etc.) are generated
+      # by bufferline from this table, not from the `hl.BufferLine*` groups in ui.lua, so the
+      # panel/bg/blue-underline accent has to be repeated here to keep file icons in sync.
+      settings.highlights.__raw = ''
+        function(defaults)
+          if require("solarized-osaka.config").is_light() then
+            return {}
+          end
+          return {
+            background = { bg = "#073642" },
+            buffer_visible = { bg = "#073642" },
+            buffer_selected = { bg = "#002b36", sp = "#268bd3", underline = true },
+          }
+        end
+      '';
     };
 
     # Skip scratch panes on save so restored sessions contain real files.

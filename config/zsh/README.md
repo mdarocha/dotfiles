@@ -23,7 +23,8 @@ and the last command run — nothing to enable, it's always on.
 Turned on beyond Home Manager's own zsh defaults:
 
 - Autosuggestion — ghost-text completion from history as you type; accept
-  with → or `End`.
+  with → or `End`. Shown in fixed Solarized base01 so it stays dimmer than typed
+  text in every terminal.
 - History substring search — type a prefix, then ↑/↓ cycles only history
   entries matching that prefix (bound to the standard arrow keys).
 - `vanilli.sh` additionally sets `auto_cd` (typing a bare directory name

@@ -13,6 +13,9 @@
   vimAlias = true;
   defaultEditor = true;
 
+  # Ruby provider is unused and its healthcheck needs network access; disable it.
+  withRuby = false;
+
   nixpkgs.useGlobalPackages = true;
 
   globals = {
@@ -26,8 +29,29 @@
     ripgrep
     fd
 
+    # Clipboard provider for the unnamedplus register on Wayland.
+    wl-clipboard
+
     # Converts images for snacks.image display.
     imagemagick
+
+    # PDF, LaTeX, and Mermaid rendering for snacks.image.
+    ghostscript
+    tectonic
+    mermaid-cli
+
+    # System trash for Snacks.explorer deletions.
+    trash-cli
+
+    # Snacks.lazygit backend; the lazygit.nvim module itself stays disabled.
+    lazygit
+
+    # vim.ui.open's fallback opener outside WSL.
+    xdg-utils
+
+    # nvim-treesitter's own :TSInstall path, unused here but silences its healthcheck.
+    tree-sitter
+    gnutar
 
     # PATH-resolved language servers: roslyn.nvim starts roslyn-ls; vtsls
     # and Copilot run on node.
@@ -40,7 +64,7 @@
     rustfmt
 
     # MSBuild for roslyn-ls; dotnet test for neotest-dotnet.
-    dotnet-sdk
+    dotnet-sdk_10
 
     # nvim-dap adapters; lldb provides lldb-dap for Rust.
     netcoredbg
@@ -58,7 +82,6 @@
   extraPlugins = with pkgs.vimPlugins; [
     solarized-osaka-nvim
     roslyn-nvim
-    jupytext-nvim
   ];
 
   # This prelude runs before the inlined Lua files; nvim-tree takes over netrw.

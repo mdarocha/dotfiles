@@ -12,6 +12,19 @@ vim.opt.mousescroll = "ver:1,hor:1"
 vim.opt.textwidth = 120
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
+vim.opt.clipboard = "unnamedplus"
+-- WSLg's wl-copy doesn't reliably reach the Windows clipboard; use `:h clipboard-wsl`.
+if vim.fn.has("wsl") == 1 then
+  local paste = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))'
+  vim.g.clipboard = {
+    name = "WslClipboard",
+    copy = { ["+"] = "clip.exe", ["*"] = "clip.exe" },
+    paste = { ["+"] = paste, ["*"] = paste },
+    cache_enabled = 0,
+  }
+end
+-- auto-session needs localoptions to restore filetype and highlighting.
+vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
 -- File buffers switch between absolute and relative numbers; panes keep their own gutters.
 local function set_editor_numbers()

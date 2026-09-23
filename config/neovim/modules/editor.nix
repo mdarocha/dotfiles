@@ -15,16 +15,22 @@
         html
         javascript
         json
+        latex
         lua
         markdown
         markdown_inline
         nix
         python
+        regex
         rust
+        scss
+        svelte
         tsx
         typescript
+        typst
         vim
         vimdoc
+        vue
         xml
         yaml
         zig
@@ -39,8 +45,15 @@
       enable = true;
       settings = {
         # Arrow keys keep their usual behavior when completion is closed.
+        # Tab accepts the menu; <C-y> belongs to Copilot alone.
         keymap = {
           preset = "default";
+          "<Tab>" = [
+            "select_and_accept"
+            "snippet_forward"
+            "fallback"
+          ];
+          "<C-y>" = false;
           "<Up>" = [
             "select_prev"
             "fallback"
@@ -108,8 +121,21 @@
         html.enable = true;
         cssls.enable = true;
         jsonls.enable = true;
-        yamlls.enable = true;
-        lemminx.enable = true;
+        yamlls = {
+          enable = true;
+          # lspconfig's dotted defaults never occur; ftdetect only sets plain "yaml".
+          filetypes = [ "yaml" ];
+        };
+        lemminx = {
+          enable = true;
+          # "xsl" is lspconfig's default but Neovim's ftdetect names .xsl files "xslt".
+          filetypes = [
+            "xml"
+            "xsd"
+            "xslt"
+            "svg"
+          ];
+        };
         zls.enable = true;
       };
     };

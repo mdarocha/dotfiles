@@ -17,7 +17,10 @@
         suggestion = {
           enabled = true;
           auto_trigger = true;
-          hide_during_completion = true;
+          # Ghost text stays visible over the completion menu so <C-y> can take it.
+          hide_during_completion = false;
+          # Without a visible suggestion, <C-y> passes through instead of requesting one.
+          trigger_on_accept = false;
           keymap = {
             accept = "<C-y>";
             dismiss = "<C-]>";
@@ -221,19 +224,6 @@
       action.__raw = "function() Snacks.picker.grep() end";
       options.desc = "Search all files";
     }
-    # BufferLine displays buffers, so gt/gT cycle files rather than Vim tab pages.
-    {
-      mode = "n";
-      key = "gt";
-      action = "<cmd>BufferLineCycleNext<CR>";
-      options.desc = "Next buffer tab";
-    }
-    {
-      mode = "n";
-      key = "gT";
-      action = "<cmd>BufferLineCyclePrev<CR>";
-      options.desc = "Previous buffer tab";
-    }
     {
       mode = "n";
       key = "<leader>bd";
@@ -256,6 +246,12 @@
     {
       mode = "n";
       key = "<leader>sf";
+      action.__raw = "function() Snacks.picker.files() end";
+      options.desc = "Find files";
+    }
+    {
+      mode = "n";
+      key = "<C-p>";
       action.__raw = "function() Snacks.picker.files() end";
       options.desc = "Find files";
     }

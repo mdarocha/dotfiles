@@ -38,7 +38,9 @@ for a brief server-list notification. [fidget.nvim](https://github.com/j-hui/fid
 displays server progress and messages in floating notifications.
 
 `vim`, `$EDITOR`, and `$VISUAL` resolve to this configured Neovim. Line numbers
-are absolute in Normal mode and relative in other editing modes.
+are absolute in Normal mode and relative in other editing modes. Yank and put
+use the system clipboard: `wl-copy`/`wl-paste` on Wayland, `clip.exe` and
+PowerShell on WSL.
 
 ### Explorer
 
@@ -62,7 +64,7 @@ beside affected files, not in a separate gutter or on every parent directory.
 | `<A-b>` or ``<C-`>`` | Toggle the bottom terminal |
 | `<A-c>` | Toggle the centered editing layout |
 | `g/` | Search across the project |
-| `<leader>sf` | Find files |
+| `<C-p>`, `<leader>sf` | Find files |
 | `<leader>sg` | Search file contents |
 | `<leader>sb` | List buffers |
 | `<leader>sS` | Find workspace symbols |
@@ -75,7 +77,9 @@ Terminals always open in a bottom split.
 
 Every open file buffer appears in the tab bar; utility panes stay out of it. Click
 a buffer to focus it or its close icon to close it. `gt` and `gT` cycle the
-displayed buffers. `:bnext` and `:bprevious` also work.
+displayed buffers from any window, including the explorer, outline, terminal, or
+a help/quickfix split; they jump back to a file window first if needed.
+`:bnext` and `:bprevious` also work from a file window.
 
 | Key | Action |
 | --- | --- |
@@ -104,8 +108,9 @@ New splits open to the right and below.
 mode with Ghostty's `#002b36` canvas and `#073642` panels.
 `:colorscheme solarized-osaka-light` selects its light variant.
 
-`snacks.image` displays linked images and math in terminals that support the
-Kitty Graphics Protocol; the source stays visible elsewhere.
+`snacks.image` displays linked images, math, PDFs, and Mermaid diagrams in
+terminals that support the Kitty Graphics Protocol; the source stays visible
+elsewhere.
 
 ## Language support
 
@@ -222,8 +227,11 @@ current Git repository. Outside a Git repository, the command displays a
 notification and stops.
 
 [copilot.lua](https://github.com/zbirenbaum/copilot.lua) provides inline
-suggestions. Run `:Copilot auth` once to authenticate. `<C-y>` accepts a
-suggestion; `Tab` keeps its normal completion and indentation behavior.
+suggestions. Run `:Copilot auth` once to authenticate. `<C-y>` accepts a visible
+Copilot suggestion, even with the completion menu open; otherwise it keeps Vim's
+default of copying the character above the cursor.
+`Tab` accepts the completion menu entry; without a menu it jumps to the next
+snippet field or indents.
 
 ## Files
 
@@ -236,6 +244,8 @@ suggestion; `Tab` keeps its normal completion and indentation behavior.
   presentation.
 - `modules/workflow.nix` configures Git, notebooks, Copilot, debugging, tests,
   and keymaps.
+- `modules/patches.nix` patches snacks.nvim, lualine.nvim, diffview.nvim, and
+  jupytext.nvim at build time to drop deprecated Neovim API calls.
 - `lua/options.lua` contains editor options, filetype indentation, and
   autosave-on-focus-change.
 - `lua/ui.lua` loads Solarized Osaka without local highlight overrides.

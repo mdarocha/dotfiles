@@ -17,6 +17,14 @@ let
       jupyter-client
       ipykernel
       debugpy
+
+      # Molten's optional output renderers (SVG, LaTeX, plots, clipboard).
+      cairosvg
+      pnglatex
+      plotly
+      kaleido
+      pyperclip
+      pillow
     ]
   );
   jupytextCli = pkgs.python3.withPackages (ps: [ ps.jupytext ]);
@@ -60,10 +68,11 @@ in
           ;
       })
       (import ./modules/editor.nix { inherit config; })
-      (import ./modules/interface.nix)
+      (import ./modules/interface.nix { inherit pkgs; })
       (import ./modules/workflow.nix {
         inherit pkgs pythonEnv bottomTerminal;
       })
+      (import ./modules/patches.nix { inherit pkgs; })
     ];
   };
 }
