@@ -145,6 +145,10 @@ are disabled.
 | `<A-CR>` | Show code actions |
 | `\r` | Rename the symbol under the cursor |
 
+LSP lookups, including Neovim's built-in `grr`, `gri`, `grt`, `gO`, and
+`:VtsSourceDefinition`, open a [snacks.nvim](https://github.com/folke/snacks.nvim)
+picker for several results and jump directly to a single one.
+
 `gr` shares a prefix with Neovim's built-in `grn`, `gra`, `gri`, and `grr`
 mappings, so it waits for `timeoutlen` before listing references. Those
 built-ins still work.

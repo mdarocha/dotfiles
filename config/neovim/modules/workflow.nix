@@ -194,10 +194,11 @@
       action.__raw = "vim.lsp.buf.code_action";
       options.desc = "Code actions";
     }
+    # Snacks jumps directly on a single result and opens the picker for several.
     {
       mode = "n";
       key = "<C-]>";
-      action.__raw = "vim.lsp.buf.implementation";
+      action.__raw = "function() Snacks.picker.lsp_implementations() end";
       options.desc = "Go to implementation";
     }
     {
@@ -209,14 +210,39 @@
     {
       mode = "n";
       key = "gr";
-      action.__raw = "vim.lsp.buf.references";
+      action.__raw = "function() Snacks.picker.lsp_references() end";
       options.desc = "References";
     }
     {
       mode = "n";
       key = "gd";
-      action.__raw = "vim.lsp.buf.definition";
+      action.__raw = "function() Snacks.picker.lsp_definitions() end";
       options.desc = "Go to definition";
+    }
+    # Override Neovim's quickfix-based LSP defaults.
+    {
+      mode = "n";
+      key = "grr";
+      action.__raw = "function() Snacks.picker.lsp_references() end";
+      options.desc = "References";
+    }
+    {
+      mode = "n";
+      key = "gri";
+      action.__raw = "function() Snacks.picker.lsp_implementations() end";
+      options.desc = "Go to implementation";
+    }
+    {
+      mode = "n";
+      key = "grt";
+      action.__raw = "function() Snacks.picker.lsp_type_definitions() end";
+      options.desc = "Go to type definition";
+    }
+    {
+      mode = "n";
+      key = "gO";
+      action.__raw = "function() Snacks.picker.lsp_symbols() end";
+      options.desc = "Document symbols";
     }
     {
       mode = "n";
