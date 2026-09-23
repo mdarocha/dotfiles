@@ -1,3 +1,7 @@
+# Home Manager entry point for the Neovim workbench. nixvim builds Neovim from
+# the feature modules below; each subdirectory is a nixvim module that owns one
+# feature's plugins, packages, keymaps, and Lua. Modules add tools through
+# extraPackagesAfter so project direnv tools take precedence on PATH.
 {
   config,
   pkgs,
@@ -10,7 +14,8 @@ let
 
   cfg = config.mdarocha.neovim;
 
-  # One Python runtime serves Neovim's provider, Molten, and the debug adapter.
+  # One Python runtime serves Neovim's provider (core), Molten's kernel
+  # (notebook), and the debugpy adapter (debug).
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
       pynvim
@@ -27,27 +32,6 @@ let
       pillow
     ]
   );
-  jupytextCli = pkgs.python3.withPackages (ps: [ ps.jupytext ]);
-
-  toolPaths = {
-    omp = "${config.mdarocha.llm-agents.oh-my-pi.package}/bin/omp";
-  };
-
-  # Terminal shortcuts share the same bottom split behavior.
-  bottomTerminal = ''
-    function()
-      Snacks.terminal(nil, { win = { position = "bottom" } })
-    end
-  '';
-
-  # These Lua files become one init script in this order.
-  luaModules = [
-    ./lua/options.lua
-    ./lua/ui.lua
-    ./lua/lsp.lua
-    ./lua/workbench.lua
-    ./lua/keymaps.lua
-  ];
 in
 {
   options.mdarocha.neovim = {
@@ -55,24 +39,31 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Keep packaging, language support, UI, and workflow settings separate.
-    programs.nixvim = lib.mkMerge [
-      (import ./modules/core.nix {
-        inherit
-          pkgs
-          lib
-          pythonEnv
-          jupytextCli
-          toolPaths
-          luaModules
-          ;
-      })
-      (import ./modules/editor.nix { inherit config; })
-      (import ./modules/interface.nix { inherit pkgs; })
-      (import ./modules/workflow.nix {
-        inherit pkgs pythonEnv bottomTerminal;
-      })
-      (import ./modules/patches.nix { inherit pkgs; })
-    ];
+    programs.nixvim = {
+      enable = true;
+
+      # Import order is the order of each module's Lua in init.lua.
+      imports = [
+        ./core
+        ./theme
+        ./snacks
+        ./filetree
+        ./outline
+        ./tabs
+        ./statusline
+        ./hints
+        ./session
+        ./treesitter
+        ./completion
+        ./lsp
+        ./copilot
+        ./git
+        ./notebook
+        ./debug
+        ./test
+      ];
+
+      _module.args = { inherit pythonEnv; };
+    };
   };
 }

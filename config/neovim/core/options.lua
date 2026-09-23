@@ -23,8 +23,6 @@ if vim.fn.has("wsl") == 1 then
     cache_enabled = 0,
   }
 end
--- auto-session needs localoptions to restore filetype and highlighting.
-vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
 -- File buffers switch between absolute and relative numbers; panes keep their own gutters.
 local function set_editor_numbers()
