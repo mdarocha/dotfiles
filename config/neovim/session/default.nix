@@ -4,15 +4,14 @@
   # auto-session needs localoptions to restore filetype and highlighting.
   opts.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions";
 
-  # Skip scratch panes on save so restored sessions contain real files.
+  # Skip scratch panes on save so restored sessions contain real files. The dashboard
+  # isn't bypassed, so quitting with every buffer closed deletes the session.
   plugins.auto-session = {
     enable = true;
     settings = {
-      auto_restore_last_session = true;
       bypass_save_filetypes = [
         "NvimTree"
         "aerial"
-        "snacks_dashboard"
         "snacks_terminal"
         "prompt"
         "help"

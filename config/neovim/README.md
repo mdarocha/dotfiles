@@ -28,8 +28,8 @@ plugins, external tools, keymaps, and Lua.
 | --- | --- |
 | `core/` | Aliases, leader keys, Python provider, clipboard, editor options, autosave |
 | `theme/` | Solarized Osaka, highlight overrides, file icons, float borders |
-| `snacks/` | [snacks.nvim](https://github.com/folke/snacks.nvim): pickers, terminal, notifications, images, Zen mode |
-| `filetree/` | [nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) explorer (left) |
+| `snacks/` | [snacks.nvim](https://github.com/folke/snacks.nvim): pickers, dashboard, terminal, notifications, images, Zen mode |
+| `filetree/` | [nvim-tree](https://github.com/nvim-tree/nvim-tree.lua) explorer (left) and the startup layout |
 | `outline/` | [Aerial](https://github.com/stevearc/aerial.nvim) symbol outline (right) |
 | `tabs/` | [bufferline](https://github.com/akinsho/bufferline.nvim) buffer tabs and `gt`/`gT` cycling |
 | `statusline/` | [lualine](https://github.com/nvim-lualine/lualine.nvim) |
@@ -82,6 +82,8 @@ Inside the explorer:
 | `H` | Toggle dotfiles (shown by default) |
 
 Diagnostics show beside the affected file, not on its parent directories.
+Editing a directory (`:e src/`) opens it in the explorer and leaves the current
+window alone.
 
 ### Buffer tabs and splits
 
@@ -90,6 +92,8 @@ Diagnostics show beside the affected file, not on its parent directories.
 | `gt` / `gT` | Next / previous buffer tab, from any window |
 | `<leader>bp` | Jump to a buffer by its letter |
 | `<leader>bd` | Close the current buffer |
+| `<leader>bo` | Close every other buffer |
+| `<leader>ba` | Close every buffer |
 | `<C-w>v` / `<C-w>s` | Split vertically / horizontally |
 | `<C-w>h/j/k/l` | Move to the split left / below / above / right |
 | `<C-w>H/J/K/L` | Move the split to that edge |
@@ -97,10 +101,22 @@ Diagnostics show beside the affected file, not on its parent directories.
 | `<C-w>_`, `<C-w>\|` | Maximize height / width |
 | `<C-w>c` / `<C-w>o` | Close this split / all other splits |
 
-The tab bar shows open file buffers only. Click a tab to focus it; click its
-icon, or right/middle-click it, to close it. When `gt` starts from the
-explorer, outline, terminal, help, or quickfix, it jumps to a file window first.
-New splits open right and below.
+Tabs in the bar are [buffers](https://neovim.io/doc/user/windows/#buffers).
+Picking one shows it in the current window; the buffer you left stays open
+[hidden](https://neovim.io/doc/user/windows/#hidden-buffer). Vim
+[tab pages](https://neovim.io/doc/user/tabpage/#tab-page) are separate window
+layouts; Diffview opens one. Click a tab to focus it; click its icon, or
+right/middle-click it, to close it. When `gt` starts from the explorer, outline,
+terminal, help, or quickfix, it jumps to a file window first. New splits open
+right and below.
+
+Closing a buffer from the tab bar or with `<leader>bd`, `<leader>bo`, or
+`<leader>ba` keeps its window, which switches to the previous buffer, or to the
+dashboard once none are left. Modified buffers ask to save first. Plain
+[`:bdelete`](https://neovim.io/doc/user/windows/#%3Abdelete) also closes the
+buffer's windows. When only sidebars remain, the last buffer (or the dashboard)
+reopens beside them, so the explorer never fills the screen. `:q` in the last
+editor window exits Neovim.
 
 ### Code
 
@@ -219,7 +235,8 @@ Formatting uses whatever the attached server supports. Inlay hints are off.
 | Autosave | Modified named files are written on focus loss or buffer leave |
 | Indentation | Spaces, 4 wide; 2 for JSON, YAML, XML, Nix, and Lua |
 | Whitespace | Tabs, trailing spaces, non-breaking spaces, and off-screen text show as dim Nerd Font glyphs |
-| Sessions | Saved per working directory and restored on start, falling back to the most recent; sidebars, terminals, and pickers are left out |
+| Startup | `vim`, `vim .`, and `vim <dir>` open the explorer beside the directory's saved session, or beside a dashboard of search keys and recent files; `vim <dir>` changes into `<dir>`. `vim <file>` opens only the file |
+| Sessions | Saved per working directory on exit and restored only in that directory; starting with file arguments skips both. Sidebars, terminals, and pickers are left out. Quitting with every buffer closed deletes the session |
 | Terminals | Always a bottom split |
 | Status line | Active Python environment and attached LSP server count; click the count to list servers |
 | Key hints | mini.clue lists `<leader>` continuations in the lower-right corner |

@@ -1,5 +1,5 @@
-# snacks.nvim: pickers, the bottom terminal, notifications, image previews,
-# Zen mode, indent guides, and the status column.
+# snacks.nvim: pickers, the dashboard, the bottom terminal, notifications, image
+# previews, Zen mode, indent guides, and the status column.
 { pkgs, ... }:
 let
   # Upstream hasn't fixed this deprecation; patch the plugin source at build time.
@@ -58,6 +58,58 @@ in
       statuscolumn.enabled = true;
       words.enabled = true;
       explorer.enabled = false;
+      # filetree/layout.lua opens it beside the tree; the built-in startup dashboard is full-screen.
+      dashboard = {
+        enabled = false;
+        preset.keys = [
+          {
+            icon = " ";
+            key = "f";
+            desc = "Find file";
+            action = ":lua Snacks.picker.files()";
+          }
+          {
+            icon = " ";
+            key = "g";
+            desc = "Search file contents";
+            action = ":lua Snacks.picker.grep()";
+          }
+          {
+            icon = " ";
+            key = "r";
+            desc = "Recent files";
+            action = ":lua Snacks.picker.recent({ filter = { cwd = true } })";
+          }
+          {
+            icon = " ";
+            key = "n";
+            desc = "New file";
+            action = ":enew | startinsert";
+          }
+          {
+            icon = " ";
+            key = "q";
+            desc = "Quit";
+            action = ":qa";
+          }
+        ];
+        sections = [
+          { section = "header"; }
+          {
+            section = "keys";
+            gap = 1;
+            padding = 1;
+          }
+          {
+            icon = " ";
+            title = "Recent files";
+            section = "recent_files";
+            cwd = true;
+            indent = 2;
+            padding = 1;
+          }
+        ];
+      };
       indent = {
         enabled = true;
         scope.enabled = false;

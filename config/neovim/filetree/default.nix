@@ -12,6 +12,8 @@
     enable = true;
     settings = {
       sync_root_with_cwd = true;
+      # layout.lua opens directories in the sidebar instead of the current window.
+      hijack_directories.enable = false;
       update_focused_file.enable = true;
       diagnostics = {
         enable = true;
@@ -97,4 +99,6 @@
       options.desc = "Toggle file explorer";
     }
   ];
+
+  extraConfigLua = builtins.readFile ./layout.lua;
 }

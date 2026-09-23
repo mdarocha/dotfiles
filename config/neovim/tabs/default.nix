@@ -43,11 +43,11 @@
       show_buffer_close_icons = true;
       show_close_icon = false;
       buffer_close_icon = "󰅖";
-      modified_icon = "●";
       left_mouse_command = "buffer %d";
-      close_command = "bdelete %d";
-      right_mouse_command = "bdelete %d";
-      middle_mouse_command = "bdelete %d";
+      # Snacks.bufdelete keeps the window open, so closing a tab never leaves a sidebar alone.
+      close_command.__raw = "function(bufnr) Snacks.bufdelete(bufnr) end";
+      right_mouse_command.__raw = "function(bufnr) Snacks.bufdelete(bufnr) end";
+      middle_mouse_command.__raw = "function(bufnr) Snacks.bufdelete(bufnr) end";
     };
     # Devicon *Selected/Visible highlights (BufferLineDevIcon<Ft>Selected, etc.) are generated
     # by bufferline from this table, not from the `hl.BufferLine*` groups in ui.lua, so the
@@ -70,8 +70,20 @@
     {
       mode = "n";
       key = "<leader>bd";
-      action = "<cmd>bdelete<CR>";
+      action.__raw = "function() Snacks.bufdelete() end";
       options.desc = "Close buffer";
+    }
+    {
+      mode = "n";
+      key = "<leader>bo";
+      action.__raw = "function() Snacks.bufdelete.other() end";
+      options.desc = "Close other buffers";
+    }
+    {
+      mode = "n";
+      key = "<leader>ba";
+      action.__raw = "function() Snacks.bufdelete.all() end";
+      options.desc = "Close all buffers";
     }
     {
       mode = "n";
