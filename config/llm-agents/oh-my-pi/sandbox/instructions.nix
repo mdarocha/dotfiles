@@ -1,17 +1,3 @@
-{
-  lib,
-  domainList,
-}:
+{ domainList }:
 
-let
-  render =
-    file: vars:
-    builtins.replaceStrings (map (name: "@${name}@") (lib.attrNames vars)) (lib.attrValues vars) (
-      builtins.readFile file
-    );
-in
-{
-  sandboxed = render ./instructions/sandboxed.md { domains = domainList; };
-
-  host = builtins.readFile ./instructions/host.md;
-}
+builtins.replaceStrings [ "@domains@" ] [ domainList ] (builtins.readFile ./instructions/sandboxed.md)

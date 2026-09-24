@@ -2,8 +2,7 @@ You are running without any sandboxing applied - full system access is available
 
 ## Host mode (no sandbox)
 
-These rules apply when running outside the sandbox, through the `omp-nosandbox`
-binary:
+These rules apply when running outside a sandbox:
 
 - **Network:** unrestricted. There is no filtering proxy and no domain allowlist,
   so every method reaches every host.

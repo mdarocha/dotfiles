@@ -9,7 +9,7 @@ scope: ["tool:bash", "tool:github"]
 interruptMode: never
 ---
 
-A commit message or PR title/body is prose the user reads. Before sending it, read
-`skill://humanizer` and check the text for the same tells that show up in docs: bold
+A commit message or PR title/body is prose the user reads. Before sending it, load
+the `humanizer` skill and check the text for the same tells that show up in docs: bold
 labels on every list item, a not-X-but-Y contrast, a staged summary paragraph, a stock
 AI word. Keep it plain and specific to what actually changed.

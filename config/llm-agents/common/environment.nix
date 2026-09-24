@@ -51,5 +51,11 @@ in
       default = instructions;
       description = "Toolset instructions describing `path`'s provisioned binaries and Python packages.";
     };
+
+    hostInstructions = mkOption {
+      type = types.str;
+      default = builtins.readFile ./environment/host.md;
+      description = "Instructions for agents running directly on the host, outside any sandbox.";
+    };
   };
 }

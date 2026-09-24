@@ -8,7 +8,7 @@ globs:
   - "*.{md,mdx,markdown,txt}"
 ---
 
-You just wrote or edited prose in a doc file. Before moving on, read `skill://humanizer`
+You just wrote or edited prose in a doc file. Before moving on, load the `humanizer` skill
 and run its process — mark the tells, draft the rewrite, check the draft, write the final
 version — over the lines you just added or changed in this file.
 

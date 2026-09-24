@@ -25,14 +25,6 @@ let
     )
   );
 
-  filesIn =
-    dir: suffix:
-    lib.mapAttrs' (file: _: lib.nameValuePair (lib.removeSuffix suffix file) (dir + "/${file}")) (
-      lib.filterAttrs (file: kind: kind == "regular" && lib.hasSuffix suffix file) (builtins.readDir dir)
-    );
-
-  rules = filesIn ./rules ".md";
-
   sandbox = import ./sandbox {
     inherit pkgs lib inputs;
     environment = cfg.environment;
@@ -111,8 +103,8 @@ in
         ".omp/agent/extensions/sandbox-instructions.ts".text = ''
           import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
-          const SANDBOX = ${builtins.toJSON sandbox.instructions.sandboxed};
-          const NO_SANDBOX = ${builtins.toJSON sandbox.instructions.host};
+          const SANDBOX = ${builtins.toJSON sandbox.instructions};
+          const NO_SANDBOX = ${builtins.toJSON cfg.environment.hostInstructions};
 
           export default function (pi: ExtensionAPI) {
             pi.setLabel("Sandbox Instructions");
@@ -134,7 +126,9 @@ in
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".omp/agent/skills/${name}" { source = dir; }
       ) cfg.skills)
-      (lib.mapAttrs' (name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }) rules)
+      (lib.mapAttrs' (
+        name: src: lib.nameValuePair ".omp/agent/rules/${name}.md" { source = src; }
+      ) cfg.rules)
     ];
 
     home.activation.ensureAgentSandboxDirs = lib.hm.dag.entryAfter [

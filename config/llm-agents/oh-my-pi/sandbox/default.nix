@@ -90,8 +90,5 @@ in
 
   inherit (paths) ensureDirs;
 
-  instructions = import ./instructions.nix {
-    inherit lib;
-    domainList = domains.markdownList;
-  };
+  instructions = import ./instructions.nix { domainList = domains.markdownList; };
 }

@@ -18,14 +18,14 @@ globs:
   - "{Makefile,Dockerfile,*.Dockerfile}"
 ---
 
-You added or changed a code comment. Re-read `AGENTS.md` § Comments and apply it
+You added or changed a code comment. Re-read § Comments in your global instructions and apply it
 to the comment prose in this edit. Preserve existing comments unless the change
 makes them false or redundant.
 
 Cut each comment to the shortest form that still reads clearly; one line by
 default. Drop lead-ins, restated code, and padding.
 
-Then read `skill://humanizer` and make another pass over that prose. Remove AI
+Then load the `humanizer` skill and make another pass over that prose. Remove AI
 writing tells without changing the technical meaning or deleting useful context.
 Do this now, in the same turn.
 

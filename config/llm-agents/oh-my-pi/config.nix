@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 {
   # appearance
   theme = {
@@ -23,7 +23,7 @@
   };
   retry = {
     fallbackChains = {
-      "anthropic/claude-sonnet-5" = [ "openai-codex/gpt-5.6-terra" ];
+      "anthropic/claude-sonnet-5" = [ "openai-codex/gpt-6-sol" ];
       "openai-codex/gpt-6-luna" = [ "anthropic/claude-haiku-4-5" ];
       "anthropic/claude-opus-5-5" = [ "openai-codex/gpt-6-sol" ];
       web = [
@@ -50,6 +50,7 @@
   treeFilterMode = "no-tools";
   doubleEscapeAction = "tree";
   startup.checkUpdate = false;
+  marketplace.autoUpdate = "off";
   autocompleteMaxVisible = 5;
   features.unexpectedStopDetection = "smart";
 
@@ -84,11 +85,10 @@
   };
   security.enabled = true;
   github.enabled = true;
-  dev.autoqa = false;
   generate_image.enabled = true;
   ttsr = {
-    repeatMode = "after-gap";
-    repeatGap = 5;
+    repeatMode = config.mdarocha.llm-agents.ruleRepeat.mode;
+    repeatGap = config.mdarocha.llm-agents.ruleRepeat.gap;
   };
 
   # tasks
@@ -110,13 +110,16 @@
   codexResets.autoRedeem = "yes";
 
   # composer
-  composer.shape = "box";
+  composer.shape = "claude";
 
   # shell
   bash.direnv = "auto";
 
-  # sharing
+  # sharing and omp.sh services
   share.store = "gist";
+  # The stream server can't be self-hosted; loopback keeps `omp stream` off omp.sh.
+  stream.serverUrl = "http://localhost";
+  dev.autoqa = false;
 
   # omp config audit decisions (see .omp/commands/omp-config-audit.md)
   # These comments are durable audit state; future runs must preserve them.
