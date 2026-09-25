@@ -1,6 +1,6 @@
 ---
 name: github
-description: Work with GitHub repositories, issues, pull requests, reviews, Actions, and stacked PRs. Use for GitHub resources, CI checks, `gh` commands, or requests to create, link, update, sync, or merge a PR stack.
+description: Work with GitHub repositories, issues, pull requests, attachments, reviews, Actions, and stacked PRs. Use for GitHub resources, CI checks, `gh` commands, or requests to create, link, update, sync, or merge a PR stack.
 user-invocable: false
 ---
 
@@ -27,6 +27,18 @@ gh issue create --title "Bug" --body "Reproduction and expected behavior"
 ```
 
 Honor the repository's worktree/branch convention when checking out a PR; don't replace the user's working tree merely to read it. For code search, use the available code-search tool; `gh search code "term" --repo owner/repo` also finds code in repositories accessible to your GitHub account.
+
+### Images and videos
+
+The dotfiles-managed `gh` supports `--attach` on `gh issue create/edit/comment` and `gh pr create/edit/comment`. Use it to upload images or videos directly to a body or comment; repeat the flag for multiple files (up to 50 per command). It does not accept arbitrary file types.
+
+```bash
+gh issue create --title "Login fails" --body 'Screenshot: ![error state](./login.png)' --attach ./login.png
+gh issue edit 123 --attach './after.png#Updated login screen'
+gh pr comment 123 --body "Before and after" --attach ./before.png --attach ./after.png
+```
+
+An attached file referenced in the body as `![alt](./login.png)` is rewritten to its uploaded URL and retains that alt text; otherwise the image or video is appended. Use `--attach './login.png#Descriptive alt text'` for an unreferenced image (the filename is the default alt text). Videos render as players and do not take alt text. `edit --attach` without `--body`/`--body-file` preserves the existing body and appends the asset; attach to one issue or PR at a time. On a partial upload failure, create/edit may still succeed remotely and print the URL while exiting nonzero: inspect the resource before retrying to avoid duplicates.
 
 `gh pr` has no review-thread resolution command. Query thread IDs first, then resolve only the requested thread:
 
