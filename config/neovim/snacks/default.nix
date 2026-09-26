@@ -111,7 +111,7 @@ in
         ];
       };
       indent = {
-        enabled = true;
+        enabled = false;
         scope.enabled = false;
         chunk.enabled = false;
       };
