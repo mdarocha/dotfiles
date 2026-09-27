@@ -31,4 +31,13 @@ final: prev: {
       '')
     ];
   });
+
+  # Neovim runs in a terminal, so its "Neovim wrapper" launcher entry is clutter.
+  wrapNeovimUnstable =
+    neovim: args:
+    (prev.wrapNeovimUnstable neovim args).overrideAttrs (old: {
+      postBuild = old.postBuild + ''
+        rm -r $out/share/applications
+      '';
+    });
 }
