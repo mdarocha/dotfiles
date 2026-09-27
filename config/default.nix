@@ -45,5 +45,6 @@
     pkgs.devenv
     pkgs.cachix
     pkgs.jq
+    pkgs.yq
   ];
 }
