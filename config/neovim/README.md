@@ -46,8 +46,8 @@ plugins, external tools, keymaps, and Lua.
 
 snacks.nvim, lualine, Diffview, and Jupytext are patched at build time to drop
 deprecated Neovim API calls; each patch lives in the module that uses the
-plugin and links its upstream issue. otter is patched to keep lines split by a
-Nix `${...}` interpolation intact.
+plugin and links its upstream issue. otter is patched so pickers receive its
+server's replies and a Nix `${...}` interpolation is blanked in embedded code.
 
 ## Keymaps
 
@@ -227,15 +227,17 @@ Formatting uses whatever the attached server supports. Inlay hints are off.
   `writeShellApplication`/`writeShellScript`/`runCommand`, `*Phase`, `script`,
   `shellHook`, Home Manager shell options and activation entries; Lua in
   nixvim's `extraConfigLua*`, `__raw`, and `mkRaw`; Python in `writePython*`
-  and `testScript`; any language after a `/* lang */` or `# lang` comment.
+  (including `writers.writePython3 "name" { … } ''…''`) and `testScript`; any
+  language after a `/* lang */` or `# lang` comment.
 - Bash, Lua, and Python in those strings also get their language server
   (diagnostics, hover, completion, go to definition, rename) through
   [otter](https://github.com/jmbuhr/otter.nvim). Languages added to a file after
   opening it attach on the next save.
 - A file's snippets in one language share a hidden buffer, so their server sees
-  one script. ShellCheck rules that misfire on `${...}` interpolations or on that
-  merged script (SC1090, SC2086, SC2093, SC2154, SC2296) are off there, and
-  LuaLS skips the parse errors from nixvim's bare-expression `__raw` values.
+  one script with every `${...}` blanked out. ShellCheck's SC2093 (`exec` in
+  that merged script) and SC2154 (`$out` and other Nix-set variables) are off
+  there, and LuaLS skips the parse errors from nixvim's bare-expression `__raw`
+  values.
 - Treesitter grammars are built by Nix and loaded from the store; nothing is
   compiled or downloaded at startup.
 - Debug launches for C# and Rust prompt for the executable, starting from
@@ -245,7 +247,7 @@ Formatting uses whatever the attached server supports. Inlay hints are off.
 
 | Topic | Behavior |
 | --- | --- |
-| Line numbers | Absolute in Normal mode, relative in other modes |
+| Line numbers | Absolute in Insert mode, relative in other modes |
 | Clipboard | System clipboard: `wl-copy`/`wl-paste` on Wayland, `clip.exe` and PowerShell on WSL |
 | Autosave | Modified named files are written on focus loss or buffer leave |
 | Indentation | Spaces, 4 wide; 2 for JSON, YAML, XML, Nix, and Lua. A project's `.editorconfig` overrides both |

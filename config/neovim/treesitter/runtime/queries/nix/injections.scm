@@ -51,3 +51,14 @@
   (#lua-match? @_func "dag%.entry%a+$")
   (#set! injection.language "bash")
   (#set! injection.combined))
+
+; pkgs.writers.writePython3 "name" { libraries = …; } ''…''; upstream only matches the two-argument form.
+(apply_expression
+  function: (apply_expression
+    function: (apply_expression
+      function: (_) @_func))
+  argument: (_
+    (string_fragment) @injection.content)
+  (#lua-match? @_func "writePy%a*%d*%a*$")
+  (#set! injection.language "python")
+  (#set! injection.combined))

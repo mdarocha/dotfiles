@@ -13,7 +13,14 @@ end
 for _, key in ipairs({ "K", "<C-k>" }) do
     vim.keymap.set("n", key, show_lsp_details, { desc = "Diagnostic or hover" })
 end
-vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, { desc = "Signature help" })
+-- Falls back to the digraph key when no attached server offers signature help.
+vim.keymap.set("i", "<C-k>", function()
+    if #vim.lsp.get_clients({ bufnr = 0, method = "textDocument/signatureHelp" }) == 0 then
+        return "<C-k>"
+    end
+    vim.lsp.buf.signature_help()
+    return ""
+end, { expr = true, desc = "Signature help" })
 
 -- LSP messages keep their server name; DEBUG logs stay below Fidget's INFO filter.
 local message_levels = {

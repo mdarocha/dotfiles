@@ -1,0 +1,23 @@
+--- a/lua/otter/lsp/init.lua	2026-09-27 11:46:21.955266888 +0000
++++ b/lua/otter/lsp/init.lua	2026-09-27 11:46:39.851912085 +0000
+@@ -200,6 +200,20 @@
+         is_closing = function() end,
+         terminate = function() end,
+       }
++      -- Callers (vim.lsp, Snacks pickers) track async replies by the returned request id.
++      local dispatch = members.request
++      local next_id = 0
++      members.request = function(method, params, handler, notify_reply_callback)
++        next_id = next_id + 1
++        local id = next_id
++        dispatch(method, params, function(err, result)
++          handler(err, result, id)
++          if notify_reply_callback then
++            notify_reply_callback(id)
++          end
++        end)
++        return true, id
++      end
+       return members
+     end,
+     init_options = {},

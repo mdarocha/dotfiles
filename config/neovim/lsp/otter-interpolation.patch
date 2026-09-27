@@ -1,6 +1,6 @@
---- a/lua/otter/keeper.lua	2026-09-27 09:49:03.338988277 +0000
-+++ b/lua/otter/keeper.lua	2026-09-27 09:49:15.277188386 +0000
-@@ -265,6 +265,27 @@
+--- a/lua/otter/keeper.lua	2026-09-27 11:46:21.919110442 +0000
++++ b/lua/otter/keeper.lua	2026-09-27 11:46:36.060752437 +0000
+@@ -265,6 +265,30 @@
            end
          end
          last.range.to = { chunk.range.to[1], chunk.range.to[2] }
@@ -11,7 +11,7 @@
 +        and chunk.range.from[1] == last.range.to[1]
 +        and chunk.range.from[2] > last.range.to[2]
 +      then
-+        -- Fill same-row gaps (e.g. Nix `${...}`) so columns match and the row isn't overwritten.
++        -- Fill same-row gaps so columns match; `${...}` becomes spaces the embedded parser accepts.
 +        local gap = api.nvim_buf_get_text(
 +          main_nr,
 +          last.range.to[1],
@@ -20,6 +20,9 @@
 +          chunk.range.from[2],
 +          {}
 +        )[1]
++        if gap:match("^%$%b{}$") then
++          gap = string.rep(" ", #gap)
++        end
 +        last.text[#last.text] = last.text[#last.text] .. gap .. (chunk.text[1] or "")
 +        for i = 2, #chunk.text do
 +          table.insert(last.text, chunk.text[i])

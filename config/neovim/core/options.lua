@@ -42,9 +42,9 @@ local function set_editor_numbers()
     return
   end
 
-  local normal = vim.fn.mode(1):sub(1, 1) == "n"
+  local insert = vim.fn.mode(1):sub(1, 1) == "i"
   vim.wo.number = true
-  vim.wo.relativenumber = not normal
+  vim.wo.relativenumber = not insert
 end
 
 vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter", "ModeChanged" }, {

@@ -3,9 +3,13 @@
 # and otter (servers for code embedded in Nix strings).
 { pkgs, lib, ... }:
 let
-  # Keeps embedded lines split by a Nix `${...}` intact (https://github.com/jmbuhr/otter.nvim/issues/285).
   patchedOtter = pkgs.vimPlugins.otter-nvim.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [ ./otter-interpolation.patch ];
+    patches = (old.patches or [ ]) ++ [
+      # Keeps embedded lines split by a Nix `${...}` intact (https://github.com/jmbuhr/otter.nvim/issues/285).
+      ./otter-interpolation.patch
+      # otter-ls returns no request id, so pickers finish before its replies arrive (no upstream issue).
+      ./otter-request-id.patch
+    ];
   });
 in
 {
@@ -89,8 +93,8 @@ in
         ];
         # One line each; embedded code starting on line 2 would overwrite the rest.
         buffers.preambles = {
-          # `${...}` trips SC1090/SC2086/SC2154/SC2296; SC2093 since a file's snippets share one script.
-          bash = [ "# shellcheck shell=bash disable=SC1090,SC2086,SC2093,SC2154,SC2296" ];
+          # SC2093: a file's snippets share one script; SC2154: Nix sets `$out` and similar.
+          bash = [ "# shellcheck shell=bash disable=SC2093,SC2154" ];
           # nixvim `__raw` values are bare expressions; closing `''` lines keep their indent.
           lua = [
             "---@diagnostic disable: miss-name, exp-in-action, unreachable-code, trailing-space"
