@@ -38,6 +38,14 @@
     languageRegister.json = "jsonc";
   };
 
+  # Extra Nix injections (nixvim Lua, Home Manager shell snippets) on top of nvim-treesitter's.
+  extraPlugins = [
+    (pkgs.vimUtils.buildVimPlugin {
+      name = "nix-injections";
+      src = ./runtime;
+    })
+  ];
+
   # nvim-treesitter's own :TSInstall path, unused here but silences its healthcheck.
   extraPackagesAfter = with pkgs; [
     tree-sitter

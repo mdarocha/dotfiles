@@ -1,0 +1,30 @@
+--- a/lua/otter/keeper.lua	2026-09-27 09:49:03.338988277 +0000
++++ b/lua/otter/keeper.lua	2026-09-27 09:49:15.277188386 +0000
+@@ -265,6 +265,27 @@
+           end
+         end
+         last.range.to = { chunk.range.to[1], chunk.range.to[2] }
++      elseif
++        last
++        and #last.text > 0
++        and last.range.to[2] > 0
++        and chunk.range.from[1] == last.range.to[1]
++        and chunk.range.from[2] > last.range.to[2]
++      then
++        -- Fill same-row gaps (e.g. Nix `${...}`) so columns match and the row isn't overwritten.
++        local gap = api.nvim_buf_get_text(
++          main_nr,
++          last.range.to[1],
++          last.range.to[2],
++          chunk.range.from[1],
++          chunk.range.from[2],
++          {}
++        )[1]
++        last.text[#last.text] = last.text[#last.text] .. gap .. (chunk.text[1] or "")
++        for i = 2, #chunk.text do
++          table.insert(last.text, chunk.text[i])
++        end
++        last.range.to = { chunk.range.to[1], chunk.range.to[2] }
+       else
+         table.insert(merged, chunk)
+       end

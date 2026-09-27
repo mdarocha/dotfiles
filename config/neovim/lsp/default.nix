@@ -1,6 +1,13 @@
 # Language servers and LSP keymaps, plus helpers: lazydev (Lua types), SchemaStore
-# (JSON/YAML schemas), roslyn.nvim (C#), vtsls commands, venv-selector, and fidget popups.
+# (JSON/YAML schemas), roslyn.nvim (C#), vtsls commands, venv-selector, fidget popups,
+# and otter (servers for code embedded in Nix strings).
 { pkgs, lib, ... }:
+let
+  # Keeps embedded lines split by a Nix `${...}` intact (https://github.com/jmbuhr/otter.nvim/issues/285).
+  patchedOtter = pkgs.vimPlugins.otter-nvim.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./otter-interpolation.patch ];
+  });
+in
 {
   plugins = {
     # nixvim registers the servers with Neovim's built-in LSP client.
@@ -23,6 +30,7 @@
             workspace.checkThirdParty = false;
           };
         };
+        bashls.enable = true;
         pyright.enable = true;
         rust_analyzer = {
           enable = true;
@@ -68,6 +76,29 @@
     # Pyright picks up the selected venv after a restart (lsp.lua).
     venv-selector.enable = true;
 
+    # Bash, Lua, and Python inside Nix strings reach their servers via hidden buffers (embedded.lua).
+    otter = {
+      enable = true;
+      package = patchedOtter;
+      autoActivate = false;
+      settings = {
+        lsp.diagnostic_update_events = [
+          "BufWritePost"
+          "InsertLeave"
+          "TextChanged"
+        ];
+        # One line each; embedded code starting on line 2 would overwrite the rest.
+        buffers.preambles = {
+          # `${...}` trips SC1090/SC2086/SC2154/SC2296; SC2093 since a file's snippets share one script.
+          bash = [ "# shellcheck shell=bash disable=SC1090,SC2086,SC2093,SC2154,SC2296" ];
+          # nixvim `__raw` values are bare expressions; closing `''` lines keep their indent.
+          lua = [
+            "---@diagnostic disable: miss-name, exp-in-action, unreachable-code, trailing-space"
+          ];
+        };
+      };
+    };
+
     # LSP messages share a small popup; chatty LuaLS progress is omitted.
     fidget = {
       enable = true;
@@ -104,6 +135,10 @@
     cargo
     rustc
     rustfmt
+
+    # bash-language-server lints with ShellCheck and formats with shfmt.
+    shellcheck
+    shfmt
 
     # Virtual environment search for venv-selector.
     fd
@@ -172,5 +207,6 @@
     ./lsp.lua
     ./roslyn.lua
     ./vtsls.lua
+    ./embedded.lua
   ];
 }

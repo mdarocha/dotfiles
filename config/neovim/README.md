@@ -35,9 +35,9 @@ plugins, external tools, keymaps, and Lua.
 | `statusline/` | [lualine](https://github.com/nvim-lualine/lualine.nvim) |
 | `hints/` | [mini.clue](https://github.com/echasnovski/mini.nvim) `<leader>` hints |
 | `session/` | [auto-session](https://github.com/rmagatti/auto-session) |
-| `treesitter/` | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) with Nix-built grammars |
+| `treesitter/` | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) with Nix-built grammars and extra Nix injections |
 | `completion/` | [blink.cmp](https://github.com/Saghen/blink.cmp) |
-| `lsp/` | Language servers, LSP keymaps, [fidget](https://github.com/j-hui/fidget.nvim), [venv-selector](https://github.com/linux-cultist/venv-selector.nvim) |
+| `lsp/` | Language servers, LSP keymaps, [fidget](https://github.com/j-hui/fidget.nvim), [venv-selector](https://github.com/linux-cultist/venv-selector.nvim), [otter](https://github.com/jmbuhr/otter.nvim) |
 | `copilot/` | [copilot.lua](https://github.com/zbirenbaum/copilot.lua) |
 | `git/` | [Fugitive](https://github.com/tpope/vim-fugitive), [Gitsigns](https://github.com/lewis6991/gitsigns.nvim), [Diffview](https://github.com/sindrets/diffview.nvim), `:OmpCommit` |
 | `notebook/` | [Molten](https://github.com/benlubas/molten-nvim) and [Jupytext](https://github.com/GCBallesteros/jupytext.nvim) |
@@ -46,7 +46,8 @@ plugins, external tools, keymaps, and Lua.
 
 snacks.nvim, lualine, Diffview, and Jupytext are patched at build time to drop
 deprecated Neovim API calls; each patch lives in the module that uses the
-plugin and links its upstream issue.
+plugin and links its upstream issue. otter is patched to keep lines split by a
+Nix `${...}` interpolation intact.
 
 ## Keymaps
 
@@ -209,6 +210,7 @@ Formatting uses whatever the attached server supports. Inlay hints are off.
 | --- | --- | --- | --- |
 | Nix | [`nil`](https://github.com/oxalica/nil), flake auto-archiving off | | |
 | Lua | [`lua-language-server`](https://github.com/LuaLS/lua-language-server) + [lazydev](https://github.com/folke/lazydev.nvim) for Neovim types | | |
+| Bash, sh | [`bash-language-server`](https://github.com/bash-lsp/bash-language-server) with [ShellCheck](https://www.shellcheck.net) and [shfmt](https://github.com/mvdan/sh) | | |
 | Python | [`pyright`](https://github.com/microsoft/pyright) | [`debugpy`](https://github.com/microsoft/debugpy) | [neotest-python](https://github.com/nvim-neotest/neotest-python) |
 | Rust | [`rust-analyzer`](https://rust-analyzer.github.io) (`cargo`, `rustc`, `rustfmt` on PATH) | `lldb-dap` from [LLVM](https://lldb.llvm.org) | [neotest-rust](https://github.com/rouge8/neotest-rust) |
 | C#, Razor | [`roslyn-ls`](https://github.com/dotnet/roslyn) via [roslyn.nvim](https://github.com/seblyng/roslyn.nvim) | [`netcoredbg`](https://github.com/Samsung/netcoredbg) | [neotest-dotnet](https://github.com/Issafalcon/neotest-dotnet) |
@@ -221,6 +223,19 @@ Formatting uses whatever the attached server supports. Inlay hints are off.
 - JSON and YAML get completion, validation, and hover from the
   [SchemaStore](https://www.schemastore.org) catalog via
   [SchemaStore.nvim](https://github.com/b0o/SchemaStore.nvim).
+- Code inside Nix strings is highlighted as its language: Bash in
+  `writeShellApplication`/`writeShellScript`/`runCommand`, `*Phase`, `script`,
+  `shellHook`, Home Manager shell options and activation entries; Lua in
+  nixvim's `extraConfigLua*`, `__raw`, and `mkRaw`; Python in `writePython*`
+  and `testScript`; any language after a `/* lang */` or `# lang` comment.
+- Bash, Lua, and Python in those strings also get their language server
+  (diagnostics, hover, completion, go to definition, rename) through
+  [otter](https://github.com/jmbuhr/otter.nvim). Languages added to a file after
+  opening it attach on the next save.
+- A file's snippets in one language share a hidden buffer, so their server sees
+  one script. ShellCheck rules that misfire on `${...}` interpolations or on that
+  merged script (SC1090, SC2086, SC2093, SC2154, SC2296) are off there, and
+  LuaLS skips the parse errors from nixvim's bare-expression `__raw` values.
 - Treesitter grammars are built by Nix and loaded from the store; nothing is
   compiled or downloaded at startup.
 - Debug launches for C# and Rust prompt for the executable, starting from
