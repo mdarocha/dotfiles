@@ -10,6 +10,7 @@ vim.opt.termguicolors = true
 vim.opt.mouse = "a"
 vim.opt.mousescroll = "ver:1,hor:1"
 vim.opt.textwidth = 120
+vim.opt.wrap = false
 vim.opt.expandtab = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
@@ -57,6 +58,15 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.bo.tabstop = 2
     vim.bo.shiftwidth = 2
+  end,
+})
+
+-- `linebreak` wraps at word boundaries instead of mid-word.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
   end,
 })
 

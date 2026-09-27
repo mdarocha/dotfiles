@@ -234,6 +234,7 @@ Formatting uses whatever the attached server supports. Inlay hints are off.
 | Clipboard | System clipboard: `wl-copy`/`wl-paste` on Wayland, `clip.exe` and PowerShell on WSL |
 | Autosave | Modified named files are written on focus loss or buffer leave |
 | Indentation | Spaces, 4 wide; 2 for JSON, YAML, XML, Nix, and Lua |
+| Wrapping | Off, except soft word wrap in Markdown |
 | Whitespace | Tabs, trailing spaces, non-breaking spaces, and off-screen text show as dim Nerd Font glyphs |
 | Startup | `vim`, `vim .`, and `vim <dir>` open the explorer beside the directory's saved session, or beside a dashboard of search keys and recent files; `vim <dir>` changes into `<dir>`. `vim <file>` opens only the file |
 | Sessions | Saved per working directory on exit and restored only in that directory; starting with file arguments skips both. Sidebars, terminals, and pickers are left out. Quitting with every buffer closed deletes the session |
