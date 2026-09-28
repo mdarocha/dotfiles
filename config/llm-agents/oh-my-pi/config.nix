@@ -108,7 +108,8 @@
   providers = {
     fetch = "native";
   };
-  codexResets.autoRedeem = "yes";
+  codexResets.autoRedeem = "unset";
+  claudeResets.autoRedeem = "unset";
 
   # composer
   composer.shape = "claude";
