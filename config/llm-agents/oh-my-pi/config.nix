@@ -19,26 +19,15 @@
   modelRoles = {
     tiny = "local/lfm2.5-230m:off";
     memory = "anthropic/claude-haiku-4-5";
-    web = "web/exa";
+    web = "web/hosted";
   };
   retry = {
     fallbackChains = {
       memory = [ "openai-codex/gpt-6-luna" ];
-      "anthropic/claude-sonnet-5" = [ "openai-codex/gpt-6-sol" ];
+      "anthropic/claude-sonnet-5-5" = [ "openai-codex/gpt-6-sol" ];
       "openai-codex/gpt-6-luna" = [ "anthropic/claude-haiku-4-5" ];
       "anthropic/claude-opus-5-5" = [ "openai-codex/gpt-6-sol" ];
-      web = [
-        "google/gemini-2.5-flash"
-        "google-antigravity/gemini-2.5-flash"
-        "openai-codex/gpt-6-luna"
-        "openai-codex/gpt-5.5"
-      ];
-      image = [
-        "openai-codex/gpt-image-1"
-        "openai/gpt-image-1"
-        "openrouter/google/gemini-3-pro-image-preview"
-        "google/gemini-3-pro-image-preview"
-      ];
+      web = [ "web/exa" ];
     };
     usageAwareFallback = true;
     usageReservePct = 5;
@@ -107,7 +96,9 @@
   # providers
   providers = {
     fetch = "native";
+    anthropic.slowMode = "auto";
   };
+  telemetry.otlpExportEnabled = false;
   codexResets.autoRedeem = "unset";
   claudeResets.autoRedeem = "unset";
 
