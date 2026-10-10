@@ -61,6 +61,23 @@
       "~/.mozilla/*"
       "~/.config/chromium/*"
       "~/.config/google-chrome/*"
+      "~/.thunderbird/*"
+      "~/.config/thunderbird/*"
+      "~/.config/evolution/*"
+      "~/.local/share/evolution/*"
+      "~/.config/goa-1.0/*"
+      "~/.config/github-copilot/*"
+      "~/.pulumi/credentials.json"
+      "~/.npmrc"
+      "~/.microsoft/usersecrets/*"
+      "~/.local/share/MicrosoftCredentialProvider/*"
+      "~/.claude.json*"
+      "~/.config/Claude/*"
+      "~/.local/share/pki/*"
+      "~/.zsh_history"
+      "~/.var/app/com.slack.Slack/*"
+      "~/.var/app/com.discordapp.Discord/*"
+      "~/.var/app/org.gnome.Fractal/*"
     ];
   };
 
