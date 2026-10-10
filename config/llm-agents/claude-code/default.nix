@@ -16,6 +16,7 @@ let
     ;
 
   binName = "claude";
+  agentHome = ".claude";
 
   python = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
 
@@ -48,16 +49,11 @@ let
         ]);
   };
 
-  wrapped =
-    import ../common/agent-wrapper.nix
-      {
-        inherit pkgs lib;
-        inherit (common) environment;
-      }
-      {
-        name = binName;
-        program = "${cfg.package}/bin/${binName} --settings ${settings}";
-      };
+  wrapped = common.wrapper {
+    name = binName;
+    home = agentHome;
+    program = "${cfg.package}/bin/${binName} --settings ${settings}";
+  };
 in
 {
   options.mdarocha.llm-agents.claude-code = {
@@ -77,10 +73,13 @@ in
 
     home.file = lib.mkMerge [
       {
-        ".claude/CLAUDE.md".text = lib.concatStringsSep "\n" [
-          common.instructions
-          common.environment.instructions
-        ];
+        ".claude/CLAUDE.md".text = lib.concatStringsSep "\n" (
+          [
+            common.instructions
+            common.environment.instructions
+          ]
+          ++ lib.optional (cfg.package != null) (common.networkLogInstructions agentHome)
+        );
       }
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }

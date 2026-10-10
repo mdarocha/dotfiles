@@ -10,6 +10,7 @@ let
   common = config.mdarocha.llm-agents;
 
   binName = "cursor-agent";
+  agentHome = ".cursor";
 
   # Injecting --add-dir before these breaks commander's dispatch: the flag
   # is only registered on the default agent invocation, not on these
@@ -47,25 +48,21 @@ let
     lib.concatStringsSep "\n" [
       common.instructions
       common.environment.instructions
+      (common.networkLogInstructions agentHome)
     ]
   );
 
-  package =
-    import ../common/agent-wrapper.nix
-      {
-        inherit pkgs lib;
-        inherit (common) environment;
-      }
-      {
-        name = binName;
-        program = "${pkgs.llm-agents.cursor-agent}/bin/${binName}";
-        preExec = ''
-          case "''${1:-}" in
-            ${lib.concatStringsSep "|" passthroughSubcommands}) ;;
-            *) set -- --add-dir ${globalRulesDir} "$@" ;;
-          esac
-        '';
-      };
+  package = common.wrapper {
+    name = binName;
+    home = agentHome;
+    program = "${pkgs.llm-agents.cursor-agent}/bin/${binName}";
+    preExec = ''
+      case "''${1:-}" in
+        ${lib.concatStringsSep "|" passthroughSubcommands}) ;;
+        *) set -- --add-dir ${globalRulesDir} "$@" ;;
+      esac
+    '';
+  };
 in
 {
   options.mdarocha.llm-agents.cursor-agent.enable = lib.mkEnableOption "Cursor Agent CLI";

@@ -10,17 +10,13 @@ let
   copilotCli = cfg.copilot-cli;
 
   binName = "copilot";
+  agentHome = ".copilot";
 
-  wrapped =
-    import ../common/agent-wrapper.nix
-      {
-        inherit pkgs lib;
-        inherit (cfg) environment;
-      }
-      {
-        name = binName;
-        program = "${pkgs.llm-agents.copilot-cli}/bin/${binName}";
-      };
+  wrapped = cfg.wrapper {
+    name = binName;
+    home = agentHome;
+    program = "${pkgs.llm-agents.copilot-cli}/bin/${binName}";
+  };
 in
 {
   options.mdarocha.llm-agents.copilot-cli.enable = lib.mkEnableOption "GitHub Copilot CLI";
@@ -33,6 +29,7 @@ in
         ".copilot/AGENTS.md".text = lib.concatStringsSep "\n" [
           cfg.instructions
           cfg.environment.instructions
+          (cfg.networkLogInstructions agentHome)
         ];
       }
       (lib.mapAttrs' (

@@ -12,7 +12,10 @@ let
   );
 in
 {
-  imports = [ ./environment.nix ];
+  imports = [
+    ./agent-wrapper.nix
+    ./environment.nix
+  ];
 
   options.mdarocha.llm-agents = {
     instructions = mkOption {
