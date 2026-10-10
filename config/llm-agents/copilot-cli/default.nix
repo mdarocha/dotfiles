@@ -9,13 +9,10 @@ let
   cfg = config.mdarocha.llm-agents;
   copilotCli = cfg.copilot-cli;
 
-  binName = "copilot";
-  agentHome = ".copilot";
-
   wrapped = cfg.wrapper {
-    name = binName;
-    home = agentHome;
-    program = "${pkgs.llm-agents.copilot-cli}/bin/${binName}";
+    name = "copilot";
+    home = ".copilot";
+    program = "${pkgs.llm-agents.copilot-cli}/bin/copilot";
   };
 in
 {
@@ -29,7 +26,7 @@ in
         ".copilot/AGENTS.md".text = lib.concatStringsSep "\n" [
           cfg.instructions
           cfg.environment.instructions
-          (cfg.networkLogInstructions agentHome)
+          (cfg.networkLogInstructions ".copilot")
         ];
       }
       (lib.mapAttrs' (

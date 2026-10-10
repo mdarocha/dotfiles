@@ -15,9 +15,6 @@ let
     types
     ;
 
-  binName = "claude";
-  agentHome = ".claude";
-
   python = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
 
   toolRulesHook = {
@@ -50,9 +47,9 @@ let
   };
 
   wrapped = common.wrapper {
-    name = binName;
-    home = agentHome;
-    program = "${cfg.package}/bin/${binName} --settings ${settings}";
+    name = "claude";
+    home = ".claude";
+    program = "${cfg.package}/bin/claude --settings ${settings}";
   };
 in
 {
@@ -78,7 +75,7 @@ in
             common.instructions
             common.environment.instructions
           ]
-          ++ lib.optional (cfg.package != null) (common.networkLogInstructions agentHome)
+          ++ lib.optional (cfg.package != null) (common.networkLogInstructions ".claude")
         );
       }
       (lib.mapAttrs' (
