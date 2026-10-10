@@ -2,6 +2,7 @@
 {
   autoMode = {
     classifierReasoningLevel = "low";
+    allowInsideWorkingDirectory = true;
 
     log = {
       enabled = true;
@@ -103,6 +104,30 @@
       "bash(git diff*)"
       "bash(git log*)"
       "bash(git show*)"
+      "bash(git rev-parse*)"
+      "bash(git ls-files*)"
+      "bash(git blame*)"
+      "bash(git branch --show-current)"
+      "bash(git remote -v)"
+      "bash(git stash list*)"
+      "bash(git add*)"
+      "bash(gh pr view*)"
+      "bash(gh pr list*)"
+      "bash(gh pr diff*)"
+      "bash(gh pr checks*)"
+      "bash(gh issue view*)"
+      "bash(gh issue list*)"
+      "bash(gh run list*)"
+      "bash(gh run view*)"
+      "bash(gh repo view*)"
+      "bash(ls*)"
+      "bash(pwd)"
+      "bash(date*)"
+      "bash(which *)"
+      "bash(cat)"
+      "bash(wc -l)"
+      "bash(sort)"
+      "bash(uniq)"
     ];
   };
 }
