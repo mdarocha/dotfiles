@@ -18,15 +18,15 @@
   hideThinkingBlock = true;
   modelRoles = {
     tiny = "local/lfm2.5-230m:off";
-    memory = "anthropic/claude-haiku-4-5";
+    memory = "anthropic/claude-haiku-5-5";
     web = "web/hosted";
   };
   retry = {
     fallbackChains = {
       memory = [ "openai-codex/gpt-6-luna" ];
-      "anthropic/claude-sonnet-5-5" = [ "openai-codex/gpt-6-sol" ];
-      "openai-codex/gpt-6-luna" = [ "anthropic/claude-haiku-4-5" ];
-      "anthropic/claude-opus-5-5" = [ "openai-codex/gpt-6-sol" ];
+      "anthropic/claude-sonnet-5-5" = [ "anthropic/claude-haiku-5-5" ];
+      "openai-codex/gpt-6-luna" = [ "anthropic/claude-haiku-5-5" ];
+      "anthropic/claude-opus-5-5" = [ "anthropic/claude-haiku-5-5" ];
       web = [ "web/exa" ];
     };
     usageAwareFallback = true;
