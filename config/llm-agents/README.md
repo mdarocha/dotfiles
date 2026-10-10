@@ -1,79 +1,53 @@
 # llm-agents
 
-Home Manager module that configures AI coding agents for local, privacy-conscious use.
+A Home Manager module that installs AI coding agents and gives them all the same
+instructions, tools, and skills.
 
-Upstream packages come from the [`numtide/llm-agents.nix`][llm-agents] flake
-(omp, copilot-cli, claude-code, cursor-agent). This module adds configuration,
-network logging, and skills on top. Set `mdarocha.llm-agents.enabledAgents` to the
-user-facing identifiers `claude`, `copilot`, `cursor`, and `omp`; it defaults to
-`[]`. Individual `claude-code.enable`, `copilot-cli.enable`, `cursor-agent.enable`,
-and `oh-my-pi.enable` options remain available (and default to `false`) for
-per-agent overrides.
+Pick the agents you want:
+
+```nix
+mdarocha.llm-agents.enabledAgents = [ "claude" "copilot" "cursor" "omp" ];
+```
+
+The agent packages come from [`numtide/llm-agents.nix`][llm-agents]. This module
+adds the configuration on top.
+
+## What every agent gets
+
+The shared pieces live in `common/`:
+
+- `instructions.md` is installed as each agent's global instructions file
+  (`CLAUDE.md`, `AGENTS.md`, and so on).
+- `environment/` defines the packages on the agent's `PATH`, a Python environment,
+  and a Chromium build. The agent is told what's available, so it doesn't try to
+  install things.
+- Everything in `skills/`, plus a few from upstream skill repos, is linked into each
+  agent's skills directory.
+- `rules/` holds short rules that fire when the agent does something that matches,
+  like editing a doc file. oh-my-pi supports them natively, and Claude Code gets them
+  through a hook.
+- Each agent's binary is a small wrapper (`agent-wrapper.nix`) that runs it behind a
+  local proxy (`network-log/`). When a session ends, the hosts it contacted are
+  appended to `~/<agent home>/network-log/`, for example
+  `~/.claude/network-log/network.log`. The proxy only records traffic. Each agent's
+  instructions say where its log is.
+
+## Agents
+
+- oh-my-pi (`oh-my-pi/`) installs [`omp`][omp] with generated settings. Your own
+  `~/.omp/agent/config.yml` is loaded after them, so changes made in the UI win. It
+  also installs [pi-automode][pi-automode], which checks every tool call against the
+  policy in `automode/settings.nix` before it runs. Fixed rules decide the simple
+  cases, and a small classifier model decides the rest.
+- Claude Code (`claude-code/`) installs [`claude`][claude-code] and enforces the
+  shared rules through a hook. On machines that already have their own `claude`, set
+  `claude-code.package = null` to install only the configuration.
+- Copilot CLI (`copilot-cli/`) installs [`copilot`][copilot-cli].
+- Cursor Agent (`cursor-agent/`) installs [`cursor-agent`][cursor-agent]. It has no
+  global instructions file, so the wrapper adds a directory holding one to every
+  session.
 
 [llm-agents]: https://github.com/numtide/llm-agents.nix
-
-## Submodules
-
-- **Common** (`common/`) — instructions, environment, skills, and rules shared by every agent:
-  - `instructions` — agent instructions (`common/instructions.md`) installed for all agents
-  - `skills` — skill name → source directory, symlinked into each agent
-  - `rules` — rule name → rule file (`common/rules/*.md`) in oh-my-pi's TTSR format
-    (`condition`, `scope`, `globs`, `interruptMode`). oh-my-pi loads them natively;
-    Claude Code enforces them through a hook. `ruleRepeat.{mode,gap}` sets how often
-    a triggered rule may fire again, for both agents.
-  - `environment.{path,env,instructions}` (`common/environment.nix`) — the PATH
-    toolset, environment variables, and rendered toolset instructions, shared by
-    every agent:
-    - `environment/packages.nix`, `environment/python.nix`, `environment/chromium.nix`
-      — the tool list, the Python environment, and the Chromium wrapper that points
-      GPU loaders at nixpkgs' Mesa
-    - `environment/toolset.md` — the toolset instructions, with `@placeholder@`
-      slots filled by `environment.nix`
-  - `agent-wrapper.nix` — the `wrapper` option (`mdarocha.llm-agents.wrapper`), a function agents call to build their binary: exports `environment.{path,env}`
-    and runs the agent under `network-log/` (`agent-netlog`), a local HTTP proxy set
-    through `HTTP(S)_PROXY`. When the agent exits, it appends the hosts contacted
-    and their counts (CONNECT tunnels for HTTPS, requests for plain HTTP) to
-    `~/<agent home>/network-log/network.log` (e.g. `~/.claude/network-log`) as a `[session: <start> - <end>] <agent> <cwd>`
-    block, and to `sessions.jsonl` as one JSON record per session. It only observes:
-    nothing is blocked or TLS-intercepted, it chains through any proxy already set,
-    and clients that ignore the proxy variables are not seen. Each agent's
-    instructions file points at its own log directory (`networkLogInstructions`).
-- **oh-my-pi** (`oh-my-pi/`) — installs and configures `omp` from [oh-my-pi][omp].
-  It writes generated settings to `~/.omp/agent/autogenerated.yml`; its wrapper
-  loads that file before the optional `~/.omp/agent/config.yml`, so UI configuration
-  takes precedence. It also installs the [pi-automode][pi-automode] extension
-  (flake input `pi-automode`) to `~/.omp/agent/extensions/pi-automode`, which runs
-  every agent tool call past permission rules and a classifier model before it
-  executes:
-  - `automode/package.nix` — the extension plus the runtime dependencies pinned in
-    its `package-lock.json`
-  - `automode/settings.nix` — the policy, passed by the `omp` wrapper as
-    `PI_AUTOMODE_SETTINGS_JSON`. That source outranks every config file: its rule
-    lists add to theirs, and its scalars win. It leaves out `classifierModel`, so
-    `~/.pi/agent/extensions/pi-automode/config.json` (the only path pi-automode reads,
-    even under OMP) stays a writable file for `/automode model`. Activation seeds it
-    with Haiku 5.5 only when it doesn't exist yet.
-
-- **Copilot CLI** (`copilot-cli/`) — installs [`copilot-cli`][copilot-cli].
-
-- **Claude Code** (`claude-code/`) — installs [`claude-code`][claude-code].
-  `CLAUDE.md` gets the common instructions. The wrapper
-  passes a generated settings file with `--settings`, leaving `~/.claude/settings.json`
-  writable. That file registers `hooks/tool_rules.py`, which enforces the common rules
-  installed to `~/.claude/tool-rules/` (plus a project's `.claude/tool-rules/`) on
-  `PreToolUse`. Interrupting rules deny the call with the rule as the reason, and
-  `interruptMode: never` rules attach it next to the tool result. Hooks can't see
-  prose or thinking, so only `tool` scopes apply. `claude-code.package = null`
-  installs only the configuration for environments that ship their own binary.
-
-- **Cursor Agent** (`cursor-agent/`) — wraps [`cursor-agent`][cursor-agent] with the
-  common agent wrapper and installs `common.skills` to `~/.cursor/skills/`.
-  cursor-agent has no user-level instructions file — `AGENTS.md`/`.cursor/rules` are
-  discovered per workspace root only — so the wrapper passes
-  `--add-dir <store path with a generated AGENTS.md>` on every invocation that
-  isn't one of its non-agent subcommands (`login`, `mcp`, `status`, …), relying on
-  cursor-agent merging rules from every added workspace root.
-
 [pi-automode]: https://github.com/czottmann/pi-automode
 [omp]: https://github.com/can1357/oh-my-pi
 [copilot-cli]: https://github.com/github/copilot-cli

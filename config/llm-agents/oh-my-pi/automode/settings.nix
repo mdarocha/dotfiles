@@ -93,7 +93,7 @@
       "bash(nix store gc*)"
     ];
 
-    # Side-effect-free OMP tools that would otherwise each cost a classifier call.
+    # Skip the classifier. A bash chain is allowed only if every command in it matches.
     allow = [
       "glob"
       "todo"
