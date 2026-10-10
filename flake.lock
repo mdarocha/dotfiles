@@ -1,26 +1,5 @@
 {
   "nodes": {
-    "agent-sandbox": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788427067,
-        "narHash": "sha256-f3AWZKXLDKTZAU9drA5n6Sle2v3G1xJeNkaXFkb1DVs=",
-        "owner": "mdarocha",
-        "repo": "agent-sandbox.nix",
-        "rev": "fc9c66326ed6f72b3e70bd7c18436d78d5fa6443",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mdarocha",
-        "ref": "main",
-        "repo": "agent-sandbox.nix",
-        "type": "github"
-      }
-    },
     "anthropics-skills": {
       "flake": false,
       "locked": {
@@ -263,9 +242,24 @@
         "type": "github"
       }
     },
+    "pi-automode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790350831,
+        "narHash": "sha256-bJXTRh7t1ZoCYJwdlTy1/77qKiDEeSP+DklEghR1DSY=",
+        "owner": "czottmann",
+        "repo": "pi-automode",
+        "rev": "e69c02036b56ca9c6a42035623bab7d4ddf73ca5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "czottmann",
+        "repo": "pi-automode",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "agent-sandbox": "agent-sandbox",
         "anthropics-skills": "anthropics-skills",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
@@ -274,6 +268,7 @@
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
         "oh-my-zsh": "oh-my-zsh",
+        "pi-automode": "pi-automode",
         "zsh-vanilli": "zsh-vanilli",
         "zsh-windows-title": "zsh-windows-title"
       }

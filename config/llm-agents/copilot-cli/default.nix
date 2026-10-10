@@ -11,13 +11,16 @@ let
 
   binName = "copilot";
 
-  wrapped = pkgs.writeShellScriptBin binName ''
-    export PATH="${lib.makeBinPath cfg.environment.path}:$PATH"
-    ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (name: value: "export ${name}=${lib.escapeShellArg value}") cfg.environment.env
-    )}
-    exec ${pkgs.llm-agents.copilot-cli}/bin/${binName} "$@"
-  '';
+  wrapped =
+    import ../common/agent-wrapper.nix
+      {
+        inherit pkgs lib;
+        inherit (cfg) environment;
+      }
+      {
+        name = binName;
+        program = "${pkgs.llm-agents.copilot-cli}/bin/${binName}";
+      };
 in
 {
   options.mdarocha.llm-agents.copilot-cli.enable = lib.mkEnableOption "GitHub Copilot CLI";

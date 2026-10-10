@@ -30,7 +30,7 @@ in
     path = mkOption {
       type = types.listOf types.package;
       default = tools.list;
-      description = "Packages placed on PATH for every configured coding agent, sandboxed or not.";
+      description = "Packages placed on PATH for every configured coding agent.";
     };
 
     env = mkOption {
@@ -50,12 +50,6 @@ in
       type = types.str;
       default = instructions;
       description = "Toolset instructions describing `path`'s provisioned binaries and Python packages.";
-    };
-
-    hostInstructions = mkOption {
-      type = types.str;
-      default = builtins.readFile ./environment/host.md;
-      description = "Instructions for agents running directly on the host, outside any sandbox.";
     };
   };
 }

@@ -50,22 +50,22 @@ let
     ]
   );
 
-  package = pkgs.writeShellScriptBin binName ''
-    export PATH="${lib.makeBinPath common.environment.path}:$PATH"
-    ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (
-        name: value: "export ${name}=${lib.escapeShellArg value}"
-      ) common.environment.env
-    )}
-
-    case "''${1:-}" in
-      ${lib.concatStringsSep "|" passthroughSubcommands})
-        exec ${pkgs.llm-agents.cursor-agent}/bin/${binName} "$@"
-        ;;
-    esac
-
-    exec ${pkgs.llm-agents.cursor-agent}/bin/${binName} --add-dir ${globalRulesDir} "$@"
-  '';
+  package =
+    import ../common/agent-wrapper.nix
+      {
+        inherit pkgs lib;
+        inherit (common) environment;
+      }
+      {
+        name = binName;
+        program = "${pkgs.llm-agents.cursor-agent}/bin/${binName}";
+        preExec = ''
+          case "''${1:-}" in
+            ${lib.concatStringsSep "|" passthroughSubcommands}) ;;
+            *) set -- --add-dir ${globalRulesDir} "$@" ;;
+          esac
+        '';
+      };
 in
 {
   options.mdarocha.llm-agents.cursor-agent.enable = lib.mkEnableOption "Cursor Agent CLI";

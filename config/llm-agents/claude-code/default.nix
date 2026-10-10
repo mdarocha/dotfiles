@@ -48,15 +48,16 @@ let
         ]);
   };
 
-  wrapped = pkgs.writeShellScriptBin binName ''
-    export PATH="${lib.makeBinPath common.environment.path}:$PATH"
-    ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (
-        name: value: "export ${name}=${lib.escapeShellArg value}"
-      ) common.environment.env
-    )}
-    exec ${cfg.package}/bin/${binName} --settings ${settings} "$@"
-  '';
+  wrapped =
+    import ../common/agent-wrapper.nix
+      {
+        inherit pkgs lib;
+        inherit (common) environment;
+      }
+      {
+        name = binName;
+        program = "${cfg.package}/bin/${binName} --settings ${settings}";
+      };
 in
 {
   options.mdarocha.llm-agents.claude-code = {
@@ -79,7 +80,6 @@ in
         ".claude/CLAUDE.md".text = lib.concatStringsSep "\n" [
           common.instructions
           common.environment.instructions
-          common.environment.hostInstructions
         ];
       }
       (lib.mapAttrs' (
