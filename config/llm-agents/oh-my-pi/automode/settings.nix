@@ -1,7 +1,6 @@
 # Schema: https://github.com/czottmann/pi-automode/blob/main/docs/configuration.md
 {
   autoMode = {
-    classifierModel = "anthropic/claude-haiku-5-5";
     classifierReasoningLevel = "low";
 
     log = {

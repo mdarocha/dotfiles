@@ -46,9 +46,12 @@ per-agent overrides.
   executes:
   - `automode/package.nix` — the extension plus the runtime dependencies pinned in
     its `package-lock.json`
-  - `automode/settings.nix` — the policy, installed read-only to
-    `~/.pi/agent/extensions/pi-automode/config.json` (pi-automode reads that path
-    under OMP too). Override it per project in `.pi/automode.local.json`.
+  - `automode/settings.nix` — the policy, passed by the `omp` wrapper as
+    `PI_AUTOMODE_SETTINGS_JSON`. That source outranks every config file: its rule
+    lists add to theirs, and its scalars win. It leaves out `classifierModel`, so
+    `~/.pi/agent/extensions/pi-automode/config.json` (the only path pi-automode reads,
+    even under OMP) stays a writable file for `/automode model`. Activation seeds it
+    with Haiku 5.5 only when it doesn't exist yet.
 
 - **Copilot CLI** (`copilot-cli/`) — installs [`copilot-cli`][copilot-cli].
 
