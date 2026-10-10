@@ -240,6 +240,7 @@ func childEnv(proxyURL string) []string {
 		"HTTPS_PROXY": proxyURL,
 		"http_proxy":  proxyURL,
 		"https_proxy": proxyURL,
+		"PI_PROXY":    proxyURL,
 		"NO_PROXY":    noProxy,
 		"no_proxy":    noProxy,
 	}
