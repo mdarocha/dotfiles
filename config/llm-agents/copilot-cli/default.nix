@@ -9,15 +9,11 @@ let
   cfg = config.mdarocha.llm-agents;
   copilotCli = cfg.copilot-cli;
 
-  binName = "copilot";
-
-  wrapped = pkgs.writeShellScriptBin binName ''
-    export PATH="${lib.makeBinPath cfg.environment.path}:$PATH"
-    ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (name: value: "export ${name}=${lib.escapeShellArg value}") cfg.environment.env
-    )}
-    exec ${pkgs.llm-agents.copilot-cli}/bin/${binName} "$@"
-  '';
+  wrapped = cfg.wrapper {
+    name = "copilot";
+    home = ".copilot";
+    program = "${pkgs.llm-agents.copilot-cli}/bin/copilot";
+  };
 in
 {
   options.mdarocha.llm-agents.copilot-cli.enable = lib.mkEnableOption "GitHub Copilot CLI";
@@ -30,6 +26,7 @@ in
         ".copilot/AGENTS.md".text = lib.concatStringsSep "\n" [
           cfg.instructions
           cfg.environment.instructions
+          (cfg.networkLogInstructions ".copilot")
         ];
       }
       (lib.mapAttrs' (

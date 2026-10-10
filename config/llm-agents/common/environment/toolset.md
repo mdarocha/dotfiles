@@ -13,8 +13,8 @@ that is not provisioned, use `nix run nixpkgs#<package>` or
 Python dependencies are provisioned through a Nix-managed environment already
 on PATH, with `VIRTUAL_ENV` pointing at it, so you MUST NOT install packages at
 runtime — `pip install`, `uv pip install`, `pip install --user`, `python -m pip`,
-or any other package manager invocation will fail or produce results silently
-discarded when the session ends.
+or any other package manager invocation will fail against the read-only Nix
+environment or install packages outside it.
 
 Pre-installed Python packages: @pythonPackages@
 

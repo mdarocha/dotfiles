@@ -15,8 +15,6 @@ let
     types
     ;
 
-  binName = "claude";
-
   python = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
 
   toolRulesHook = {
@@ -48,15 +46,11 @@ let
         ]);
   };
 
-  wrapped = pkgs.writeShellScriptBin binName ''
-    export PATH="${lib.makeBinPath common.environment.path}:$PATH"
-    ${lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (
-        name: value: "export ${name}=${lib.escapeShellArg value}"
-      ) common.environment.env
-    )}
-    exec ${cfg.package}/bin/${binName} --settings ${settings} "$@"
-  '';
+  wrapped = common.wrapper {
+    name = "claude";
+    home = ".claude";
+    program = "${cfg.package}/bin/claude --settings ${settings}";
+  };
 in
 {
   options.mdarocha.llm-agents.claude-code = {
@@ -76,11 +70,13 @@ in
 
     home.file = lib.mkMerge [
       {
-        ".claude/CLAUDE.md".text = lib.concatStringsSep "\n" [
-          common.instructions
-          common.environment.instructions
-          common.environment.hostInstructions
-        ];
+        ".claude/CLAUDE.md".text = lib.concatStringsSep "\n" (
+          [
+            common.instructions
+            common.environment.instructions
+          ]
+          ++ lib.optional (cfg.package != null) (common.networkLogInstructions ".claude")
+        );
       }
       (lib.mapAttrs' (
         name: dir: lib.nameValuePair ".claude/skills/${name}" { source = dir; }

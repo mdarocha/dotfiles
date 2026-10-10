@@ -21,7 +21,7 @@ nix shell nixpkgs#python3 --command python -c "print('hello')"
 
 ## Unknown package
 
-`nix-locate` may not be on `PATH`, especially in a sandbox. Run it temporarily from `nix-index`; it uses the existing `~/.cache/nix-index/files` database when available.
+`nix-locate` may not be on `PATH`. Run it temporarily from `nix-index`; it uses the existing `~/.cache/nix-index/files` database when available.
 
 ```bash
 # Find the package providing this exact executable path.

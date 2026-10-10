@@ -86,6 +86,8 @@ sentence padding.
   into named constants or enums. Leave self-explanatory, one-off values
   inline — don't create a constant just to name something obvious. If a
   value comes from an external spec (e.g. HTTP 200), name it regardless.
+- Inline variables used in only one place. Keep a named binding only when
+  it's reused or when the expression would be hard to read inline.
 - Reduce nesting: prefer early return/continue over deeply nested
   conditionals (avoid the arrow anti-pattern).
 - Prefer enums over boolean parameters when a function takes more than one

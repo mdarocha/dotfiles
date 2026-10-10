@@ -76,7 +76,7 @@
             export HOME="$TMPDIR/home"
             mkdir -p "$HOME"
 
-            for cmd in git zsh gh copilot claude cursor-agent omp-nosandbox; do
+            for cmd in git zsh gh copilot claude cursor-agent omp; do
               if [ ! -x "${homePath}/bin/$cmd" ]; then
                 echo "missing executable in Home Manager profile: $cmd" >&2
                 exit 1
@@ -84,13 +84,6 @@
 
               "${homePath}/bin/$cmd" --version
             done
-
-            # The sandboxed omp launches bubblewrap, which cannot nest inside the
-            # Nix build sandbox, so only its presence is checked here.
-            if [ ! -x "${homePath}/bin/omp" ]; then
-              echo "missing executable in Home Manager profile: omp" >&2
-              exit 1
-            fi
 
             touch "$out"
           '';
