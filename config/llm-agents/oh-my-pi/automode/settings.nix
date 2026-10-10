@@ -24,6 +24,7 @@
       "Building and evaluating Nix expressions (`nix build`, `nix eval`, `nix flake check`, `nix flake lock`)"
       "Committing to the current repository and pushing a task branch; opening or updating a pull request on github.com/mdarocha when the user asked for a PR"
       "Non-GET requests to the trusted providers, package sources, and source control listed in the environment, as part of the task"
+      "Modifying, overwriting, or deleting git-tracked files inside the current repository or its worktrees (including `git rm`) when the task requires it, e.g. fixing code or resolving PR review comments; git history keeps this recoverable. Files that are untracked or ignored and predate the session still need explicit user approval"
     ];
 
     soft_deny = [
