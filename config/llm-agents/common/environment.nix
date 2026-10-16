@@ -8,6 +8,7 @@ let
   inherit (lib) mkOption types;
 
   python = import ./environment/python.nix { inherit pkgs; };
+  node = import ./environment/node.nix { inherit pkgs; };
   chromium = import ./environment/chromium.nix { inherit pkgs; };
   tools = import ./environment/packages.nix {
     inherit pkgs lib chromium;
@@ -18,10 +19,11 @@ let
 
   instructions =
     builtins.replaceStrings
-      [ "@packages@" "@pythonPackages@" ]
+      [ "@packages@" "@pythonPackages@" "@nodePackages@" ]
       [
         (inlineNames tools.names)
         (inlineNames python.packageNames)
+        (inlineNames (lib.attrNames node.packages))
       ]
       (builtins.readFile ./environment/toolset.md);
 in
@@ -39,6 +41,7 @@ in
         # Tools that respect $VIRTUAL_ENV (editors, venv-detection, and
         # OMP's own runtime PATH-prepending) pick up the Nix-built env.
         VIRTUAL_ENV = "${python.env}";
+        NODE_PATH = "${node.nodePath}";
         CHROME_BIN = "${chromium}/bin/chromium";
         PUPPETEER_EXECUTABLE_PATH = "${chromium}/bin/chromium";
         PUPPETEER_SKIP_DOWNLOAD = "true";

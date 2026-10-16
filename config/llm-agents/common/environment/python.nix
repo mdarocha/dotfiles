@@ -22,6 +22,10 @@ let
     "defusedxml"
     "lxml"
     "python-pptx"
+    "markitdown"
+    "msoffcrypto-tool"
+    "olefile"
+    "extract-msg"
 
     # Data processing and analysis
     "numpy"

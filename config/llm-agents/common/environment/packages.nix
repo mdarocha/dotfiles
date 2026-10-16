@@ -34,6 +34,9 @@ let
     # PDF/office skills: CLI tools for document processing
     poppler-utils
     qpdf
+    pdftk
+    zip
+    unzip
     pandoc
     libreoffice-stable
     tesseract

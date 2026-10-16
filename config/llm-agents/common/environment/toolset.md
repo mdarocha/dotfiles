@@ -8,6 +8,13 @@ Do not assume a tool outside this list exists — check first. If you need one
 that is not provisioned, use `nix run nixpkgs#<package>` or
 `nix shell nixpkgs#<package>` to get it temporarily instead of installing it (see the `run-with-nix` skill).
 
+## Node.js modules
+
+These npm packages are preinstalled and resolvable via `NODE_PATH`; `require()`
+them directly. Do not run `npm install` for them.
+
+Available: @nodePackages@
+
 ## Python execution environment
 
 Python dependencies are provisioned through a Nix-managed environment already
