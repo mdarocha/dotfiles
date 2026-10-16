@@ -11,6 +11,7 @@
   tui.renderMermaid = true;
   tui.vimMode = true;
   task.showResolvedModelBadge = true;
+  title.icons = "nf+emoji";
 
   # model
   advisor.syncBacklog = "5";
@@ -23,7 +24,10 @@
   };
   retry = {
     fallbackChains = {
-      memory = [ "openai-codex/gpt-6-luna" ];
+      memory = [
+        "openai-codex/gpt-6-luna"
+        "github-copilot/claude-haiku-5.5"
+      ];
       "anthropic/claude-sonnet-5-5" = [ "anthropic/claude-haiku-5-5" ];
       "openai-codex/gpt-6-luna" = [ "anthropic/claude-haiku-5-5" ];
       "anthropic/claude-opus-5-5" = [ "anthropic/claude-haiku-5-5" ];
@@ -51,8 +55,8 @@
     thresholdTokens = -1;
     handoffSaveToDisk = false;
     methodOrder = [
-      "snapcompact"
       "remote"
+      "snapcompact"
       "soft"
     ];
   };
@@ -60,6 +64,7 @@
 
   # memory
   memory.backend = "mnemopi";
+  autolearn.enabled = true;
   mnemopi = {
     scoping = "per-project-tagged";
     polyphonicRecall = true;
@@ -104,6 +109,8 @@
 
   # composer
   composer.shape = "claude";
+
+  worktree.onExit = "remove";
 
   # shell
   bash.direnv = "auto";
