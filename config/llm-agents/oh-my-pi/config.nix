@@ -44,6 +44,7 @@
   treeFilterMode = "no-tools";
   doubleEscapeAction = "tree";
   startup.checkUpdate = false;
+  setupVersion = 2;
   marketplace.autoUpdate = "off";
   autocompleteMaxVisible = 5;
   features.unexpectedStopDetection = "smart";
