@@ -28,7 +28,7 @@
         "openai-codex/gpt-6-luna"
         "github-copilot/claude-haiku-5.5"
       ];
-      "anthropic/claude-haiku-5-5" = [ "openai-codex/gpt-6-luna" ];
+      "anthropic/*" = [ "github-copilot/*" ];
       web = [ "web/exa" ];
     };
     usageAwareFallback = true;
