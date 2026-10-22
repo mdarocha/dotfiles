@@ -45,7 +45,10 @@ in
       readOnly = true;
       description = "Takes an agent's home directory relative to `$HOME` and returns instructions describing its network log.";
       default =
-        home: builtins.replaceStrings [ "@dir@" ] [ "~/${home}/${logDirName}" ] (builtins.readFile ./network-log.md);
+        home:
+        builtins.replaceStrings [ "@dir@" ] [ "~/${home}/${logDirName}" ] (
+          builtins.readFile ./network-log.md
+        );
     };
   };
 }
