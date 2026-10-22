@@ -25,7 +25,8 @@ The shared pieces live in `common/`:
   agent's skills directory.
 - `rules/` holds short rules that fire when the agent does something that matches,
   like editing a doc file. oh-my-pi supports them natively, and Claude Code gets them
-  through a hook.
+  through a hook. A rule with a `question` fires in oh-my-pi only when a judge model
+  answers yes; the hook can't ask, so it fires on the `condition` match alone.
 - Each agent's binary is a small wrapper (`agent-wrapper.nix`) that runs it behind a
   local proxy (`network-log/`). When a session ends, the hosts it contacted are
   appended to `~/<agent home>/network-log/`, for example

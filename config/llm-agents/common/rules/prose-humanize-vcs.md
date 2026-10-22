@@ -3,7 +3,7 @@ name: prose-humanize-vcs
 description: "Run a humanizer pass over commit messages and PR text before sending"
 condition:
   - "git\\s+commit(?![^\\n]*--no-edit)"
-  - "gh\\s+(?:pr|issue)\\s+(?:create|edit|comment)\\b"
+  - "gh\\s+(?:pr|issue)\\s+(?:create|edit|comment)\\b(?![^\\n]*--help)"
   - "\"op\"\\s*:\\s*\"pr_create\""
 scope: ["tool:bash", "tool:github"]
 interruptMode: never

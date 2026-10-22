@@ -7,8 +7,9 @@ arguments either denies the call with the rule as the reason (interrupting
 rules, like OMP's abort-and-retry) or attaches the rule next to the tool result
 (`interruptMode: never` or `prose-only`).
 
-Hooks cannot observe streamed prose or thinking, so only tool scopes apply, and
-`astCondition` is unsupported. PostToolBatch/Stop/SubagentStop count completed
+Hooks cannot observe streamed prose or thinking, so only tool scopes apply.
+`astCondition` is unsupported, and so is `question`: a judged rule fires on its
+`condition` prefilter alone. PostToolBatch/Stop/SubagentStop count completed
 turns for the `after-gap` repeat policy; SessionEnd drops the session's state.
 """
 

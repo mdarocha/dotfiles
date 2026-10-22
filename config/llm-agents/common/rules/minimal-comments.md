@@ -3,7 +3,7 @@ name: minimal-comments
 description: "Review every code comment against the project policy"
 condition:
   - "(?m)(?:^[ \\t]*|[ \\t]+)(?://|/\\*|<!--)[ \\t]*\\S"
-  - "(?m)(?:^[ \\t]*|[ \\t]+)#(?!(!|\\[|include|define|ifn?def|endif|if|elif|else|error|warning|pragma|import|region|endregion|line|undef|version|extension))[ \\t]*\\S"
+  - "(?m)(?:^[ \\t]*|[ \\t]+)#+(?!(!|\\[|include|define|ifn?def|endif|if|elif|else|error|warning|pragma|import|region|endregion|line|undef|version|extension))[ \\t]+\\S"
   - "(?m)^[ \\t]*(--|;+|%|\\(\\*|!)[ \\t]+\\S"
   - "(?m)^[ \\t]*'[ \\t]+\\S"
 scope: ["tool:edit", "tool:write", "tool:ast_edit"]
