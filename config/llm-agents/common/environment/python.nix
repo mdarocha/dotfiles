@@ -36,6 +36,7 @@ let
     # HTTP and web
     "requests"
     "beautifulsoup4"
+    "trafilatura"
 
     # General utilities
     "python-dateutil"
