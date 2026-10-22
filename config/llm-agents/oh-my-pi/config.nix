@@ -29,7 +29,10 @@
         "github-copilot/claude-haiku-5.5"
       ];
       "anthropic/*" = [ "github-copilot/*" ];
-      web = [ "web/exa" "web/public" ];
+      web = [
+        "web/exa"
+        "web/public"
+      ];
     };
     usageAwareFallback = true;
     usageReservePct = 5;
