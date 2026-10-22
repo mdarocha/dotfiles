@@ -4,6 +4,8 @@
     { pkgs, system, ... }:
     {
       checks = {
+        formatting = self.formatter.${system}.check self;
+
         shellcheck =
           let
             inherit (pkgs.lib.fileset) toSource unions;
