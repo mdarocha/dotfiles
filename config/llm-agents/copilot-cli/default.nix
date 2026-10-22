@@ -9,10 +9,19 @@ let
   cfg = config.mdarocha.llm-agents;
   copilotCli = cfg.copilot-cli;
 
+  # patchelf >= 0.18 corrupts the Node SEA blob when setting rpath; the wrapper's LD_LIBRARY_PATH covers it.
+  package = pkgs.llm-agents.copilot-cli.overrideAttrs {
+    postInstall = ''
+      install -m755 copilot "$out/lib/copilot-cli/copilot"
+      patchelf --set-interpreter "$(cat ${pkgs.stdenv.cc}/nix-support/dynamic-linker)" \
+        "$out/lib/copilot-cli/copilot"
+    '';
+  };
+
   wrapped = cfg.wrapper {
     name = "copilot";
     home = ".copilot";
-    program = "${pkgs.llm-agents.copilot-cli}/bin/copilot";
+    program = "${package}/bin/copilot";
   };
 in
 {
