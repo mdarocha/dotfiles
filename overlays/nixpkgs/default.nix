@@ -5,6 +5,8 @@ final: prev: {
     })
   ];
 
+  gh-actions-lock = final.callPackage ./gh-actions-lock.nix { };
+
   zsh-history-substring-search = prev.zsh-history-substring-search.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [
       (final.writeText "history-search-preserve-highlights.patch" ''
