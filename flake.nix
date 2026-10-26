@@ -51,7 +51,7 @@
     };
 
     zsh-windows-title = {
-      url = "github:mdarocha/zsh-windows-title/master";
+      url = "github:mdarocha/zsh-windows-title/main";
       flake = false;
     };
 
