@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
 
       - name: Install Nix
-        uses: mdarocha/nix-magic-setup@7dee3924074b4600122e79b82b2c759706601786 # v2.1.0
+        uses: mdarocha/nix-magic-setup@95c70aabd32f788ff69e57c1c2433756b5825f6b # v2.1.2
 
       - name: Setup Cachix
         uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
