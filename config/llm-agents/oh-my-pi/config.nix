@@ -8,10 +8,8 @@
   symbolPreset = "nerd";
   terminal.showProgress = true;
   tui.textSizing = true;
-  tui.renderMermaid = true;
   tui.vimMode = true;
   task.showResolvedModelBadge = true;
-  title.icons = "nf+emoji";
 
   # model
   advisor.syncBacklog = "5";
@@ -54,8 +52,6 @@
   contextPromotion.enabled = true;
   compaction = {
     thresholdPercent = 80;
-    thresholdTokens = -1;
-    handoffSaveToDisk = false;
     methodOrder = [
       "remote"
       "snapcompact"
@@ -98,7 +94,6 @@
     eager = "preferred";
     agentPrewalk.designer = "on";
   };
-  isolation.backend = "auto";
 
   # providers
   providers = {
@@ -106,16 +101,11 @@
     anthropic.slowMode = "auto";
   };
   telemetry.otlpExportEnabled = false;
-  codexResets.autoRedeem = "unset";
-  claudeResets.autoRedeem = "unset";
 
   # composer
   composer.shape = "claude";
 
   worktree.onExit = "remove";
-
-  # shell
-  bash.direnv = "auto";
 
   # sharing and omp.sh services
   share.store = "gist";
