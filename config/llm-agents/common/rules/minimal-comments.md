@@ -9,11 +9,11 @@ condition:
 scope: ["tool:edit", "tool:write", "tool:ast_edit"]
 interruptMode: never
 question: >-
-  Answer yes only if this edit adds or changes a code comment that breaks the comment policy: it restates the
+  Answer yes if this edit adds or changes a code comment that breaks the comment policy: it restates the
   code, narrates the edit or the session, labels a section, or adds filler. Answer no for comments that state a
   constraint, a non-obvious mechanism, a workaround with its issue link, or a public contract; for shebangs and
   lint or shellcheck directives; for Markdown headings; for `#` or `//` inside strings; and when the edit has no
-  comment. When unsure, answer no.
+  comment. When unsure, answer yes.
 globs:
   - "*.{c,h,cc,cpp,cxx,hpp,cs,java,kt,kts,scala,swift,go,rs,zig}"
   - "*.{ts,tsx,js,jsx,mjs,cjs,vue,svelte,php,dart,py,rb,lua,pl,pm,r,jl}"
