@@ -14,7 +14,7 @@ interruptMode: never
 
 This PR targets a branch that is not a default branch, so it is one layer of a stack. Do not
 describe the stack in the PR body. Link the PRs as a native GitHub stack, bottom to top, as
-described in the "Stacked pull requests" section of the `github` skill:
+described in `references/stacks.md` of the `github` skill:
 
 ```bash
 gh pr view <number> --json number,baseRefName,headRefName,state   # check each base/head chain first
