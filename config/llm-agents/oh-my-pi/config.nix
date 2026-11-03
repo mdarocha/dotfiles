@@ -9,10 +9,10 @@
   terminal.showProgress = true;
   tui.textSizing = true;
   tui.vimMode = true;
-  task.showResolvedModelBadge = true;
+  tui.autoGraph = "smart";
+  display.cacheMissMarker = true;
 
   # model
-  advisor.syncBacklog = "5";
   defaultThinkingLevel = "auto";
   hideThinkingBlock = true;
   modelRoles = {
@@ -35,6 +35,7 @@
     usageAwareFallback = true;
     usageReservePct = 5;
     usageReservePolicy = "auto";
+    fallbackOn = "usage-limit";
   };
 
   # interaction
@@ -45,8 +46,8 @@
   startup.checkUpdate = false;
   setupVersion = 2;
   marketplace.autoUpdate = "off";
-  autocompleteMaxVisible = 5;
   features.unexpectedStopDetection = "smart";
+  error.notify = "on";
 
   # context
   contextPromotion.enabled = true;
@@ -79,6 +80,9 @@
   security.enabled = true;
   github.enabled = true;
   generate_image.enabled = true;
+  edit.autoRepair.enabled = true;
+  lsp.diagnosticsOnEdit = true;
+  secrets.enabled = true;
   ttsr = {
     repeatMode = config.mdarocha.llm-agents.ruleRepeat.mode;
     repeatGap = config.mdarocha.llm-agents.ruleRepeat.gap;
@@ -87,18 +91,22 @@
   # tasks
   task = {
     isolation = {
-      enabled = false;
-      merge = "branch";
+      enabled = true;
       commits = "ai";
     };
     eager = "preferred";
     agentPrewalk.designer = "on";
+    enableEffort = true;
+    maxEffort = "xhigh";
   };
+  prewalk.auto = "on";
 
   # providers
   providers = {
     fetch = "native";
     anthropic.slowMode = "auto";
+    tinyModelDevice = "auto";
+    tinyModelDtype = "auto";
   };
   telemetry.otlpExportEnabled = false;
 
@@ -117,5 +125,6 @@
   # These comments are durable audit state; future runs must preserve them.
   # - modelRoles.{default,smol,slow,plan,task,commit,advisor,vision}: intentionally left unmanaged; skip in future audits.
   # - stt.modelName: intentionally left unmanaged; skip in future audits.
+  # - power.sleepPrevention: intentionally left unmanaged; skip in future audits.
 
 }
