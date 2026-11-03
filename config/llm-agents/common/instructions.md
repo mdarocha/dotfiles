@@ -4,54 +4,6 @@ If a tool you need is not on PATH, do not install it into the user profile —
 run it temporarily with `nix run nixpkgs#<package>` or
 `nix shell nixpkgs#<package>` instead (see the `run-with-nix` skill).
 
-## Git LFS
-
-Do **not** run `git lfs install`: LFS filters are already configured
-globally (`filter.lfs.*` in `~/.config/git/config`, provisioned by
-home-manager's `programs.git.lfs.enable`), `add`/`commit`/`push`/`checkout` already
-smudge/clean LFS-tracked files correctly without any per-repo
-`.git/config` entries. `git-lfs` itself is on `$PATH`.
-
-## Browser GPU acceleration
-
-Some tasks (ie. WebGL rendering, in-browser ML) REQUIRE GPU acceleration in the browser, since they are too
-slow without it.
-
-Confirm the actual GPU backend via `chrome://gpu`'s "Graphics Feature Status"
-and `GPU0` fields, not `WEBGL_debug_renderer_info` / `navigator.userAgent` —
-the browser tool spoofs those for fingerprinting resistance regardless of the
-real backend.
-
-GPU availability depends on whether: (1) the required /dev/dri is currently available
-(it can be unavailable if the current machine has no GPU), (2) the browser is not
-running in "headless" mode.
-
-If Chromium is running headless but the task genuinely needs GPU-backed
-rendering (e.g. WebGL correctness, GPU compute), headless mode cannot provide
-it — ask the user to switch the browser tool to visible/non-headless mode and
-relaunch it.
-
-## Code search tool selection
-
-When searching for code outside the current project, choose the right tool:
-1. **grep MCP** (preferred for public code): Use the `grep` MCP server for searching public code on GitHub.
-   It performs fast literal and regex pattern matching across millions of repositories.
-   Best for: finding usage examples, API patterns, library idioms, and real-world code snippets.
-2. **gh CLI** (for private/org code): Use `gh search code` when results from private or organization
-   repositories are needed, since the grep MCP only indexes public code.
-   Also useful when you need to scope searches to a specific owner or repository.
-3. **codesearch** (fallback): Use the `codesearch` tool when the grep MCP doesn't return good results.
-   It uses semantic/neural search (via Exa AI) rather than pattern matching, so it can find
-   conceptually relevant code, documentation, and examples even when you don't know the exact syntax.
-
-## Documentation search
-
-Use the **context7 MCP** to fetch current, version-accurate documentation for any library, framework,
-SDK, API, CLI tool, or cloud service — including well-known ones like React, Next.js, Prisma, Django,
-Spring Boot, or Tailwind. Prefer this over web search for library docs, since your training data may
-not reflect recent changes. Use it for: API syntax, configuration, version migration, library-specific
-debugging, setup instructions, and CLI tool usage.
-
 ## Comments
 
 Prefer clear code to explanatory prose. Keep a comment when it provides information
