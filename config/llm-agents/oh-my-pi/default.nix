@@ -40,7 +40,7 @@ let
 
   automode = import ./automode/package.nix {
     inherit pkgs lib;
-    src = inputs.pi-automode;
+    src = inputs.omp-automode;
   };
 
   # pi-automode's only config path, even under OMP. The env policy outranks it,

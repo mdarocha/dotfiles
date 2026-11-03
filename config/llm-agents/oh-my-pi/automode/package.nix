@@ -26,7 +26,7 @@ let
     };
   }) (lib.filterAttrs isRuntime lock.packages);
 in
-pkgs.runCommand "pi-automode-${manifest.version}" { } ''
+pkgs.runCommand "omp-automode-${manifest.version}" { } ''
   mkdir -p $out
   cp -r ${src}/package.json ${src}/extensions ${src}/skills $out/
   ${lib.concatMapStrings (module: ''
