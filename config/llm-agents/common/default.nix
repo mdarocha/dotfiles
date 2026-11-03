@@ -32,6 +32,7 @@ in
         github = ./skills/github;
         run-with-nix = ./skills/run-with-nix;
         prose-check = ./skills/prose-check;
+        browser-gpu = ./skills/browser-gpu;
         verify = ./skills/verify;
         simplify = ./skills/simplify;
         pdf = "${inputs.anthropics-skills}/skills/pdf";
