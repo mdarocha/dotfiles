@@ -31,6 +31,7 @@ in
         commit = ./skills/commit;
         github = ./skills/github;
         run-with-nix = ./skills/run-with-nix;
+        browser-gpu = ./skills/browser-gpu;
         verify = ./skills/verify;
         simplify = ./skills/simplify;
         pdf = "${inputs.anthropics-skills}/skills/pdf";
