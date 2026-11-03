@@ -52,9 +52,9 @@ Copilot review requests and effort are in `references/reviews.md`. Review thread
 
 Green means two things: the latest CI run for the pushed head passes, and every review thread is answered and either resolved or left open with a stated reason. Repeat until neither has open items.
 
-1. Wait for CI: `scripts/ci-wait.sh --pr 123`. Exit 0 means all checks passed; 1 means a check failed and the script prints the failure excerpt; 2 means timeout; 3 means no checks appeared. Its default timeout is 1800 s, so give the tool call a longer timeout or run it in the background.
+1. Wait for CI: `scripts/ci-wait.sh --pr 123`. Exit 0 means all checks passed; 1 means a check failed and the script prints the failure excerpt; 2 means timeout; 3 means no checks appeared. Its default timeout is 1800 s, so give the tool call a longer timeout or run it in the background. A `github` tool `run_watch` can replace it, but it watches only Actions runs, so checks and statuses from other apps go unseen. When its result says `Log tail unavailable` (gh refuses logs that contain escape sequences), get the log with `scripts/ci-failures.sh <run-id>`.
 2. On failure, fix the cause, verify locally when that is cheaper than another push, commit, and push.
-3. List review threads: `scripts/pr-threads.sh list 123`. It prints unresolved threads with every comment and the non-empty review summaries; `--all` includes resolved and outdated threads. Each thread header shows its ID.
+3. List review threads: `scripts/pr-threads.sh list 123`. It prints unresolved threads with every comment and the non-empty review summaries; `--all` includes resolved and outdated threads. Each thread header shows its ID. A `pr://123` read shows review comments too, but without thread IDs or resolved state, and with the whole PR body.
 4. For each thread, read the full comment, then either fix the code or decide not to change it. Push the fix first, so the reply can cite a commit that exists.
 5. Reply with the commit short SHA and what changed, or with the reason for not changing: `scripts/pr-threads.sh reply PRRT_ID "text"`.
 6. Resolve only threads that have a reply: `scripts/pr-threads.sh resolve PRRT_ID [PRRT_ID...]`. Leave a thread open when the reviewer should decide.
