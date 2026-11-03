@@ -2,12 +2,10 @@
 name: pr-stack-non-default-base
 description: "A PR whose base is not a default branch belongs to a stack: link it with gh stack"
 condition:
-  - |-
-    \bgh\b[\s\S]*?\bpr\s+create\b[\s\S]*?(?:\s--base(?:=|\s+)|\s-B\s*)[\\"']*(?!(?:main|master|develop|development|dev|trunk|default|staging|production|stable)(?![\w./-]))[^\s"'\\;&|)]+
-  - |-
-    \\?"op\\?"\s*:\s*\\?"pr_create\\?"[\s\S]*?\\?"base\\?"\s*:\s*\\?"(?!(?:main|master|develop|development|dev|trunk|default|staging|production|stable)(?![\w./-]))[^"\\\s]+
-  - |-
-    \\?"base\\?"\s*:\s*\\?"(?!(?:main|master|develop|development|dev|trunk|default|staging|production|stable)(?![\w./-]))[^"\\\s]+[\s\S]*?\\?"op\\?"\s*:\s*\\?"pr_create\\?"
+  - "\\bgh\\s+pr\\s+(?:create|edit)\\b"
+  - "\"op\"\\s*:\\s*\"pr_create\""
+question: >-
+  Answer yes only if this command creates or edits a pull request and explicitly sets its base branch (`--base`, `-B`, or a JSON `base` field) to a branch that is not the repository's default branch (main, master, develop, trunk, or similar). Answer no when no base is set, when the base is a default branch, or when the text only shows such a command as an example, in a file, or in a quoted string.
 scope: ["tool:bash", "tool:github"]
 interruptMode: never
 ---
