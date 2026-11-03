@@ -25,8 +25,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    pi-automode = {
-      url = "github:czottmann/pi-automode";
+    omp-automode = {
+      url = "github:royce-mathew/omp-automode";
       flake = false;
     };
 

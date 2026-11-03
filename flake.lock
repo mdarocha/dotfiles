@@ -242,19 +242,19 @@
         "type": "github"
       }
     },
-    "pi-automode": {
+    "omp-automode": {
       "flake": false,
       "locked": {
-        "lastModified": 1790350831,
-        "narHash": "sha256-bJXTRh7t1ZoCYJwdlTy1/77qKiDEeSP+DklEghR1DSY=",
-        "owner": "czottmann",
-        "repo": "pi-automode",
-        "rev": "e69c02036b56ca9c6a42035623bab7d4ddf73ca5",
+        "lastModified": 1792521270,
+        "narHash": "sha256-DDLkfRXikh8YkpP9qkZKhuXwbTgmg6vK7Ah+W0B1U7I=",
+        "owner": "royce-mathew",
+        "repo": "omp-automode",
+        "rev": "78a2a52f0d88e0792be5c3d13c9c62dd66c883b7",
         "type": "github"
       },
       "original": {
-        "owner": "czottmann",
-        "repo": "pi-automode",
+        "owner": "royce-mathew",
+        "repo": "omp-automode",
         "type": "github"
       }
     },
@@ -268,7 +268,7 @@
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
         "oh-my-zsh": "oh-my-zsh",
-        "pi-automode": "pi-automode",
+        "omp-automode": "omp-automode",
         "zsh-vanilli": "zsh-vanilli",
         "zsh-windows-title": "zsh-windows-title"
       }

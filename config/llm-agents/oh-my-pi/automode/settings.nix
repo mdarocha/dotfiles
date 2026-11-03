@@ -1,4 +1,4 @@
-# Schema: https://github.com/czottmann/pi-automode/blob/main/docs/configuration.md
+# Schema: https://github.com/royce-mathew/omp-automode/blob/main/docs/configuration.md
 {
   autoMode = {
     classifierReasoningLevel = "low";
@@ -68,7 +68,7 @@
       "Printing or sending authentication tokens (`gh auth token`, provider API keys, cloud credentials) outside the tool that owns them"
     ];
 
-    # Trailing `*` on files: pi-automode doesn't strip omp read selectors (`~/.netrc:1-2`).
+    # Trailing `*` on files: omp-automode doesn't strip omp read selectors (`~/.netrc:1-2`).
     deniedPaths = [
       "~/.ssh/*"
       "~/.gnupg/*"

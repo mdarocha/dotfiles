@@ -37,7 +37,7 @@ The shared pieces live in `common/`:
 
 - oh-my-pi (`oh-my-pi/`) installs [`omp`][omp] with generated settings. Your own
   `~/.omp/agent/config.yml` is loaded after them, so changes made in the UI win. It
-  also installs [pi-automode][pi-automode], which checks every tool call against the
+  also installs [omp-automode][omp-automode], which checks every tool call against the
   policy in `automode/settings.nix` before it runs. Fixed rules decide the simple
   cases, and a small classifier model decides the rest.
 - Claude Code (`claude-code/`) installs [`claude`][claude-code] and enforces the
@@ -49,7 +49,7 @@ The shared pieces live in `common/`:
   session.
 
 [llm-agents]: https://github.com/numtide/llm-agents.nix
-[pi-automode]: https://github.com/czottmann/pi-automode
+[omp-automode]: https://github.com/royce-mathew/omp-automode
 [omp]: https://github.com/can1357/oh-my-pi
 [copilot-cli]: https://github.com/github/copilot-cli
 [claude-code]: https://github.com/anthropics/claude-code
