@@ -44,22 +44,24 @@ An attached file referenced in the body as `![alt](./login.png)` is rewritten to
 
 `gh issue artifact` (preview) attaches Markdown documents, HTML documents, and links to an issue. Read `references/artifacts.md` before creating, editing, listing, or deleting artifacts.
 
-`gh pr` has no review-thread resolution command. Query thread IDs first, then resolve only the requested thread:
+### Reviews
 
-```bash
-gh api graphql -f query='query($owner:String!,$repo:String!,$pr:Int!){repository(owner:$owner,name:$repo){pullRequest(number:$pr){reviewThreads(first:100){nodes{id isResolved comments(first:1){nodes{body}}}}}}}' -f owner=OWNER -f repo=REPO -F pr=NUMBER
-gh api graphql -f query='mutation($id:ID!){resolveReviewThread(input:{threadId:$id}){thread{id isResolved}}}' -f id=PRT_ID
-```
+Copilot review requests and effort are in `references/reviews.md`. Review threads are handled by `scripts/pr-threads.sh` (see "Getting a PR green").
 
-For more than 100 review threads, paginate the GraphQL connection rather than assuming the first page is complete.
+## Getting a PR green
 
-### Copilot code review
+Green means two things: the latest CI run for the pushed head passes, and every review thread is answered and either resolved or left open with a stated reason. Repeat until neither has open items.
 
-```bash
-gh pr edit 123 --add-reviewer "@copilot"
-```
+1. Wait for CI: `scripts/ci-wait.sh --pr 123`. Exit 0 means all checks passed; 1 means a check failed and the script prints the failure excerpt; 2 means timeout; 3 means no checks appeared. Its default timeout is 1800 s, so give the tool call a longer timeout or run it in the background.
+2. On failure, fix the cause, verify locally when that is cheaper than another push, commit, and push.
+3. List review threads: `scripts/pr-threads.sh list 123`. It prints unresolved threads with every comment and the non-empty review summaries; `--all` includes resolved and outdated threads. Each thread header shows its ID.
+4. For each thread, read the full comment, then either fix the code or decide not to change it. Push the fix first, so the reply can cite a commit that exists.
+5. Reply with the commit short SHA and what changed, or with the reason for not changing: `scripts/pr-threads.sh reply PRRT_ID "text"`.
+6. Resolve only threads that have a reply: `scripts/pr-threads.sh resolve PRRT_ID [PRRT_ID...]`. Leave a thread open when the reviewer should decide.
+7. A review summary with no thread needs a PR comment, not a thread reply: `gh pr comment 123 --body "..."`.
+8. Return to step 1 for the new head.
 
-The reviewer bot login is `copilot-pull-request-reviewer[bot]`; GraphQL `requestReviewsByLogin` takes it as `botLogins`. Review effort (Lite or Balanced) has no per-request parameter in the REST API, GraphQL schema, or `gh` as of `gh` 2.103.3, so don't guess a field such as `effort_level`. Without one, the effort comes from the requester's settings, so API-triggered reviews use the token owner's personal setting. The `Review effort:` line in the review body shows what actually ran. Recheck `gh pr edit --help` and cli/cli#14188 before claiming otherwise.
+Bot reviewers, including Copilot, post threads the same way.
 
 ## Stacked pull requests
 
