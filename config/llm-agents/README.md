@@ -36,10 +36,11 @@ The shared pieces live in `common/`:
 ## Agents
 
 - oh-my-pi (`oh-my-pi/`) installs [`omp`][omp] with generated settings. Your own
-  `~/.omp/agent/config.yml` is loaded after them, so changes made in the UI win. It
-  also installs [omp-automode][omp-automode], which checks every tool call against the
-  policy in `automode/settings.nix` before it runs. Fixed rules decide the simple
-  cases, and a small classifier model decides the rest.
+  `~/.omp/agent/config.yml` is loaded after them, so changes made in the UI win.
+  Activation drops entries there that repeat a generated value, so later repo changes
+  still reach this machine. It also installs [omp-automode][omp-automode], which checks
+  every tool call against the policy in `automode/settings.nix` before it runs. Fixed
+  rules decide the simple cases, and a small classifier model decides the rest.
 - Claude Code (`claude-code/`) installs [`claude`][claude-code] and enforces the
   shared rules through a hook. On machines that already have their own `claude`, set
   `claude-code.package = null` to install only the configuration.

@@ -6,7 +6,7 @@ condition:
   - "gh\\s+(?:pr|issue)\\s+(?:create|edit|comment)\\b(?![^\\n]*--help)"
   - "\"op\"\\s*:\\s*\"pr_create\""
 scope: ["tool:bash", "tool:github"]
-interruptMode: never
+interruptMode: tool-only
 ---
 
 A commit message or PR title/body is prose the user reads. Before sending it, load
