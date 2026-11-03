@@ -49,6 +49,14 @@ gh api graphql -f query='mutation($id:ID!){resolveReviewThread(input:{threadId:$
 
 For more than 100 review threads, paginate the GraphQL connection rather than assuming the first page is complete.
 
+### Copilot code review
+
+```bash
+gh pr edit 123 --add-reviewer "@copilot"
+```
+
+The reviewer bot login is `copilot-pull-request-reviewer[bot]`; GraphQL `requestReviewsByLogin` takes it as `botLogins`. Review effort (Lite or Balanced) has no per-request parameter in the REST API, GraphQL schema, or `gh` as of `gh` 2.103.3, so don't guess a field such as `effort_level`. Without one, the effort comes from the requester's settings, so API-triggered reviews use the token owner's personal setting. The `Review effort:` line in the review body shows what actually ran. Recheck `gh pr edit --help` and cli/cli#14188 before claiming otherwise.
+
 ## Stacked pull requests
 
 `gh stack` is provided declaratively by the dotfiles (`config/git/gh.nix`). A stack is a linear dependency chain in one repository: `(main) <- base-change <- dependent-change`. The bottom PR targets `main`; each higher PR targets the branch immediately below it, so its diff contains only its layer. GitHub's stack grouping is **additional** to the base-branch chain. A pair of PRs with correct bases is not necessarily a GitHub stack.
