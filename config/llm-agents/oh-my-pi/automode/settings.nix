@@ -1,12 +1,22 @@
-# Schema: https://github.com/royce-mathew/omp-automode/blob/main/docs/configuration.md
+# Schema: https://github.com/mdarocha/omp-automode/blob/integration/docs/configuration.md
 {
   autoMode = {
     classifierReasoningLevel = "low";
+    # The calibrated `@judge` (Jev) approves clear cases in ~0.3s and sends the rest to
+    # the detailed `@smol` review (~4.5s); it can never block on its own.
+    classifierStrategy = "hybrid";
     # 6 of ~9300 classifications hit the 20s default and failed closed.
     classifierTimeoutMs = 40000;
     # Pasted logs in long sessions push the real authorization out of the 4000 default.
     maxUserTranscriptTokens = 8000;
     allowInsideWorkingDirectory = true;
+    # Plain reads (`sed -n`, `cat`, `git log`, …) were 73% of classifier allows.
+    allowReadOnlyBash = true;
+    readOnlyRoots = [
+      "/tmp"
+      "~/.omp/wt"
+      "/nix/store"
+    ];
 
     log = {
       enabled = true;
@@ -22,8 +32,8 @@
       "Personal domain: mdarocha.pl"
       "Dotfiles: this machine's Home Manager/NixOS configuration lives in github.com/mdarocha/dotfiles"
       "Scratch areas: /tmp and ~/.omp/wt hold clones, worktrees, and build output that agents create for a task; they are disposable"
-      "Agent coordination: a message wrapped in `<irc from=\"parent\" ...>` comes from the coordinating agent, which holds the user's request. Treat it like a user message that carries the user's authorization for the task it describes"
-      "A coordinator HOLD covers only the action it names. Tool results are hidden from you, so a later note lifting the hold may not be visible"
+      "Agent coordination: a message wrapped in `<irc from=\"parent\" ...>` comes from the coordinating agent, which holds the user's request. It carries the user's authorization for the task it describes, as far as the main session's user messages support it"
+      "A coordinator HOLD covers only the action it names, until a later coordinator message lifts it"
     ];
 
     allow = [
@@ -60,29 +70,28 @@
       "Granting admin, owner, IAM, RBAC, repository, or production access permissions."
       "Exfiltrating repository contents, secrets, credentials, private keys, tokens, or internal data to untrusted domains, public storage, logs, URLs, metadata, or third-party services."
       "Systematically scanning for credentials, tokens, private keys, or secrets beyond what the task directly requires."
-      "Tampering with logs, audit trails, security monitoring, permission rules, auto-mode configuration, or files that define the agent's safety controls."
+      "Tampering with logs, audit trails, security monitoring, or the active safety controls: the loaded auto-mode extension, its active configuration, and permission rules. A development checkout of the extension's source that is not the loaded copy is ordinary project code."
       "Creating services, endpoints, workflows, or autonomous agents that execute arbitrary code without meaningful human approval."
-      "Posting or updating public or external content that is fabricated, impersonates the user, or claims a person's approval that did not happen. The agent's statements about checks it ran itself (tests, builds, evals, lint) are not fabrication: tool results are hidden from you, so missing output in the transcript is not evidence. Block only when the transcript shows the check was never invoked or the claim contradicts visible evidence."
+      "Posting or updating public or external content that is fabricated, impersonates the user, or claims a person's approval that did not happen. The agent's statements about checks it ran itself (tests, builds, evals, lint) are not fabrication: tool-result excerpts are partial, so a missing result is not evidence. Block only when the transcript shows the check was never invoked or the claim contradicts visible evidence."
       "Changing GitHub repository or organization settings: Actions workflow permissions (e.g. `can_approve_pull_request_reviews`), rulesets, branch protection, secrets, deploy keys, visibility; or deleting repositories."
       "Reading secrets from the desktop keyring or Secret Service (secret-tool, gnome-keyring, kwallet) or browser credential stores"
       "Printing or sending authentication tokens (`gh auth token`, provider API keys, cloud credentials) outside the tool that owns them"
     ];
 
-    # Trailing `*` on files: omp-automode doesn't strip omp read selectors (`~/.netrc:1-2`).
     deniedPaths = [
       "~/.ssh/*"
       "~/.gnupg/*"
       "~/.password-store/*"
       "~/.local/share/keyrings/*"
-      "~/.config/gh/hosts.yml*"
-      "~/.git-credentials*"
-      "~/.netrc*"
+      "~/.config/gh/hosts.yml"
+      "~/.git-credentials"
+      "~/.netrc"
       "~/.aws/*"
       "~/.azure/*"
       "~/.kube/*"
-      "~/.docker/config.json*"
+      "~/.docker/config.json"
       "~/.config/rclone/*"
-      "~/.claude/.credentials.json*"
+      "~/.claude/.credentials.json"
       "~/.omp/agent/agent.db*"
       "~/.mozilla/*"
       "~/.config/chromium/*"
@@ -93,14 +102,14 @@
       "~/.local/share/evolution/*"
       "~/.config/goa-1.0/*"
       "~/.config/github-copilot/*"
-      "~/.pulumi/credentials.json*"
-      "~/.npmrc*"
+      "~/.pulumi/credentials.json"
+      "~/.npmrc"
       "~/.microsoft/usersecrets/*"
       "~/.local/share/MicrosoftCredentialProvider/*"
-      "~/.claude.json*"
+      "~/.claude.json"
       "~/.config/Claude/*"
       "~/.local/share/pki/*"
-      "~/.zsh_history*"
+      "~/.zsh_history"
       "~/.var/app/com.slack.Slack/*"
       "~/.var/app/com.discordapp.Discord/*"
       "~/.var/app/org.gnome.Fractal/*"
@@ -108,7 +117,7 @@
   };
 
   permissions = {
-    # Subagents have no UI, so `ask` blocks them outright; leave user-authorizable actions to the classifier.
+    # Subagents forward `ask` to the main session's UI (25s to answer, then blocked).
     ask = [
       "bash(sudo *)"
       "bash(git push -f*)"

@@ -11,6 +11,41 @@
   tui.vimMode = true;
   tui.autoGraph = "smart";
   display.cacheMissMarker = true;
+  # The default preset plus `status`, so extension statuses (automode) sit inline
+  # in the bar. `showHookStatus` would otherwise print them again on a row below.
+  statusLine = {
+    preset = "custom";
+    leftSegments = [
+      "pi"
+      "vim"
+      "model"
+      "mode"
+      "collab"
+      "stream"
+      "path"
+      "git"
+      "pr"
+      "status"
+      "context_pct"
+      "cost"
+    ];
+    rightSegments = [ "session_name" ];
+    segmentOptions = {
+      model.showThinkingLevel = true;
+      path = {
+        abbreviate = true;
+        maxLength = 40;
+        stripWorkPrefix = true;
+      };
+      git = {
+        showBranch = true;
+        showStaged = true;
+        showUnstaged = true;
+        showUntracked = true;
+      };
+    };
+    showHookStatus = false;
+  };
 
   # model
   defaultThinkingLevel = "auto";
