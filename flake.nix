@@ -26,7 +26,7 @@
     };
 
     omp-automode = {
-      url = "github:royce-mathew/omp-automode";
+      url = "github:mdarocha/omp-automode/integration";
       flake = false;
     };
 

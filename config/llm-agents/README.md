@@ -40,7 +40,8 @@ The shared pieces live in `common/`:
   Activation drops entries there that repeat a generated value, so later repo changes
   still reach this machine. It also installs [omp-automode][omp-automode], which checks
   every tool call against the policy in `automode/settings.nix` before it runs. Fixed
-  rules decide the simple cases, and a small classifier model decides the rest.
+  rules decide the simple cases, and omp's `@smol` model role decides the rest. The
+  build is the `integration` branch of the fork, which merges the open upstream PRs.
 - Claude Code (`claude-code/`) installs [`claude`][claude-code] and enforces the
   shared rules through a hook. On machines that already have their own `claude`, set
   `claude-code.package = null` to install only the configuration.
@@ -50,7 +51,7 @@ The shared pieces live in `common/`:
   session.
 
 [llm-agents]: https://github.com/numtide/llm-agents.nix
-[omp-automode]: https://github.com/royce-mathew/omp-automode
+[omp-automode]: https://github.com/mdarocha/omp-automode
 [omp]: https://github.com/can1357/oh-my-pi
 [copilot-cli]: https://github.com/github/copilot-cli
 [claude-code]: https://github.com/anthropics/claude-code
