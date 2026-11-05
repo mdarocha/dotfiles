@@ -42,6 +42,7 @@
   steeringMode = "all";
   followUpMode = "all";
   treeFilterMode = "no-tools";
+  btw.inject = true;
   doubleEscapeAction = "tree";
   startup.checkUpdate = false;
   setupVersion = 2;
