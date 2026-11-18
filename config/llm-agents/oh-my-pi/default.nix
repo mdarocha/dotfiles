@@ -44,13 +44,6 @@ let
     src = inputs.omp-automode;
   };
 
-  # pi-automode's only config path, even under OMP. The env policy outranks it,
-  # so it holds just the `/automode model` choice.
-  automodeConfig = "$HOME/.pi/agent/extensions/pi-automode/config.json";
-  automodeSeed = (pkgs.formats.json { }).generate "pi-automode.json" {
-    autoMode.classifierModel = "anthropic/claude-haiku-5-5";
-  };
-
   ompSpecificInstructions = ''
     ## Git worktrees
 
@@ -117,10 +110,14 @@ in
       ) cfg.rules)
     ];
 
-    home.activation.seedPiAutomodeConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      if [ ! -e "${automodeConfig}" ]; then
-        run mkdir -p "$(dirname "${automodeConfig}")"
-        run install -m 600 ${automodeSeed} "${automodeConfig}"
+    # The classifier now defaults to omp's `@smol` role chain, which falls back across
+    # providers. Remove the file this module used to seed, but only while it still holds
+    # exactly the seeded value; a `/automode model` choice stays and the extension moves it
+    # to ~/.omp/agent/automode/config.json.
+    home.activation.dropLegacyAutomodeSeed = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      legacy="$HOME/.pi/agent/extensions/pi-automode/config.json"
+      if [ -f "$legacy" ] && ${pkgs.jq}/bin/jq -e '. == {autoMode: {classifierModel: "anthropic/claude-haiku-5-5"}}' "$legacy" >/dev/null 2>&1; then
+        run rm "$legacy"
       fi
     '';
 
