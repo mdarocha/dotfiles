@@ -245,11 +245,11 @@
     "omp-automode": {
       "flake": false,
       "locked": {
-        "lastModified": 1795022345,
-        "narHash": "sha256-k1aZF1u8urA1YAiIxWjXY2Z84CmIgcEWDlm5k0v9yUE=",
+        "lastModified": 1795255625,
+        "narHash": "sha256-AdXem70aKZn4ux9BkpmW6c7LaRxhsfEVh1DNGKn1fUY=",
         "owner": "mdarocha",
         "repo": "omp-automode",
-        "rev": "bd3ddb2bbabaafffa9681ec1965eb63ebe4d8368",
+        "rev": "7917c61da4df5a0478fa993133919fe99fc95864",
         "type": "github"
       },
       "original": {
