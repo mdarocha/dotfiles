@@ -1,12 +1,22 @@
-# Schema: https://github.com/royce-mathew/omp-automode/blob/main/docs/configuration.md
+# Schema: https://github.com/mdarocha/omp-automode/blob/main/docs/configuration.md
 {
   autoMode = {
     classifierReasoningLevel = "low";
+    # The calibrated `@judge` (Jev) approves clear cases in ~0.3s and sends the rest to
+    # the detailed `@smol` review (~4.5s); it can never block on its own.
+    classifierStrategy = "hybrid";
     # 6 of ~9300 classifications hit the 20s default and failed closed.
     classifierTimeoutMs = 40000;
     # Pasted logs in long sessions push the real authorization out of the 4000 default.
     maxUserTranscriptTokens = 8000;
     allowInsideWorkingDirectory = true;
+    # Plain reads (`sed -n`, `cat`, `git log`, …) were 73% of classifier allows.
+    allowReadOnlyBash = true;
+    readOnlyRoots = [
+      "/tmp"
+      "~/.omp/wt"
+      "/nix/store"
+    ];
 
     log = {
       enabled = true;
@@ -68,7 +78,6 @@
       "Printing or sending authentication tokens (`gh auth token`, provider API keys, cloud credentials) outside the tool that owns them"
     ];
 
-    # Trailing `*` on files: omp-automode doesn't strip omp read selectors (`~/.netrc:1-2`).
     deniedPaths = [
       "~/.ssh/*"
       "~/.gnupg/*"
@@ -108,7 +117,7 @@
   };
 
   permissions = {
-    # Subagents have no UI, so `ask` blocks them outright; leave user-authorizable actions to the classifier.
+    # Subagents forward `ask` to the main session's UI (25s to answer, then blocked).
     ask = [
       "bash(sudo *)"
       "bash(git push -f*)"
