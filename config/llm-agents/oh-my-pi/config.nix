@@ -105,6 +105,7 @@
     enableEffort = true;
     maxEffort = "xhigh";
     autoParallel = "suggest";
+    crossInstance = true;
   };
   prewalk.auto = "on";
 
