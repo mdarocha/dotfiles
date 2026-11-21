@@ -30,6 +30,7 @@ let
     binutils
     file
     procps
+    ghidra
 
     # PDF/office skills: CLI tools for document processing
     poppler-utils

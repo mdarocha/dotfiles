@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   # appearance
   theme = {
@@ -42,6 +42,10 @@
   steeringMode = "all";
   followUpMode = "all";
   treeFilterMode = "no-tools";
+  gc = {
+    strip = true;
+    stripAfterDays = 90;
+  };
   btw.inject = true;
   doubleEscapeAction = "tree";
   startup.checkUpdate = false;
@@ -70,6 +74,7 @@
     polyphonicRecall = true;
     enhancedRecall = true;
     proactiveLinking = true;
+    recallRelevance = "auto";
   };
 
   # tools
@@ -99,6 +104,7 @@
     agentPrewalk.designer = "on";
     enableEffort = true;
     maxEffort = "xhigh";
+    autoParallel = "suggest";
   };
   prewalk.auto = "on";
 
@@ -110,6 +116,17 @@
     tinyModelDtype = "auto";
   };
   telemetry.otlpExportEnabled = false;
+
+  # Stencil services (Spotlight, the ABKit WebKit engine from build.stencil.so) stay off.
+  spotlight.experiment.enabled = false;
+  models.noSpotlight = true;
+  browser.webkit = false;
+
+  # binary analysis: Nix-provided Ghidra and the shared agent Python env (has pyghidra)
+  ghidra = {
+    installDir = "${pkgs.ghidra}/lib/ghidra";
+    python = "${config.mdarocha.llm-agents.environment.env.VIRTUAL_ENV}/bin/python";
+  };
 
   # composer
   composer.shape = "claude";

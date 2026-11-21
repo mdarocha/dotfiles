@@ -38,6 +38,9 @@ let
     "beautifulsoup4"
     "trafilatura"
 
+    # Binary analysis (omp's Ghidra backend)
+    "pyghidra"
+
     # General utilities
     "python-dateutil"
     "chardet"
