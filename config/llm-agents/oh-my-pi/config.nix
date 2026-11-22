@@ -75,6 +75,11 @@
     enhancedRecall = true;
     proactiveLinking = true;
     recallRelevance = "auto";
+    # Polish content in several projects; "en" embeddings recall it poorly.
+    embeddingVariant = "multilingual";
+    retainEveryNTurns = 8;
+    recallLimit = 5;
+    injectionTokenLimit = 2500;
   };
 
   # tools
