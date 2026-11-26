@@ -24,6 +24,17 @@ in
       default = builtins.readFile ./instructions.md;
     };
 
+    scratchpadInstructions = mkOption {
+      type = types.functionTo types.str;
+      readOnly = true;
+      description = "Takes an agent's harness name and returns instructions pointing it at `/tmp/<harness>-scratchpad/`.";
+      default =
+        harness:
+        builtins.replaceStrings [ "@dir@" ] [ "/tmp/${harness}-scratchpad/" ] (
+          builtins.readFile ./scratchpad.md
+        );
+    };
+
     skills = mkOption {
       type = types.attrsOf types.path;
       description = "Map of skill name to source directory. Each skill is symlinked into all configured agents.";

@@ -73,6 +73,7 @@ in
         ".claude/CLAUDE.md".text = lib.concatStringsSep "\n" (
           [
             common.instructions
+            (common.scratchpadInstructions "claude-code")
             common.environment.instructions
           ]
           ++ lib.optional (cfg.package != null) (common.networkLogInstructions ".claude")

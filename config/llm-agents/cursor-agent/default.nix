@@ -44,6 +44,7 @@ let
   globalRulesDir = pkgs.writeTextDir "AGENTS.md" (
     lib.concatStringsSep "\n" [
       common.instructions
+      (common.scratchpadInstructions "cursor-agent")
       common.environment.instructions
       (common.networkLogInstructions ".cursor")
     ]

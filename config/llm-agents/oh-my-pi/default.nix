@@ -91,6 +91,7 @@ in
       {
         ".omp/agent/AGENTS.md".text = lib.concatStringsSep "\n" [
           cfg.instructions
+          (cfg.scratchpadInstructions "oh-my-pi")
           cfg.environment.instructions
           (cfg.networkLogInstructions ".omp")
           ompSpecificInstructions

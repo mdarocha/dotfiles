@@ -34,6 +34,7 @@ in
       {
         ".copilot/AGENTS.md".text = lib.concatStringsSep "\n" [
           cfg.instructions
+          (cfg.scratchpadInstructions "copilot-cli")
           cfg.environment.instructions
           (cfg.networkLogInstructions ".copilot")
         ];
