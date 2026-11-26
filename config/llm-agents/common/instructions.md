@@ -4,6 +4,15 @@ If a tool you need is not on PATH, do not install it into the user profile —
 run it temporarily with `nix run nixpkgs#<package>` or
 `nix shell nixpkgs#<package>` instead (see the `run-with-nix` skill).
 
+## Scratch files
+
+Put all temporary and scratch work (throwaway scripts, downloads, build
+output, clones, test fixtures) in `/tmp/<harness>-scratchpad/`, where
+`<harness>` is your agent harness (`claude-code`, `oh-my-pi`,
+`copilot-cli`, `cursor-agent`); create it if missing. Never use `~/tmp`,
+`~/.cache`, the repository tree, or other ad-hoc locations. `/tmp` is wiped
+on reboot, so don't keep anything there that must survive one.
+
 ## Comments
 
 Prefer clear code to explanatory prose. Keep a comment when it provides information
